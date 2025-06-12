@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kelime Avı</title>
+
+  <script src="https://unpkg.com/react@17/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    body {
+      overscroll-behavior-y: none;
+      touch-action: none;
+      -webkit-user-select: none;
+      user-select: none;
+      height: 100vh;
+      overflow: hidden;
+      font-family: 'Inter', sans-serif;
+    }
+    .grid {
+      touch-action: pan-x pan-y;
+      -webkit-tap-highlight-color: transparent;
+    }
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+    .obscured-cell {
+      background-color: #D1D5DB;
+      color: transparent;
+      opacity: 0.6;
+    }
+    .scrollbar-thin { scrollbar-width: thin; scrollbar-color: #9CA3AF #E5E7EB; }
+    .scrollbar-thin::-webkit-scrollbar { width: 5px; }
+    .scrollbar-thin::-webkit-scrollbar-track { background: #E5E7EB; border-radius: 10px;}
+    .scrollbar-thin::-webkit-scrollbar-thumb { background-color: #9CA3AF; border-radius: 10px; border: 1px solid #E5E7EB; }
+  </style>
+</head>
+<body class="h-[100vh] flex flex-col overflow-hidden bg-gray-50">
+
+<div id="root" class="flex-1 overflow-hidden"></div>
+
+<audio id="correctSound" preload="auto" src="sounds/correct.mp3">Tarayıcınız ses etiketini desteklemiyor.</audio>
+<audio id="wrongSound" preload="auto" src="sounds/wrong.mp3">Tarayıcınız ses etiketini desteklemiyor.</audio>
+
+<script type="text/babel">
+  window.onerror = function (msg, url, lineNo, columnNo, error) { console.error(`Global error: ${msg}\nURL: ${url}\nLine: ${lineNo}\nColumn: ${columnNo}\nError:`, error); const root = document.getElementById('root'); if (root) root.innerHTML = `<div class="p-4 text-red-600">Beklenmedik bir hata oluştu. Lütfen sayfayı yenileyin. Hata: ${msg}</div>`; return false; };
+  if (window.Babel) { Babel.registerPreset('react', { presets: ['react'] }); } else { console.error('Babel yüklenemedi! JSX çevrimi başarısız olacak.'); const root = document.getElementById('root'); if (root) root.innerHTML = `<div class="p-4 text-red-600">Kritik hata: Babel yüklenemedi. Uygulama çalışamaz.</div>`; }
+  
+  function customToUpperCase(str) { if (typeof str !== 'string') return ''; try { return str.replace(/i/g, 'İ').replace(/ı/g, 'I').replace(/ğ/g, 'Ğ').replace(/ü/g, 'Ü').replace(/ş/g, 'Ş').replace(/ö/g, 'Ö').replace(/ç/g, 'Ç').toUpperCase(); } catch (err) { console.error('customToUpperCase hatası:', err); return (str || '').toUpperCase(); } }
+
+  class ErrorBoundary extends React.Component { state = { hasError: false }; static getDerivedStateFromError(error) { return { hasError: true }; } componentDidCatch(error, errorInfo) { console.error("ErrorBoundary yakaladı:", error, errorInfo); } render() { if (this.state.hasError) { return <div className="p-4 text-red-600">Beklenmedik bir hata oluştu. Lütfen sayfayı yenileyin.</div>; } return this.props.children; } }
+
+  const translations = {
+    tr: { title: "Kelime Avı", rulesTitle: "Oyun Kuralları", rules: [ "Oyunda 60 seviye vardır, tahta her 12 seviyede bir büyür.", "Kelimeler sağa, sola, yukarı, aşağı ve çapraz olarak yerleştirilmiştir.", "Harfleri kaydırarak kelimeleri seçin. Doğru kelimeler listede pasifleşir.", "Tüm kelimeleri bulun, gizli sözcüğü tahmin edin ve seviyeyi tamamlayın." ], startButton: "Kelime Avına Başla", easyMode: "Kolay Mod", hardMode: "Zor Mod", level: "Seviye", words: "Kelimeler", hiddenWord: "Gizli Sözcük", hiddenWordPlaceholder: "Gizli sözcüğü girin", checkButton: "Kontrol Et", homeButton: "Ana Sayfa", footer: `© ${new Date().getFullYear()} Ozcelik Inc. Tüm hakları saklıdır.`, congrats: "Tebrikler!", error: "Hata!", successMessage: (word) => `Harika! Gizli sözcüğü buldunuz: ${word}`, allWordsRequired: "Önce tüm kelimeleri bulmalısınız!", wrongGuess: "Yanlış tahmin! Tekrar deneyin.", gameCompleted: "Tebrikler! Oyunu başarıyla tamamladınız!", continueButton: "Devam Et", tryAgainButton: "Tekrar Dene", language: "Dil", turkish: "Türkçe", english: "English" },
+    en: { title: "Word Hunt", rulesTitle: "Game Rules", rules: [ "60 levels total, the board grows every 12 levels.", "Words are placed right, left, up, down, and diagonally.", "Swipe letters to select words. Correct ones deactivate in the list.", "Find all words, guess the hidden word, and complete the level." ], startButton: "Start Word Hunt", easyMode: "Easy Mode", hardMode: "Hard Mode", level: "Level", words: "Words", hiddenWord: "Hidden Word", hiddenWordPlaceholder: "Enter the hidden word", checkButton: "Check", homeButton: "Home", footer: `© ${new Date().getFullYear()} Ozcelik Inc. All rights reserved.`, congrats: "Congratulations!", error: "Error!", successMessage: (word) => `Great! You found the hidden word: ${word}`, allWordsRequired: "You must find all words first!", wrongGuess: "Incorrect guess! Try again.", gameCompleted: "Congratulations! You have successfully completed the game!", continueButton: "Continue", tryAgainButton: "Try Again", language: "Language", turkish: "Türkçe", english: "English" }
+  };
+  const charSets = { tr: 'ABCÇDEFGĞHIİJKLMNOÖPRSŞTUÜVYZ'.split(''), en: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('') };
+  
+  
+const wordLists = { // ÖNEMLİ: Kelime listelerinizin TAM ve DOĞRU olduğundan emin olun!
+       tr: [ 'at', 'kuş', 'kap', 'küp', 'fil', 'ayı', 'ot', 'çim', 'çam', 'gül', 'tuz', 'ut', 'ney', 'org', 'arp', 'saz', 'nem', 'kar', 'çiy', 'don', 'göz', 'kul', 'diş', 'kas', 'dil', 'saç', 'tır', 'su', 'çay', 'ip', 'gol', 'yüz', 'kaş', 'ev', 'oda', 'yem', 'kök', 'dal', 'bar', 'not', 'sor', 'iş', 'köy', 'kent', 'el', 'kol', 'baş', 'bel', 'yol', 'kaz', 'hol', 'puf', 'duş', 'tül', 'ruj', 'far', 'köz', 'dut', 'kedi', 'inek', 'koyun', 'keçi', 'kurt', 'masa', 'tava', 'kupa', 'saat', 'kase', 'şef', 'terz', 'iran', 'irak', 'kore', 'mısır', 'şili', 'peru', 'süt', 'bal', 'kek', 'kazı', 'ekmek', 'lale', 'meşe', 'ağaç', 'boks', 'koşu', 'yoga', 'tenis', 'judo', 'gri', 'bej', 'mor', 'sarı', 'lila', 'raf', 'vazo', 'soba', 'ayna', 'halı', 'tabak', 'fırın', 'sehpa', 'keman', 'davul', 'flüt', 'bere', 'etek', 'mayo', 'hırka', 'sis', 'kalp', 'mide', 'deri', 'kano', 'uçak', 'gemi', 'kayık', 'nar', 'muz', 'elma', 'üzüm', 'erik', 'turp', 'roka', 'soda', 'kola', 'dart', 'okey', 'kart', 'dama', 'lens', 'fare', 'dağ', 'göl', 'kum', 'taş', 'tepe', 'ada', 'koy', 'alın', 'dudak', 'çene', 'bot', 'mont', 'şort', 'bluz', 'tayt', 'kafe', 'büfe', 'ödev', 'test', 'cam', 'yün', 'kız', 'kutu', 'ilçe', 'tatlı', 'sırt', 'park', 'avlu', 'saha', 'okul', 'müze', 'cami', 'ofis', 'otel', 'serçe', 'şahin', 'ördek', 'alo', 'güle', 'üç', 'dört', 'beş', 'altı', 'yedi', 'kapı', 'dans', 'bale', 'sap', 'kıyı', 'buz', 'limon', 'banyo', 'askı', 'biblo', 'stor', 'küvet', 'fırça', 'tarak', 'makas', 'eklem', 'hadi', 'hoş', 'olur', 'simit', 'açma', 'pide', 'mantı', 'kısır', 'nohut', 'pırasa', 'lahana', 'taze', 'kuru', 'nane', 'sumak', 'susam', 'kaju', 'ceviz', 'incir', 'kivi', 'köpek', 'balık', 'kaplan', 'aslan', 'tilki', 'yılan', 'karga', 'kalem', 'araba', 'çanta', 'cetvel', 'doktor', 'avukat', 'polis', 'yazar', 'mimar', 'kasap', 'pizza', 'çorba', 'kaktüs', 'çınar', 'bambu', 'funda', 'kekik', 'futbol', 'güreş', 'karate', 'eskrim', 'sörf', 'mavi', 'yeşil', 'siyah', 'beyaz', 'pembe', 'kahve', 'bordo', 'lamba', 'perde', 'çatal', 'kaşık', 'bıçak', 'koltuk', 'yatak', 'dolap', 'gitar', 'kanun', 'kaval', 'atkı', 'kemer', 'ceket', 'kazak', 'şapka', 'yelek', 'tunik', 'fular', 'yağmur', 'güneş', 'bulut', 'sıcak', 'soğuk', 'beyin', 'kemik', 'burun', 'tırnak', 'damar', 'sinir', 'taksi', 'tren', 'metro', 'armut', 'kiraz', 'çilek', 'kavun', 'kabak', 'biber', 'soğan', 'havuç', 'marul', 'bamya', 'ayran', 'kefir', 'boza', 'tavla', 'kablo', 'yazıcı', 'modem', 'deniz', 'orman', 'nehir', 'çöl', 'ova', 'toprak', 'vadi', 'bayır', 'plato', 'rıfkı', 'liman', 'kulak', 'boyun', 'yanak', 'çizme', 'kaban', 'çiçek', 'meyve', 'kabuk', 'pazar', 'çarşı', 'liste', 'plan', 'çizim', 'resim', 'cevap', 'sınav', 'proje', 'rapor', 'sunum', 'aile', 'komşu', 'konuk', 'yolcu', 'turist', 'erken', 'geç', 'sonra', 'önce', 'hemen', 'yarın', 'dün', 'tuğla', 'beton', 'ahşap', 'metal', 'kumaş', 'pamuk', 'bebek', 'kitap', 'dergi', 'kağıt', 'silgi', 'torba', 'poşet', 'sokak', 'cadde', 'bölge', 'ülke', 'kıta', 'yemek', 'börek', 'pilav', 'kebap', 'döner', 'sarma', 'sabah', 'akşam', 'öğle', 'ayak', 'omuz', 'göğüs', 'bahçe', 'köprü', 'tünel', 'sinema', 'market', 'fırın', 'banka', 'kartal', 'kaz', 'tavuk', 'selam', 'sekiz', 'dokuz', 'üçgen', 'hoşça', 'şeker', 'duvar', 'tavan', 'zemin', 'çatı', 'balkon', 'teras', 'dalga', 'duman', 'sandal', 'ahbap', 'salon', 'kiler', 'mutfak', 'yorgan', 'çarşaf', 'yastık', 'divan', 'kanepe', 'vitrin', 'sepet', 'saksı', 'heykel', 'tablo', 'poster', 'panjur', 'lavabo', 'musluk', 'havlu', 'cımbız', 'törpü', 'maskar', 'allık', 'parfüm', 'şampuan', 'krem', 'losyon', 'sirke', 'fişek', 'tamam', 'ender', 'sağol', 'bilek', 'kumpir', 'poğaça', 'dolma', 'fasulye', 'mantar', 'kereviz', 'tarçın', 'kimyon', 'dereotu', 'adaçayı', 'badem', 'fıstık', 'findık', 'hurma', 'yaban', 'vişne', 'rende', 'asker', 'kürek', 'çadır', 'tavşan', 'defter', 'bardak', 'anahtar', 'eczacı', 'fransa', 'italya', 'japonya', 'kanada', 'peynir', 'makarna', 'yumurta', 'yoğurt', 'zeytin', 'orkide', 'basketb', 'atletiz', 'hentbol', 'kırmızı', 'lacivert', 'turkuaz', 'piyano', 'gömlek', 'ayakkabı', 'eldiven', 'kravat', 'rüzgar', 'yıldırım', 'kamyon', 'tramvay', 'portakal', 'domates', 'patates', 'ıspanak', 'bezelye', 'satranç', 'yapboz', 'bilardo', 'körebe', 'seksek', 'klavye', 'kamera', 'hoparlör', 'tablet', 'drone', 'ekran', 'router', 'batarya', 'sensör', 'adaptör', 'mağara', 'leylak', 'kirpik', 'gözlük', 'terlik', 'tişört', 'tomurcuk', 'lokanta', 'pastane', 'dükkan', 'mektup', 'ajanda', 'takvim', 'harita', 'makale', 'arkadaş', 'misafir', 'öğrenci', 'şimdi', 'plastik', 'gazete', 'salata', 'meydan', 'hastane', 'tiyatro', 'baykuş', 'lütfen', 'pardon', 'bir', 'iki', 'pencere', 'koridor', 'sandalet', 'kristal', 'battaniy', 'komodin', 'gardırop', 'çiçeklik', 'çerçeve', 'jaluzi', 'fonluk', 'korniş', 'aynalı', 'sabunluk', 'ojelik', 'dişmacun', 'görüşürüz', 'eyvallah', 'lahmacun', 'mercimek', 'barbunya', 'patlıcan', 'brokoli', 'enginar', 'zencefil', 'zerdeçal', 'karabiber', 'maydanoz', 'fesleğen', 'biberiye', 'çörekotu', 'haşhaş', 'anason', 'kestane', 'kuruüzüm', 'kayısı', 'şeftali', 'nektarin', 'mandalin', 'greyfurt', 'avokado', 'böğürtlen', 'ahududu', 'kızılcık', 'karpuz', 'formül', 'pergel', 'melodi', 'virgül', 'mevsim', 'yıldız', 'öğretmen', 'mühendis', 'hemşire', 'sanatçı', 'almanya', 'brezilya', 'ispanya', 'norveç', 'voleybol', 'süpürge', 'şifonyer', 'manzara', 'mengene', 'şırınga', 'kavanoz', 'iskelet', 'kumanda', 'bilgisayar', 'televizyon', 'tornavida', 'motosiklet', 'helikopter', 'saklambaç', 'yakartop', 'monitör', 'şelale', 'hayalperest', 'sindirim', 'karnabahar', 'karanfil', 'sandalye', 'ameliyat', 'mikrofon', 'kerpeten', 'elektrik', 'bulaşıkçı', 'buzdolabı', 'dondurucu', 'teknoloji', 'galibiyet', 'antrenman', 'matematik', 'noktalama', 'enstrüman', 'tasarımcı', 'programcı', 'algoritma', 'enflasyon', 'deflasyon', 'emeklilik', 'parlamento', 'demokrasi', 'medeniyet', 'psikoloji', 'sosyoloji' ],
+       en: [ /* ... Kısaltıldı ... */ ]
+   };
+  const hiddenWordLists = {
+    tr: {
+        5: [
+            'asker', 'balta', 'rende', 'kürek', 'çadır', 'çekiç', 'fener', 'kazma', 'olta', 'pusu', 'sapan', 'çizme', 'kapan', 'silah', 'lamba', 'yelken', 'kılıç', 'mızrak', 'çömlek', 'yayla'],
+        6: [
+            'formül', 'melodi', 'mevsim', 'pergel', 'virgül', 'yıldız', 'roket', 'gezegen', 'uydu', 'krater',
+            'zeytin', 'kalite', 'çırağı', 'kalemk', 'çekyat', 'piknik', 'çember', 'deneme', 'güneşli', 'akarsu'
+        ],
+        7: [
+            'iskelet', 'kavanoz', 'kumanda', 'manzara', 'mengene', 'şırınga', 'dürbün', 'baston', 'çanta', 'valiz',
+            'çantacı', 'kırtasi', 'merdane', 'tornacı', 'boynuzl', 'lavanta', 'köşegen', 'yakutlu', 'kalemci', 'havlucu'
+        ],
+        8: [
+            'ameliyat', 'elektrik', 'karanfil', 'kerpeten', 'mikrofon', 'sandalye', 'teleskop', 'stetoskop', 'termometre', 'tansiyon',
+            'uçurtmak', 'eldiveni', 'buzdolabı', 'karambol', 'kompresör', 'pusulaçı', 'daktiloğ', 'fenerbah', 'haritacı', 'subasman'
+        ],
+        9: [
+            'algoritma', 'antrenman', 'bulaşıkçı', 'buzdolabı', 'deflasyon', 'demokrasi', 'dondurucu', 'emeklilik', 'enflasyon', 'enstrüman',
+            'galibiyet', 'matematik', 'medeniyet', 'noktalama', 'parlamento', 'programcı', 'psikoloji', 'sosyoloji', 'tasarımcı', 'teknoloji'
+        ]
+    },
+    en: { 5: ['apple', 'beach', 'brain', 'bread', 'chair', 'cloud', 'dance', 'dream', 'earth', 'field'], 6: ['banana', 'camera', 'doctor', 'engine', 'flower', 'guitar', 'hammer', 'island', 'jacket', 'kitchen'], 7: ['balloon', 'battery', 'bicycle', 'blanket', 'captain', 'channel', 'diamond', 'evening', 'feather', 'fortune'], 8: ['airplane', 'calendar', 'computer', 'elephant', 'hospital', 'mountain', 'notebook', 'umbrella', 'volcano', 'sandwich'], 9: ['adventure', 'blueprint', 'chemistry', 'dimension', 'eliminate', 'frequency', 'generator', 'highlight', 'illustrate', 'knowledge', 'landscape', 'magnitude', 'neighbour', 'objective', 'parachute', 'raspberry', 'satellite', 'telescope', 'underline', 'xylophone'] }
+  };
+
+  // *** YENİ boardSizes lojiği ***
+  const boardSizes = [];
+  const getHiddenWordLength = (level) => {
+      if (level < 12) return 5; // Seviye 0-11
+      if (level < 24) return 6; // Seviye 12-23
+      if (level < 36) return 7; // Seviye 24-35
+      if (level < 48) return 8; // Seviye 36-47
+      return 9; // Seviye 48-59
+  };
+
+  const initialRowsConfig = [7, 9, 11, 13, 15]; // Her 12 seviyelik aşama için başlangıç satır sayısı
+  const initialColsConfig = [8, 9, 10, 11, 12]; // Her 12 seviyelik aşama için başlangıç sütun sayısı
+
+
+
+
+
+  for (let stage = 0; stage < 5; stage++) {
+      let baseRows = initialRowsConfig[stage];
+      let baseCols = initialColsConfig[stage];
+      for (let levelInStage = 0; levelInStage < 12; levelInStage++) {
+          const actualLevel = stage * 12 + levelInStage;
+          if (actualLevel < 60) {
+              let r = (levelInStage < 6) ? baseRows : baseRows + 1;
+              let c = baseCols + Math.floor(levelInStage / 2);
+              r = Math.max(7, Math.min(16, r));
+              c = Math.max(8, Math.min(22, c));
+              if (c <= r && r > 7) c = r + 1;
+              boardSizes.push({
+                  rows: r,
+                  cols: c,
+                  hiddenWordLength: getHiddenWordLength(actualLevel)
+              });
+          }
+      }
+  }
+
+  const directions = [ { name: 'right', dx: 0, dy: 1 }, { name: 'left', dx: 0, dy: -1 }, { name: 'down', dx: 1, dy: 0 }, { name: 'up', dx: -1, dy: 0 }, { name: 'down-right', dx: 1, dy: 1 }, { name: 'down-left', dx: 1, dy: -1 }, { name: 'up-right', dx: -1, dy: 1 }, { name: 'up-left', dx: -1, dy: -1 } ];
+  
+  function canPlaceWord(board, word, r, c, dr, dc) { const rows = board.length; const cols = board[0].length; for (let i = 0; i < word.length; i++) { const nr = r + i * dr; const nc = c + i * dc; if (nr < 0 || nr >= rows || nc < 0 || nc >= cols || board[nr][nc] !== '') return false; } return true; }
+  function placeWordOnBoard(board, word, r, c, dr, dc) { const positions = []; for (let i = 0; i < word.length; i++) { const nr = r + i * dr; const nc = c + i * dc; board[nr][nc] = word[i]; positions.push({ row: nr, col: nc }); } return positions; }
+  
+  function createBoard(level, language) {
+      try {
+        const config = boardSizes[level];
+        if (!config) {
+            console.error(`Geçersiz seviye config: ${level}.`);
+            return { board: [], words: [], hiddenWord: 'HATA' };
+        }
+        let baseWordCount = 7 + Math.floor(level / 6);
+        const { rows, cols, hiddenWordLength } = config;
+        let boardAttempts = 0;
+        
+        while (boardAttempts < 500) {
+          boardAttempts++;
+          const board = Array(rows).fill().map(() => Array(cols).fill(''));
+          const requiredWordsInfo = [];
+
+          const suitableHiddenWords = hiddenWordLists[language]?.[hiddenWordLength] || [];
+          if (!suitableHiddenWords.length) { continue; }
+          const hiddenWord = customToUpperCase(_.sample(suitableHiddenWords));
+
+          const potentialWords = (wordLists[language] || []).filter(w => w && w.length >= 2 && w.length <= Math.max(rows, cols)).map(customToUpperCase);
+          const potentialWordsSet = new Set(potentialWords);
+          const targetWordCount = Math.max(10, baseWordCount);
+          const requiredWordCountActual = Math.min(potentialWordsSet.size - 1, targetWordCount);
+          const wordsAvailableForSampling = Array.from(potentialWordsSet).filter(w => w !== hiddenWord);
+          const countToSample = Math.max(0, requiredWordCountActual);
+
+          if (wordsAvailableForSampling.length < countToSample) { continue; }
+          const selectedRequiredWords = _.sampleSize(wordsAvailableForSampling, countToSample);
+          
+          const sortedWords = selectedRequiredWords.sort((a,b) => b.length - a.length);
+          const placedWords = new Set();
+          const diagonalDirections = directions.filter(d => Math.abs(d.dx) === 1 && Math.abs(d.dy) === 1);
+
+          const numToForceDiagonal = Math.min(Math.floor(sortedWords.length / 3), 3); // Kelimelerin 1/3'ünü, en fazla 3 tane olacak şekilde çapraz yerleştirmeyi zorla
+          for (let i = 0; i < numToForceDiagonal; i++) {
+              const word = sortedWords[i];
+              let placed = false;
+              for (let attempt = 0; attempt < 250; attempt++) {
+                  const dir = _.sample(diagonalDirections);
+                  const r = _.random(rows - 1);
+                  const c = _.random(cols - 1);
+                  if (canPlaceWord(board, word, r, c, dir.dx, dir.dy)) {
+                      const positions = placeWordOnBoard(board, word, r, c, dir.dx, dir.dy);
+                      requiredWordsInfo.push({ word, positions, direction: dir.name });
+                      placedWords.add(word);
+                      placed = true;
+                      break;
+                  }
+              }
+          }
+
+          for (const word of sortedWords) {
+              if (placedWords.has(word)) continue;
+              let placed = false;
+              for (let attempt = 0; attempt < 150; attempt++) {
+                  const dir = _.sample(directions);
+                  const r = _.random(rows - 1);
+                  const c = _.random(cols - 1);
+                  if (canPlaceWord(board, word, r, c, dir.dx, dir.dy)) {
+                     const positions = placeWordOnBoard(board, word, r, c, dir.dx, dir.dy);
+                     requiredWordsInfo.push({ word, positions, direction: dir.name });
+                     placedWords.add(word);
+                     placed = true;
+                     break;
+                  }
+              }
+          }
+
+          const successRatio = sortedWords.length > 0 ? placedWords.size / sortedWords.length : 1;
+          if (successRatio < 0.7) { continue; }
+
+          const emptyCells = [];
+          for (let r = 0; r < rows; r++) { for (let c = 0; c < cols; c++) { if (board[r][c] === '') emptyCells.push({r, c}); } }
+          
+          let scatteredHiddenLetterPositions = [];
+          const emptyCellsForHidden = _.sampleSize(emptyCells, hiddenWord.length);
+          hiddenWord.split('').forEach((letter, i) => {
+              if(emptyCellsForHidden[i]) {
+                  const {r, c} = emptyCellsForHidden[i];
+                  board[r][c] = letter;
+                  scatteredHiddenLetterPositions.push({ row: r, col: c, letter });
+              }
+          });
+
+          for (let r = 0; r < rows; r++) { for (let c = 0; c < cols; c++) { if (board[r][c] === '') { board[r][c] = charSets[language][Math.floor(Math.random() * charSets[language].length)]; } } }
+
+          return { board, words: requiredWordsInfo, hiddenWord, scatteredHiddenLetterPositions };
+        }
+        console.error(`500 denemeden sonra tahta oluşturulamadı (Seviye ${level}).`);
+        return { board: [], words: [], hiddenWord: 'HATA' };
+      } catch (e) { console.error(`createBoard kritik hatası (Seviye ${level}):`, e); return { board: [], words: [], hiddenWord: 'HATA' }; }
+  }
+
+  function Modal({ isOpen, message, isSuccess, onClose, language }) { const t = translations[language]; if (!isOpen) return null; return ( <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4"> <div className="bg-white p-6 rounded-xl shadow-2xl max-w-sm w-full text-center"> <h3 className={`text-xl font-semibold mb-3 ${isSuccess ? 'text-green-600' : 'text-red-600'}`}> {isSuccess ? t.congrats : t.error} </h3> <p className="text-gray-700 mb-6">{message}</p> <button onClick={onClose} className={`px-5 py-2 rounded-lg text-white font-medium text-sm transition duration-300 ${isSuccess ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'}`}> {isSuccess ? t.continueButton : t.tryAgainButton} </button> </div> </div> ); }
+  
+  function HomePage({ startGame, language, setLanguage }) { const t = translations[language] || translations['en']; if (!t) { return <div className="p-4 text-center">Dil yüklenemedi...</div>; } return ( <div className="container mx-auto px-4 lg:px-8 xl:px-12 py-8 text-center flex flex-col justify-center items-center h-full"> <div className="bg-gradient-to-br from-indigo-500 to-purple-600 text-white p-6 rounded-lg shadow-lg mb-6 w-full max-w-xs"> <h1 className="text-3xl lg:text-4xl font-bold">{t?.title || 'Kelime Avı'}</h1> </div> <div className="bg-gradient-to-b from-indigo-100 to-purple-100 p-6 rounded-2xl shadow-xl max-w-md lg:max-w-lg w-full mb-8"> <h2 className="text-2xl lg:text-3xl font-bold text-indigo-700 mb-4">{t?.rulesTitle || 'Kurallar'}</h2> <ul className="text-left list-disc pl-5 space-y-2 text-base lg:text-lg text-gray-800"> {(t?.rules || []).map((rule, index) => <li key={index}>{rule}</li>)} </ul> </div> <div className="flex flex-col sm:flex-row justify-center items-center gap-3 lg:gap-4 mb-8 w-full max-w-md"> <div className="flex items-center gap-2 w-full sm:w-auto"> <label htmlFor="language-select" className="text-sm lg:text-base font-medium text-gray-700">{t?.language || 'Dil'}:</label> <select id="language-select" value={language} onChange={(e) => setLanguage(e.target.value)} className="bg-white border border-gray-300 text-gray-900 text-sm lg:text-base rounded-lg focus:ring-indigo-500 focus:border-indigo-500 p-2 w-full"> <option value="tr">{t?.turkish || 'Türkçe'}</option> <option value="en">{t?.english || 'English'}</option> </select> </div> <button onClick={() => startGame('easyMode')} className="w-full sm:w-auto bg-green-600 text-white px-6 py-2 rounded-lg font-semibold lg:text-lg hover:bg-green-700 transition duration-300 shadow-md"> {t?.easyMode || 'Kolay Mod'} </button> <button onClick={() => startGame('hardMode')} className="w-full sm:w-auto bg-red-600 text-white px-6 py-2 rounded-lg font-semibold lg:text-lg hover:bg-red-700 transition duration-300 shadow-md"> {t?.hardMode || 'Zor Mod'} </button> </div> <div className="w-full text-center py-2 text-xs lg:text-sm text-gray-500 mt-auto"> {t?.footer || `© ${new Date().getFullYear()} Ozcelik Inc.`} </div> </div> ); }
+
+  function WordHunt({ goToHome, language, mode }) {
+       const t = translations[language] || translations['en'];
+       const [level, setLevel] = React.useState(0);
+       const [gameState, setGameState] = React.useState(null);
+       const [isLoading, setIsLoading] = React.useState(true);
+       const [selectedCells, setSelectedCells] = React.useState([]);
+       const [foundWords, setFoundWords] = React.useState([]);
+       const [hiddenWordGuess, setHiddenWordGuess] = React.useState('');
+       const [modal, setModal] = React.useState({ isOpen: false, message: '', isSuccess: false });
+       const [isSwiping, setIsSwiping] = React.useState(false);
+       const [swipeDirectionInfo, setSwipeDirectionInfo] = React.useState({ dx: 0, dy: 0 });
+       const gridRef = React.useRef(null);
+
+      React.useEffect(() => { setIsLoading(true); setGameState(null); const timerId = setTimeout(() => { let newGameState = createBoard(level, language); if (!newGameState || !newGameState.board || newGameState.board.length === 0) { setModal({isOpen: true, message: "Tahta oluşturulamadı. Ana sayfaya dönülüyor.", isSuccess: false}); } setGameState(newGameState); setIsLoading(false); setSelectedCells([]); setFoundWords([]); setHiddenWordGuess(''); setIsSwiping(false); }, 50); return () => clearTimeout(timerId); }, [language, level]);
+
+      const playSound = (soundId) => { const sound = document.getElementById(soundId); if (sound) { sound.currentTime = 0; sound.play().catch(e => {}); } };
+      const playCorrectSound = () => playSound('correctSound');
+      const playWrongSound = () => playSound('wrongSound');
+
+      const getCellFromCoordinates = (clientX, clientY) => { try { const grid = gridRef.current; if (!grid || !gameState?.board || !gameState.board[0]) return null; const rect = grid.getBoundingClientRect(); const cols = gameState.board[0].length; const rows = gameState.board.length; if (cols === 0 || rows === 0) return null; const cellWidth = rect.width / cols; const cellHeight = rect.height / rows; const x = clientX - rect.left; const y = clientY - rect.top; const col = Math.min(cols - 1, Math.max(0, Math.floor(x / cellWidth))); const row = Math.min(rows - 1, Math.max(0, Math.floor(y / cellHeight))); if (clientX >= rect.left && clientX <= rect.right && clientY >= rect.top && clientY <= rect.bottom) return { row, col }; return null; } catch (e) { return null; } };
+      const allRequiredWordsFound = gameState?.words?.length > 0 && foundWords.length === gameState.words.length;
+      const isCellPartOfFoundRequiredWord = (r, c) => gameState?.words?.some(w => foundWords.includes(w.word) && w.positions.some(p => p.row === r && p.col === c));
+      const isCellScatteredHiddenLetter = (r, c) => gameState?.scatteredHiddenLetterPositions?.some(p => p.row === r && p.col === c);
+      const isCellSelected = (r, c) => selectedCells.some(cell => cell.row === r && cell.col === c);
+
+      const handleInteractionStart = (clientX, clientY) => {
+          if (allRequiredWordsFound || isLoading || !gameState) return;
+          const cell = getCellFromCoordinates(clientX, clientY);
+          if (cell) {
+              const canStart = !isCellPartOfFoundRequiredWord(cell.row, cell.col);
+              if (canStart) {
+                  setIsSwiping(true);
+                  setSelectedCells([cell]);
+                  setSwipeDirectionInfo({ dx: 0, dy: 0 });
+              }
+          }
+      };
+      
+      const handleInteractionMove = React.useCallback( _.throttle((clientX, clientY) => { if (!isSwiping || !selectedCells?.length || allRequiredWordsFound || isLoading || !gameState) return; const currentCell = getCellFromCoordinates(clientX, clientY); if (!currentCell) return; const lastCell = selectedCells[selectedCells.length - 1]; if (currentCell.row === lastCell.row && currentCell.col === lastCell.col) return; if (selectedCells.length > 1 && currentCell.row === selectedCells[selectedCells.length - 2]?.row && currentCell.col === selectedCells[selectedCells.length - 2]?.col) { setSelectedCells(prev => prev.slice(0, -1)); if (selectedCells.length === 2) { setSwipeDirectionInfo({ dx: 0, dy: 0 }); } return; } const isAlreadySelected = isCellSelected(currentCell.row, currentCell.col); if (isAlreadySelected) return; let dx = currentCell.row - lastCell.row; let dy = currentCell.col - lastCell.col; if (Math.abs(dx) > 1 || Math.abs(dy) > 1 || (dx === 0 && dy === 0)) return; let currentDir = { dx: Math.sign(dx), dy: Math.sign(dy) }; if (selectedCells.length === 1) { setSwipeDirectionInfo(currentDir); setSelectedCells(prev => [...prev, currentCell]); } else { if (currentDir.dx === swipeDirectionInfo.dx && currentDir.dy === swipeDirectionInfo.dy) { setSelectedCells(prev => [...prev, currentCell]); } } }, 20), [isSwiping, selectedCells, swipeDirectionInfo, allRequiredWordsFound, isLoading, gameState]);
+      
+      const handleInteractionEnd = () => { if (!isSwiping || !selectedCells?.length || isLoading || !gameState) { if (selectedCells.length > 0) setSelectedCells([]); if (isSwiping) setIsSwiping(false); return; } const word = selectedCells.map(c => gameState.board?.[c.row]?.[c.col] || '').join(''); const target = gameState.words?.find(w => w.word === word); if (target && !foundWords.includes(word)) { setFoundWords(prev => [...prev, word]); playCorrectSound(); } setSelectedCells([]); setIsSwiping(false); };
+      const handleNextLevel = () => { if (level < 59) { setLevel(p => p + 1); } else { setModal({ isOpen: true, message: t.gameCompleted, isSuccess: true }); } };
+      const handleHiddenWordSubmit = () => { if (!allRequiredWordsFound) { setModal({ isOpen: true, message: t.allWordsRequired, isSuccess: false }); playWrongSound(); return; } if (customToUpperCase(hiddenWordGuess) === gameState?.hiddenWord) { setModal({ isOpen: true, message: t.successMessage(gameState.hiddenWord), isSuccess: true }); playCorrectSound(); } else { setModal({ isOpen: true, message: t.wrongGuess, isSuccess: false }); playWrongSound(); setHiddenWordGuess(''); } };
+      const closeModal = () => { const wasSuccess = modal.isSuccess; const wasGameCompletedMessage = modal.message === t.gameCompleted; const wasBoardErrorMessage = modal.message === "Tahta oluşturulamadı. Ana sayfaya dönülüyor."; const wasHiddenWordSuccess = wasSuccess && !wasGameCompletedMessage && !wasBoardErrorMessage; setModal({ isOpen: false, message: '', isSuccess: false }); if (wasHiddenWordSuccess) { handleNextLevel(); } else if (wasGameCompletedMessage && wasSuccess) { goToHome(); } else if (wasBoardErrorMessage && !wasSuccess) { goToHome(); } };
+
+      if (isLoading) { return ( <div className="flex items-center justify-center h-full text-lg lg:text-xl font-semibold text-indigo-700">Seviye {level + 1} Yükleniyor...</div> ); }
+      if (!gameState || !gameState.board || !Array.isArray(gameState.board) || gameState.board.length === 0) { return ( <div className="flex flex-col items-center justify-center h-full text-lg lg:text-xl font-semibold text-red-600 p-4"> <p>Üzgünüz, bu seviye yüklenirken bir sorun oluştu.</p> <button onClick={goToHome} className="mt-4 bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 lg:text-lg">Ana Sayfaya Dön</button> <Modal isOpen={modal.isOpen} message={modal.message} isSuccess={modal.isSuccess} onClose={closeModal} language={language}/> </div> ); }
+
+       let theme; if (mode === 'hardMode') { theme = { bg: 'bg-red-50', foundCell: 'bg-red-300', hiddenWordCell: 'bg-blue-400 text-white font-bold', wordBg: 'bg-red-200', gridBg: 'bg-red-100', button: 'bg-red-600 hover:bg-red-700', inputBorder: 'border-red-300 focus:border-red-500', selectedCell: 'bg-yellow-400', obscuredCell: 'bg-gray-300 text-transparent opacity-60' }; } else { theme = { bg: 'bg-indigo-50', foundCell: 'bg-green-300', hiddenWordCell: 'bg-blue-400 text-white font-bold', wordBg: 'bg-indigo-200', gridBg: 'bg-indigo-100', button: 'bg-indigo-600 hover:bg-indigo-700', inputBorder: 'border-indigo-300 focus:border-indigo-500', selectedCell: 'bg-yellow-300', obscuredCell: 'bg-gray-300 text-transparent opacity-60' }; }
+       const gridCols = gameState.board[0].length; const gridRows = gameState.board.length;
+const textSizeClass = "text-[3.2vmin] sm:text-[2.9vmin] md:text-[2.7vmin] lg:text-[2.5vmin]";
+       return (
+         <div className={`container mx-auto px-2 sm:px-4 lg:px-6 xl:px-8 py-4 text-center h-full flex flex-col ${theme.bg} overflow-hidden`}>
+           <div className="flex-1 flex flex-col lg:flex-row lg:gap-4 xl:gap-6 overflow-hidden">
+
+             <div className="w-full lg:w-3/5 xl:w-2/3 flex flex-col py-2 order-1 lg:h-full">
+               <h2 className="text-xl lg:text-2xl xl:text-3xl font-semibold text-indigo-800 mb-3 flex-shrink-0">{t.level} {level + 1}</h2>
+               <div className="flex flex-grow items-center justify-center w-full px-1 max-w-2xl mx-auto">
+                 <div ref={gridRef} className={`grid gap-0.5 ${theme.gridBg} p-1 rounded-lg shadow-md w-full`}
+                      style={{ gridTemplateColumns: `repeat(${gridCols}, minmax(0, 1fr))`, aspectRatio: `${gridCols} / ${gridRows}` }}
+                      onMouseDown={(e) => handleInteractionStart(e.clientX, e.clientY)}
+                      onMouseMove={(e) => { if(isSwiping) handleInteractionMove(e.clientX, e.clientY);}}
+                      onMouseUp={handleInteractionEnd} onMouseLeave={handleInteractionEnd}
+                      onTouchStart={(e) => { e.preventDefault(); handleInteractionStart(e.touches[0].clientX, e.touches[0].clientY); }}
+                      onTouchMove={(e) => { e.preventDefault(); if(isSwiping) handleInteractionMove(e.touches[0].clientX, e.touches[0].clientY);}}
+                      onTouchEnd={(e) => {e.preventDefault(); handleInteractionEnd();}} onTouchCancel={(e) => {e.preventDefault(); handleInteractionEnd();}}>
+                   {gameState.board.map((row, rowIndex) =>
+                     row.map((letter, colIndex) => {
+                       const isSelected = isCellSelected(rowIndex, colIndex);
+                       const isFoundRequiredPart = isCellPartOfFoundRequiredWord(rowIndex, colIndex);
+                       const isHiddenLetter = isCellScatteredHiddenLetter(rowIndex, colIndex);
+                       let cellClass = 'bg-white';
+                       let textClass = 'text-gray-800';
+                       let content = letter;
+                       if (allRequiredWordsFound) {
+                         if (isHiddenLetter) {
+                           cellClass = theme.hiddenWordCell;
+                           textClass = 'text-white';
+                         } else {
+                           cellClass = theme.obscuredCell;
+                         }
+                       } else {
+                         if (isSelected) {
+                           cellClass = theme.selectedCell;
+                           textClass = 'text-black font-bold';
+                         } else if (isFoundRequiredPart) {
+                           cellClass = theme.foundCell;
+                           textClass = 'text-gray-600 opacity-75';
+                         }
+                       }
+                       return ( <div key={`${rowIndex}-${colIndex}`} className={`flex items-center justify-center text-center font-semibold border border-gray-200/50 rounded aspect-square ${textSizeClass} ${cellClass} ${textClass} transition-colors duration-150 select-none`} > {content || ''} </div> );
+                     })
+                   )}
+                 </div>
+               </div>
+             </div>
+
+             <div className="w-full lg:w-2/5 xl:w-1/3 flex flex-col gap-4 lg:h-full lg:overflow-y-auto py-2 px-2 order-2 lg:order-2">
+               <div className="flex-shrink-0">
+                 <h3 className="text-lg lg:text-xl xl:text-2xl font-semibold text-indigo-800 mb-2">{t.words} ({foundWords.length}/{gameState.words.length})</h3>
+                 <div className="flex flex-wrap justify-center gap-1.5 max-h-[20vh] md:max-h-[25vh] lg:max-h-[calc(50vh-60px)] xl:max-h-[calc(60vh-60px)] overflow-y-auto p-2 bg-gray-100 rounded-lg scrollbar-thin">
+                   {gameState.words.map(({ word }) => { const isFound = foundWords.includes(word); const isHiddenInHardMode = mode === 'hardMode' && !isFound; return ( <span key={word} className={`px-2.5 py-1 rounded-md ${isFound ? 'bg-gray-300 text-gray-500 line-through' : isHiddenInHardMode ? 'bg-gray-300 opacity-0 pointer-events-none' : theme.wordBg + ' text-gray-800'} text-xs sm:text-sm lg:text-base font-medium overflow-hidden text-ellipsis whitespace-nowrap transition-all duration-300`} style={{ minWidth: '65px', textAlign: 'center' }} > {isHiddenInHardMode ? '???' : word} </span> ); })}
+                 </div>
+               </div>
+               <div className="flex-shrink-0 mt-2 lg:mt-4">
+                 <div className="flex flex-col gap-2">
+                   <input type="text" value={hiddenWordGuess} onChange={(e) => setHiddenWordGuess(e.target.value)} className={`border-2 ${theme.inputBorder} p-2 rounded-lg text-sm lg:text-base focus:outline-none focus:ring-2 focus:ring-indigo-300 h-10 lg:h-11 w-full`} placeholder={t.hiddenWordPlaceholder} disabled={!allRequiredWordsFound} aria-label={t.hiddenWordPlaceholder}/>
+                   <button onClick={handleHiddenWordSubmit} className={`${theme.button} text-white px-4 py-2 rounded-lg hover:opacity-90 text-sm lg:text-base h-10 lg:h-11 font-medium transition duration-300 w-full disabled:opacity-50 disabled:cursor-not-allowed`} disabled={!allRequiredWordsFound}> {t.checkButton} </button>
+                   <button onClick={goToHome} className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 text-sm lg:text-base h-10 lg:h-11 font-medium transition duration-300 w-full"> {t.homeButton} </button>
+                 </div>
+               </div>
+             </div>
+           </div>
+
+           <div className="w-full text-center py-2 text-xs lg:text-sm text-gray-500 mt-auto"> {t.footer} </div>
+           <Modal isOpen={modal.isOpen} message={modal.message} isSuccess={modal.isSuccess} onClose={closeModal} language={language}/>
+         </div>
+       );
+  }
+
+  function App() { const [isGameStarted, setIsGameStarted] = React.useState(false); const [language, setLanguage] = React.useState('tr'); const [mode, setMode] = React.useState('easyMode'); const startGame = (selectedMode) => { setMode(selectedMode); setIsGameStarted(true); }; const goToHome = () => setIsGameStarted(false); return ( <ErrorBoundary> <div className="h-full w-full overflow-hidden"> {isGameStarted ? ( <WordHunt goToHome={goToHome} language={language} mode={mode} /> ) : ( <HomePage startGame={startGame} language={language} setLanguage={setLanguage} /> )} </div> </ErrorBoundary> ); }
+  
+  try { const rootElement = document.getElementById('root'); if (typeof ReactDOM !== 'undefined' && rootElement) { ReactDOM.render(<App />, rootElement); } else { throw new Error('ReactDOM or root element not found'); } } catch (e) { console.error("ReactDOM.render critical error:", e); const root = document.getElementById('root'); if (root) root.innerHTML = `<div class="p-4 text-red-600">Uygulama başlatılırken kritik hata oluştu: ${e.message}</div>`; }
+
+</script>
+
+</body>
+</html>

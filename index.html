@@ -258,8 +258,19 @@
        const [isSwiping, setIsSwiping] = React.useState(false);
        const [swipeDirectionInfo, setSwipeDirectionInfo] = React.useState({ dx: 0, dy: 0 });
        const gridRef = React.useRef(null);
+       const [showHardModeHint, setShowHardModeHint] = React.useState(false);
+
 
       React.useEffect(() => { setIsLoading(true); setGameState(null); const timerId = setTimeout(() => { let newGameState = createBoard(level, language); if (!newGameState || !newGameState.board || newGameState.board.length === 0) { setModal({isOpen: true, message: "Tahta oluşturulamadı. Lütfen sayfayı yenileyin.", isSuccess: false}); } setGameState(newGameState); setIsLoading(false); setSelectedCells([]); setFoundWords([]); setHiddenWordGuess(''); setIsSwiping(false); }, 100); return () => clearTimeout(timerId); }, [language, level]);
+    React.useEffect(() => {
+  if (mode === 'hardMode') {
+    setShowHardModeHint(true);
+    const timer = setTimeout(() => setShowHardModeHint(false), 7000);
+    return () => clearTimeout(timer);
+  } else {
+    setShowHardModeHint(false);
+  }
+}, [level, mode]);
 
       const playSound = (soundId) => { const sound = document.getElementById(soundId); if (sound) { sound.currentTime = 0; sound.play().catch(e => {}); } };
       const playCorrectSound = () => playSound('correctSound');
@@ -285,7 +296,7 @@
           }
       };
       
-      const handleInteractionMove = React.useCallback( _.throttle((clientX, clientY) => { if (!isSwiping || !selectedCells?.length || allRequiredWordsFound || isLoading || !gameState) return; const currentCell = getCellFromCoordinates(clientX, clientY); if (!currentCell) return; const lastCell = selectedCells[selectedCells.length - 1]; if (currentCell.row === lastCell.row && currentCell.col === lastCell.col) return; if (selectedCells.length > 1 && currentCell.row === selectedCells[selectedCells.length - 2]?.row && currentCell.col === selectedCells[selectedCells.length - 2]?.col) { setSelectedCells(prev => prev.slice(0, -1)); if (selectedCells.length === 2) { setSwipeDirectionInfo({ dx: 0, dy: 0 }); } return; } const isAlreadySelected = isCellSelected(currentCell.row, currentCell.col); if (isAlreadySelected) return; let dx = currentCell.row - lastCell.row; let dy = currentCell.col - lastCell.col; if (Math.abs(dx) > 1 || Math.abs(dy) > 1 || (dx === 0 && dy === 0)) return; let currentDir = { dx: Math.sign(dx), dy: Math.sign(dy) }; if (selectedCells.length === 1) { setSwipeDirectionInfo(currentDir); setSelectedCells(prev => [...prev, currentCell]); } else { if (currentDir.dx === swipeDirectionInfo.dx && currentDir.dy === swipeDirectionInfo.dy) { setSelectedCells(prev => [...prev, currentCell]); } } }, 20), [isSwiping, selectedCells, swipeDirectionInfo, allRequiredWordsFound, isLoading, gameState]);
+      const handleInteractionMove = React.useCallback( _.throttle((clientX, clientY) => { if (!isSwiping || !selectedCells?.length || allRequiredWordsFound || isLoading || !gameState) return; const currentCell = getCellFromCoordinates(clientX, clientY); if (!currentCell) return; const lastCell = selectedCells[selectedCells.length - 1]; if (currentCell.row === lastCell.row && currentCell.col === lastCell.col) return; if (selectedCells.length > 1 && currentCell.row === selectedCells[selectedCells.length - 2]?.row && currentCell.col === selectedCells[selectedCells.length - 2]?.col) { setSelectedCells(prev => prev.slice(0, -1)); if (selectedCells.length === 2) { setSwipeDirectionInfo({ dx: 0, dy: 0 }); } return; } const isAlreadySelected = isCellSelected(currentCell.row, currentCell.col); const isLocked = isCellPartOfFoundRequiredWord(currentCell.row, currentCell.col);if (isAlreadySelected) return; let dx = currentCell.row - lastCell.row; let dy = currentCell.col - lastCell.col; if (Math.abs(dx) > 1 || Math.abs(dy) > 1 || (dx === 0 && dy === 0)) return; let currentDir = { dx: Math.sign(dx), dy: Math.sign(dy) }; if (selectedCells.length === 1) { setSwipeDirectionInfo(currentDir); setSelectedCells(prev => [...prev, currentCell]); } else { if (currentDir.dx === swipeDirectionInfo.dx && currentDir.dy === swipeDirectionInfo.dy) { setSelectedCells(prev => [...prev, currentCell]); } } }, 20), [isSwiping, selectedCells, swipeDirectionInfo, allRequiredWordsFound, isLoading, gameState]);
       
       const handleInteractionEnd = () => { if (!isSwiping || !selectedCells?.length || isLoading || !gameState) { if (selectedCells.length > 0) setSelectedCells([]); if (isSwiping) setIsSwiping(false); return; } const word = selectedCells.map(c => gameState.board?.[c.row]?.[c.col] || '').join(''); const target = gameState.words?.find(w => w.word === word); if (target && !foundWords.includes(word)) { setFoundWords(prev => [...prev, word]); playCorrectSound(); } setSelectedCells([]); setIsSwiping(false); };
       const handleNextLevel = () => { if (level < 59) { setLevel(p => p + 1); } else { setModal({ isOpen: true, message: t.gameCompleted, isSuccess: true }); } };
@@ -364,6 +375,12 @@
              <div className="w-full lg:w-2/5 xl:w-1/3 flex flex-col gap-4 lg:h-full lg:overflow-y-auto py-2 px-2 order-2 lg:order-2">
                <div className="flex-shrink-0">
                  <h3 className="text-lg lg:text-xl xl:text-2xl font-semibold text-indigo-800 mb-2">{t.words} ({foundWords.length}/{gameState.words.length})</h3>
+                 {mode === 'hardMode' && showHardModeHint && (
+  <div className="text-sm lg:text-base text-gray-600 italic mb-2 transition-opacity duration-500">
+    Oyun alanında bulduğunuz kelimeler, doğru bir şekilde bulundukça burada görüntülenecektir.
+  </div>
+)}
+
                  <div className="flex flex-wrap justify-center gap-1.5 max-h-[20vh] md:max-h-[25vh] lg:max-h-[calc(50vh-60px)] xl:max-h-[calc(60vh-60px)] overflow-y-auto p-2 bg-gray-100 rounded-lg scrollbar-thin">
                    {gameState.words.map(({ word }) => { const isFound = foundWords.includes(word); const isHiddenInHardMode = mode === 'hardMode' && !isFound; return ( <span key={word} className={`px-2.5 py-1 rounded-md ${isFound ? 'bg-gray-300 text-gray-500 line-through' : isHiddenInHardMode ? 'bg-gray-300 opacity-0 pointer-events-none' : theme.wordBg + ' text-gray-800'} text-xs sm:text-sm lg:text-base font-medium overflow-hidden text-ellipsis whitespace-nowrap transition-all duration-300`} style={{ minWidth: '65px', textAlign: 'center' }} > {isHiddenInHardMode ? '???' : word} </span> ); })}
                  </div>
@@ -390,6 +407,7 @@
                </div>
              </div>
            </div>
+
 
            <div className="w-full text-center py-2 text-xs lg:text-sm text-gray-500 mt-auto"> {t.footer} </div>
            <Modal isOpen={modal.isOpen} message={modal.message} isSuccess={modal.isSuccess} onClose={closeModal} language={language}/>

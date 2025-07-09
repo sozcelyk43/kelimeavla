@@ -296,7 +296,73 @@
           }
       };
       
-      const handleInteractionMove = React.useCallback( _.throttle((clientX, clientY) => { if (!isSwiping || !selectedCells?.length || allRequiredWordsFound || isLoading || !gameState) return; const currentCell = getCellFromCoordinates(clientX, clientY); if (!currentCell) return; const lastCell = selectedCells[selectedCells.length - 1]; if (currentCell.row === lastCell.row && currentCell.col === lastCell.col) return; if (selectedCells.length > 1 && currentCell.row === selectedCells[selectedCells.length - 2]?.row && currentCell.col === selectedCells[selectedCells.length - 2]?.col) { setSelectedCells(prev => prev.slice(0, -1)); if (selectedCells.length === 2) { setSwipeDirectionInfo({ dx: 0, dy: 0 }); } return; } const isAlreadySelected = isCellSelected(currentCell.row, currentCell.col); const isLocked = isCellPartOfFoundRequiredWord(currentCell.row, currentCell.col);if (isAlreadySelected) return; let dx = currentCell.row - lastCell.row; let dy = currentCell.col - lastCell.col; if (Math.abs(dx) > 1 || Math.abs(dy) > 1 || (dx === 0 && dy === 0)) return; let currentDir = { dx: Math.sign(dx), dy: Math.sign(dy) }; if (selectedCells.length === 1) { setSwipeDirectionInfo(currentDir); setSelectedCells(prev => [...prev, currentCell]); } else { if (currentDir.dx === swipeDirectionInfo.dx && currentDir.dy === swipeDirectionInfo.dy) { setSelectedCells(prev => [...prev, currentCell]); } } }, 20), [isSwiping, selectedCells, swipeDirectionInfo, allRequiredWordsFound, isLoading, gameState]);
+      const handleInteractionMove = React.useCallback(
+  _.throttle((clientX, clientY) => {
+    if (!isSwiping || !selectedCells?.length || allRequiredWordsFound || isLoading || !gameState) return;
+
+    const currentCell = getCellFromCoordinates(clientX, clientY);
+    if (!currentCell) return;
+
+    const lastCell = selectedCells[selectedCells.length - 1];
+    if (currentCell.row === lastCell.row && currentCell.col === lastCell.col) return;
+
+    // Geriye doğru silme mantığı
+    if (selectedCells.length > 1 && currentCell.row === selectedCells[selectedCells.length - 2]?.row && currentCell.col === selectedCells[selectedCells.length - 2]?.col) {
+      setSelectedCells(prev => prev.slice(0, -1));
+      if (selectedCells.length === 2) {
+        setSwipeDirectionInfo({ dx: 0, dy: 0 });
+      }
+      return;
+    }
+
+    const isAlreadySelected = isCellSelected(currentCell.row, currentCell.col);
+    const isLocked = isCellPartOfFoundRequiredWord(currentCell.row, currentCell.col);
+
+    // **DÜZELTME 1 BURADA UYGULANDI:**
+    // Hücre zaten seçiliyse veya bulunmuş bir kelimeye aitse (kilitliyse) devam etme
+    if (isAlreadySelected || isLocked) return;
+
+    const dx = currentCell.row - lastCell.row;
+    const dy = currentCell.col - lastCell.col;
+
+    // Sadece komşu hücrelere izin ver
+    if (Math.abs(dx) > 1 || Math.abs(dy) > 1 || (dx === 0 && dy === 0)) return;
+
+    // **DÜZELTME 2 BURADA UYGULANDI (YENİ MANTIK):**
+    if (selectedCells.length === 1) {
+      // Yönü ilk iki hücreye göre belirle ve kilitle
+      const currentDir = { dx: Math.sign(dx), dy: Math.sign(dy) };
+      setSwipeDirectionInfo(currentDir);
+      setSelectedCells(prev => [...prev, currentCell]);
+    } else {
+      // Sonraki hücrelerin, kilitlenen ana yöne uymasını sağla
+      // Bu, anlık kaymaları tolere ederken genel yönü korur.
+      const startCell = selectedCells[0];
+      const totalDx = currentCell.row - startCell.row;
+      const totalDy = currentCell.col - startCell.col;
+
+      let isDirectionallyCorrect = false;
+      // Düz hareketlerde (yatay/dikey)
+      if (swipeDirectionInfo.dx === 0 || swipeDirectionInfo.dy === 0) {
+        if ( (Math.sign(totalDx) === swipeDirectionInfo.dx) && (Math.sign(totalDy) === swipeDirectionInfo.dy) ) {
+          isDirectionallyCorrect = true;
+        }
+      }
+      // Çapraz hareketlerde
+      else {
+        if ( (Math.sign(totalDx) === swipeDirectionInfo.dx) && (Math.sign(totalDy) === swipeDirectionInfo.dy) && (Math.abs(totalDx) === Math.abs(totalDy)) ) {
+           isDirectionallyCorrect = true;
+        }
+      }
+
+      // Yeni hücre, bir önceki hücrenin direkt komşusu olmalı VE ana yöne uymalı
+      if (isDirectionallyCorrect) {
+        setSelectedCells(prev => [...prev, currentCell]);
+      }
+    }
+  }, 20), // Throttle süresini 20ms olarak tuttuk, akıcı bir deneyim için iyi bir değerdir.
+  [isSwiping, selectedCells, swipeDirectionInfo, allRequiredWordsFound, isLoading, gameState]
+);
       
       const handleInteractionEnd = () => { if (!isSwiping || !selectedCells?.length || isLoading || !gameState) { if (selectedCells.length > 0) setSelectedCells([]); if (isSwiping) setIsSwiping(false); return; } const word = selectedCells.map(c => gameState.board?.[c.row]?.[c.col] || '').join(''); const target = gameState.words?.find(w => w.word === word); if (target && !foundWords.includes(word)) { setFoundWords(prev => [...prev, word]); playCorrectSound(); } setSelectedCells([]); setIsSwiping(false); };
       const handleNextLevel = () => { if (level < 59) { setLevel(p => p + 1); } else { setModal({ isOpen: true, message: t.gameCompleted, isSuccess: true }); } };

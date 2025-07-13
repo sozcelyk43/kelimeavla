@@ -267,7 +267,34 @@
        const [hardModeHintState, setHardModeHintState] = React.useState('hidden'); 
 
       React.useEffect(() => { setIsLoading(true); setGameState(null); const timerId = setTimeout(() => { let newGameState = createBoard(level, language); if (!newGameState || !newGameState.board || newGameState.board.length === 0) { setModal({isOpen: true, message: "Tahta oluşturulamadı. Lütfen sayfayı yenileyin.", isSuccess: false}); } setGameState(newGameState); setIsLoading(false); setSelectedCells([]); setFoundWords([]); setHiddenWordGuess(''); setIsSwiping(false); }, 100); return () => clearTimeout(timerId); }, [language, level]);
-
+      
+    React.useEffect(() => {
+        const grid = gridRef.current;
+        if (!grid) return;
+        const handleTouchStart = (e) => {
+            e.preventDefault();
+            handleInteractionStart(e.touches[0].clientX, e.touches[0].clientY);
+        };
+        const handleTouchMove = (e) => {
+            e.preventDefault();
+            handleInteractionMove(e.touches[0].clientX, e.touches[0].clientY);
+        };
+        const handleTouchEnd = (e) => {
+            e.preventDefault();
+            handleInteractionEnd();
+        };
+        grid.addEventListener('touchstart', handleTouchStart, { passive: false });
+        grid.addEventListener('touchmove', handleTouchMove, { passive: false });
+        grid.addEventListener('touchend', handleTouchEnd, { passive: false });
+        grid.addEventListener('touchcancel', handleTouchEnd, { passive: false });
+        return () => {
+            grid.removeEventListener('touchstart', handleTouchStart);
+            grid.removeEventListener('touchmove', handleTouchMove);
+            grid.removeEventListener('touchend', handleTouchEnd);
+            grid.removeEventListener('touchcancel', handleTouchEnd);
+        };
+      }, [handleInteractionStart, handleInteractionMove, handleInteractionEnd]);
+    
       React.useEffect(() => {
         if (mode === 'hardMode') {
           setHardModeHintState('visible'); 
@@ -402,10 +429,7 @@
                       style={{ gridTemplateColumns: `repeat(${gridCols}, minmax(0, 1fr))`, aspectRatio: `${gridCols} / ${gridRows}` }}
                       onMouseDown={(e) => handleInteractionStart(e.clientX, e.clientY)}
                       onMouseMove={(e) => { if(isSwiping) handleInteractionMove(e.clientX, e.clientY);}}
-                      onMouseUp={handleInteractionEnd} onMouseLeave={handleInteractionEnd}
-                      onTouchStart={(e) => { e.preventDefault(); handleInteractionStart(e.touches[0].clientX, e.touches[0].clientY); }}
-                      onTouchMove={(e) => { e.preventDefault(); if(isSwiping) handleInteractionMove(e.touches[0].clientX, e.touches[0].clientY);}}
-                      onTouchEnd={(e) => {e.preventDefault(); handleInteractionEnd();}} onTouchCancel={(e) => {e.preventDefault(); handleInteractionEnd();}}>
+                      onMouseUp={handleInteractionEnd} onMouseLeave={handleInteractionEnd}>
                    {gameState.board.map((row, rowIndex) =>
                      row.map((letter, colIndex) => {
                        const isSelected = isCellSelected(rowIndex, colIndex);

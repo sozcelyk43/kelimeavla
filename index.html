@@ -116,11 +116,10 @@
   function canPlaceRequiredWord(board, word, r, c, dr, dc) { const rows = board.length; const cols = board[0].length; for (let i = 0; i < word.length; i++) { const nr = r + i * dr; const nc = c + i * dc; if (nr < 0 || nr >= rows || nc < 0 || nc >= cols || board[nr][nc] !== '') return false; } return true; }
   function canPlaceFillerWord(board, lockGrid, word, r, c, dr, dc) { const rows = board.length; const cols = board[0].length; for (let i = 0; i < word.length; i++) { const nr = r + i * dr; const nc = c + i * dc; if (nr < 0 || nr >= rows || nc < 0 || nc >= cols || lockGrid[nr][nc] || (board[nr][nc] !== '' && board[nr][nc] !== word[i])) { return false; } } return true; }
   
-// SON NİHAİ VERSİYON - DİNAMİK GİZLİ KELİME MANTIĞI
+// SON GÜNCELLEME - Gizli Kelime Uzunluğu {5,6,7,8} olacak şekilde ayarlandı
 
 function createBoard(level, language) {
     try {
-        // boardSizes içindeki `hiddenWordLength` referansı kaldırıldı.
         const staticConfig = boardSizes[level];
         if (!staticConfig) { console.error(`Geçersiz seviye config: ${level}.`); return null; }
         const { rows, cols } = staticConfig;
@@ -133,7 +132,6 @@ function createBoard(level, language) {
             const allWords = (wordLists[language] || []).filter(w => w && w.length >= 2).map(customToUpperCase);
             let potentialWords = _.shuffle(allWords);
 
-            // Önceki gibi yardımcı fonksiyonlar
             const canPlaceWithoutOverlap = (word, r, c, dir) => {
                 for (let i = 0; i < word.length; i++) {
                     const nr = r + i * dir.dx; const nc = c + i * dir.dy;
@@ -171,23 +169,34 @@ function createBoard(level, language) {
                 for (let r = 0; r < rows; r++) { for (let c = 0; c < cols; c++) { for (const dir of straightDirections) { if (canPlaceWithoutOverlap(word, r, c, dir)) availablePositions.push({ r, c, dir }); } } }
                 if (availablePositions.length > 0) { const { r, c, dir } = _.sample(availablePositions); placeAndLockWord(word, r, c, dir); }
             }
-
-            // *** YENİ MANTIK BURADA BAŞLIYOR ***
-
-            // 3. BOŞ HÜCRELERİ BUL VE GİZLİ KELİME UZUNLUĞUNU BELİRLE
+            
+            // 3. BOŞ HÜCRELERE GÖRE GİZLİ KELİME UZUNLUĞUNU BELİRLE
             const emptyCells = [];
             for (let r = 0; r < rows; r++) { for (let c = 0; c < cols; c++) { if (!lockGrid[r][c]) emptyCells.push({ r, c }); } }
-
-            const availableSpace = emptyCells.length;
-            // Kalan boşluk sayısına göre gizli kelime uzunluğunu 5 ile 10 arasında belirle
-            const targetHiddenWordLength = _.clamp(availableSpace, 5, 10);
             
-            // Eğer en az 5 boşluk bile yoksa, bu deneme başarısızdır.
-            if (availableSpace < 5) continue;
+            const availableSpace = emptyCells.length;
+            let targetHiddenWordLength = 0;
+
+            // *** YENİ KURAL BURADA UYGULANDI ***
+            // Kalan boşluğa göre 5, 6, 7 veya 8 harfli kelimelerden en uygun olanı seç.
+            if (availableSpace >= 8) {
+                targetHiddenWordLength = 8;
+            } else if (availableSpace >= 7) {
+                targetHiddenWordLength = 7;
+            } else if (availableSpace >= 6) {
+                targetHiddenWordLength = 6;
+            } else if (availableSpace >= 5) {
+                targetHiddenWordLength = 5;
+            }
+            
+            // Eğer 5 harflik bile yer yoksa, bu deneme başarısızdır.
+            if (targetHiddenWordLength === 0) {
+                continue;
+            }
 
             // 4. UYGUN GİZLİ KELİMEYİ SEÇ VE YERLEŞTİR
             const suitableHiddenWords = allWords.filter(w => w.length === targetHiddenWordLength && !placedWordsInfo.some(p => p.word === w));
-            if (suitableHiddenWords.length === 0) continue; // Uygun kelime yoksa yeniden dene
+            if (suitableHiddenWords.length === 0) continue; 
             
             const hiddenWord = _.sample(suitableHiddenWords);
             const cellsForHidden = _.sampleSize(emptyCells, targetHiddenWordLength);
@@ -195,7 +204,6 @@ function createBoard(level, language) {
             
             cellsForHidden.forEach((cell, i) => {
                 board[cell.r][cell.c] = hiddenWord[i];
-                // Bu hücreyi artık dolu olarak işaretle ki rastgele harf yazılmasın
                 lockGrid[cell.r][cell.c] = true; 
                 scatteredHiddenLetterPositions.push({ row: cell.r, col: cell.c });
             });
@@ -209,7 +217,6 @@ function createBoard(level, language) {
                 }
             }
             
-            // BAŞARILI BİR TAHTA OLUŞTURULDU
             const finalWords = _.sortBy(placedWordsInfo, 'word');
             return { board, words: finalWords, hiddenWord, scatteredHiddenLetterPositions };
         }
@@ -222,7 +229,6 @@ function createBoard(level, language) {
         return null;
     }
 }
-
   function Modal({ isOpen, message, isSuccess, onClose, language }) { const t = translations[language]; if (!isOpen) return null; return ( <div class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4"> <div class="bg-white p-6 rounded-xl shadow-2xl max-w-sm w-full text-center"> <h3 class={`text-xl font-semibold mb-3 ${isSuccess ? 'text-green-600' : 'text-red-600'}`}> {isSuccess ? t.congrats : t.error} </h3> <p class="text-gray-700 mb-6">{message}</p> <button onClick={onClose} class={`px-5 py-2 rounded-lg text-white font-medium text-sm transition duration-300 ${isSuccess ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'}`}> {isSuccess ? t.continueButton : t.tryAgainButton} </button> </div> </div> ); }
   
   function HomePage({ startGame, language, setLanguage }) { const t = translations[language] || translations['en']; if (!t) { return <div class="p-4 text-center">Dil yüklenemedi...</div>; } return ( <div class="container mx-auto px-4 lg:px-8 xl:px-12 py-8 text-center flex flex-col justify-center items-center h-full"> <div class="bg-gradient-to-br from-indigo-500 to-purple-600 text-white p-6 rounded-lg shadow-lg mb-6 w-full max-w-xs"> <h1 class="text-3xl lg:text-4xl font-bold">{t?.title || 'Kelime Avı'}</h1> </div> <div class="bg-gradient-to-b from-indigo-100 to-purple-100 p-6 rounded-2xl shadow-xl max-w-md lg:max-w-lg w-full mb-8"> <h2 class="text-2xl lg:text-3xl font-bold text-indigo-700 mb-4">{t?.rulesTitle || 'Kurallar'}</h2> <ul class="text-left list-disc pl-5 space-y-2 text-base lg:text-lg text-gray-800"> {(t?.rules || []).map((rule, index) => <li key={index}>{rule}</li>)} </ul> </div> <div class="flex flex-col sm:flex-row justify-center items-center gap-3 lg:gap-4 mb-8 w-full max-w-md"> <div class="flex items-center gap-2 w-full sm:w-auto"> <label htmlFor="language-select" class="text-sm lg:text-base font-medium text-gray-700">{t?.language || 'Dil'}:</label> <select id="language-select" value={language} onChange={(e) => setLanguage(e.target.value)} class="bg-white border border-gray-300 text-gray-900 text-sm lg:text-base rounded-lg focus:ring-indigo-500 focus:border-indigo-500 p-2 w-full"> <option value="tr">{t?.turkish || 'Türkçe'}</option> <option value="en">{t?.english || 'English'}</option> </select> </div> <button onClick={() => startGame('easyMode')} class="w-full sm:w-auto bg-green-600 text-white px-6 py-2 rounded-lg font-semibold lg:text-lg hover:bg-green-700 transition duration-300 shadow-md"> {t?.easyMode || 'Kolay Mod'} </button> <button onClick={() => startGame('hardMode')} class="w-full sm:w-auto bg-red-600 text-white px-6 py-2 rounded-lg font-semibold lg:text-lg hover:bg-red-700 transition duration-300 shadow-md"> {t?.hardMode || 'Zor Mod'} </button> </div> <div class="w-full text-center py-2 text-xs lg:text-sm text-gray-500 mt-auto"> {t?.footer || `© ${new Date().getFullYear()} Ozcelik Inc.`} </div> </div> ); }

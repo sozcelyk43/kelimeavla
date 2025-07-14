@@ -40,17 +40,17 @@
     .scrollbar-thin::-webkit-scrollbar-thumb { background-color: #9CA3AF; border-radius: 10px; border: 1px solid #E5E7EB; }
     @keyframes flashing-effect {
       0%, 100% { 
-        background-color: #fefce8;        transform: scale(1);       }
+        background-color: #fefce8;
+        transform: scale(1);
+      }
       50% { 
-        background-color: #facc15;        transform: scale(1.05); 
+        background-color: #facc15;
+        transform: scale(1.05); 
       }
     }
     .animate-flashing {
       animation: flashing-effect 0.8s ease-in-out infinite;
     }
-
-
-    
   </style>
 </head>
 <body class="h-[100vh] flex flex-col overflow-hidden bg-gray-50">
@@ -62,11 +62,12 @@
 
 <script type="text/babel">
   window.onerror = function (msg, url, lineNo, columnNo, error) { console.error(`Global error: ${msg}\nURL: ${url}\nLine: ${lineNo}\nColumn: ${columnNo}\nError:`, error); const root = document.getElementById('root'); if (root) root.innerHTML = `<div class="p-4 text-red-600">Beklenmedik bir hata oluştu. Lütfen sayfayı yenileyin. Hata: ${msg}</div>`; return false; };
-  if (window.Babel) { Babel.registerPreset('react', { presets: ['react'] }); } else { console.error('Babel yüklenemedi! JSX çevrimi başarısız olacak.'); const root = document.getElementById('root'); if (root) root.innerHTML = `<div class="p-4 text-red-600">Kritik hata: Babel yüklenemedi. Uygulama çalışamaz.</div>`; }
+  // AŞAĞIDAKİ GEREKSİZ SATIR KALDIRILDI
+  // if (window.Babel) { Babel.registerPreset('react', { presets: ['react'] }); } 
   
   function customToUpperCase(str) { if (typeof str !== 'string') return ''; try { return str.replace(/i/g, 'İ').replace(/ı/g, 'I').replace(/ğ/g, 'Ğ').replace(/ü/g, 'Ü').replace(/ş/g, 'Ş').replace(/ö/g, 'Ö').replace(/ç/g, 'Ç').toUpperCase(); } catch (err) { console.error('customToUpperCase hatası:', err); return (str || '').toUpperCase(); } }
 
-  class ErrorBoundary extends React.Component { state = { hasError: false }; static getDerivedStateFromError(error) { return { hasError: true }; } componentDidCatch(error, errorInfo) { console.error("ErrorBoundary yakaladı:", error, errorInfo); } render() { if (this.state.hasError) { return <div className="p-4 text-red-600">Beklenmedik bir hata oluştu. Lütfen sayfayı yenileyin.</div>; } return this.props.children; } }
+  class ErrorBoundary extends React.Component { state = { hasError: false }; static getDerivedStateFromError(error) { return { hasError: true }; } componentDidCatch(error, errorInfo) { console.error("ErrorBoundary yakaladı:", error, errorInfo); } render() { if (this.state.hasError) { return <div class="p-4 text-red-600">Beklenmedik bir hata oluştu. Lütfen sayfayı yenileyin.</div>; } return this.props.children; } }
 
   const translations = {
     tr: { title: "Kelime Avı", rulesTitle: "Oyun Kuralları", rules: [ "Oyunda 60 seviye vardır, tahta her 6 seviyede bir büyür.", "Kelimeler sağa, sola, yukarı, aşağı ve çapraz olarak yerleştirilmiştir.", "Harfleri kaydırarak kelimeleri seçin. Doğru kelimeler listede pasifleşir.", "Tüm kelimeleri bulun, gizli sözcüğü tahmin edin ve seviyeyi tamamlayın." ], startButton: "Kelime Avına Başla", easyMode: "Kolay Mod", hardMode: "Zor Mod", level: "Seviye", words: "Kelimeler", hiddenWord: "Gizli Sözcük", hiddenWordPlaceholder: "Gizli sözcüğü girin", checkButton: "Kontrol Et", homeButton: "Ana Sayfa", footer: `© ${new Date().getFullYear()} Ozcelik Inc. Tüm hakları saklıdır.`, congrats: "Tebrikler!", error: "Hata!", successMessage: (word) => `Harika! Gizli sözcüğü buldunuz: ${word}`, allWordsRequired: "Önce tüm kelimeleri bulmalısınız!", wrongGuess: "Yanlış tahmin! Tekrar deneyin.", gameCompleted: "Tebrikler! Oyunu başarıyla tamamladınız!", continueButton: "Devam Et", tryAgainButton: "Tekrar Dene", language: "Dil", turkish: "Türkçe", english: "English" },
@@ -81,28 +82,23 @@
  
   const boardSizes = [];
   const getHiddenWordLength = (level) => {
-      const stage = Math.floor(level / 6); // Artık 10 aşama var (0-9)
-      return Math.min(9, 5 + Math.floor(stage / 2)); // Kelime uzunluğu daha kademeli artar
+      const stage = Math.floor(level / 6);
+      return Math.min(9, 5 + Math.floor(stage / 2));
   };
   const initialRowsConfig = [7, 9, 11, 13, 15];
   const initialColsConfig = [8, 9, 10, 11, 12];
 
   for (let level = 0; level < 60; level++) {
-      const stage = Math.floor(level / 6);       // Her 6 seviyede bir yeni aşama
-      const configIndex = Math.floor(stage / 2); // Her 12 seviyede bir ana ayarları (satır/sütun) değiştir
-      const levelInStage = level % 6;            // 6'lık aşama içindeki mevcut seviye (0-5)
-
+      const stage = Math.floor(level / 6);
+      const configIndex = Math.floor(stage / 2);
+      const levelInStage = level % 6;
       let baseRows = initialRowsConfig[configIndex];
       let baseCols = initialColsConfig[configIndex];
-
-      // Aşama içindeki daha basit büyüme mantığı
-      let r = baseRows + Math.floor(levelInStage / 3); // Satır sayısını aşamanın yarısında bir kez artır
-      let c = baseCols + Math.floor(levelInStage / 2); // Sütun sayısını aşama içinde birkaç kez artır
-
+      let r = baseRows + Math.floor(levelInStage / 3);
+      let c = baseCols + Math.floor(levelInStage / 2);
       r = Math.max(7, Math.min(16, r));
       c = Math.max(8, Math.min(22, c));
       if (c <= r && r > 7) c = r + 1;
-
       boardSizes.push({ rows: r, cols: c, hiddenWordLength: getHiddenWordLength(level) });
   }
 
@@ -114,156 +110,49 @@
   const allDirections = [...directions.diagonal, ...directions.horizontal, ...directions.vertical];
   const straightDirections = [...directions.horizontal, ...directions.vertical];
   
-  function placeWordOnBoard(board, word, r, c, dr, dc, lockGrid = null) {
-      const positions = [];
-      for (let i = 0; i < word.length; i++) {
-          const nr = r + i * dr;
-          const nc = c + i * dc;
-          board[nr][nc] = word[i];
-          if (lockGrid) lockGrid[nr][nc] = true;
-          positions.push({ row: nr, col: nc });
-      }
-      return positions;
-  }
-
-  function canPlaceRequiredWord(board, word, r, c, dr, dc) {
-      const rows = board.length; const cols = board[0].length;
-      for (let i = 0; i < word.length; i++) {
-          const nr = r + i * dr; const nc = c + i * dc;
-          if (nr < 0 || nr >= rows || nc < 0 || nc >= cols || board[nr][nc] !== '') return false;
-      }
-      return true;
-  }
-
-  function canPlaceFillerWord(board, lockGrid, word, r, c, dr, dc) {
-      const rows = board.length; const cols = board[0].length;
-      for (let i = 0; i < word.length; i++) {
-          const nr = r + i * dr; const nc = c + i * dc;
-          if (nr < 0 || nr >= rows || nc < 0 || nc >= cols || lockGrid[nr][nc] || (board[nr][nc] !== '' && board[nr][nc] !== word[i])) {
-              return false;
-          }
-      }
-      return true;
-  }
+  function placeWordOnBoard(board, word, r, c, dr, dc, lockGrid = null) { const positions = []; for (let i = 0; i < word.length; i++) { const nr = r + i * dr; const nc = c + i * dc; board[nr][nc] = word[i]; if (lockGrid) lockGrid[nr][nc] = true; positions.push({ row: nr, col: nc }); } return positions; }
+  function canPlaceRequiredWord(board, word, r, c, dr, dc) { const rows = board.length; const cols = board[0].length; for (let i = 0; i < word.length; i++) { const nr = r + i * dr; const nc = c + i * dc; if (nr < 0 || nr >= rows || nc < 0 || nc >= cols || board[nr][nc] !== '') return false; } return true; }
+  function canPlaceFillerWord(board, lockGrid, word, r, c, dr, dc) { const rows = board.length; const cols = board[0].length; for (let i = 0; i < word.length; i++) { const nr = r + i * dr; const nc = c + i * dc; if (nr < 0 || nr >= rows || nc < 0 || nc >= cols || lockGrid[nr][nc] || (board[nr][nc] !== '' && board[nr][nc] !== word[i])) { return false; } } return true; }
   
   function createBoard(level, language) {
     try {
-        const config = boardSizes[level];
-        if (!config) { console.error(`Geçersiz seviye config: ${level}.`); return null; }
+        const config = boardSizes[level]; if (!config) { console.error(`Geçersiz seviye config: ${level}.`); return null; }
         const { rows, cols, hiddenWordLength } = config;
         let boardAttempts = 0;
-
         while (boardAttempts < 50) {
             boardAttempts++;
             const board = Array(rows).fill(null).map(() => Array(cols).fill(''));
             const lockGrid = Array(rows).fill(null).map(() => Array(cols).fill(false));
             const requiredWordsInfo = [];
             const potentialWords = (wordLists[language] || []).filter(w => w && w.length >= 2).map(customToUpperCase);
-
             const suitableHiddenWords = potentialWords.filter(w => w.length === hiddenWordLength);
             if (suitableHiddenWords.length === 0) { console.error(`${hiddenWordLength} harfli bir gizli kelime ana listede bulunamadı.`); continue; }
             const hiddenWord = _.sample(suitableHiddenWords);
-            
             const baseWordCount = 7 + Math.floor(level / 6);
             const targetWordCount = Math.max(10, baseWordCount);
             const wordsAvailableForSampling = potentialWords.filter(w => w !== hiddenWord);
             const selectedRequiredWords = _.sampleSize(wordsAvailableForSampling, Math.min(targetWordCount, wordsAvailableForSampling.length));
-            
-            const placeWords = (wordsToPlace, availableDirections) => {
-                for (const word of wordsToPlace) {
-                    for (let attempt = 0; attempt < 200; attempt++) {
-                        const dir = _.sample(availableDirections);
-                        const r = _.random(rows - 1);
-                        const c = _.random(cols - 1);
-                        if (canPlaceRequiredWord(board, word, r, c, dir.dx, dir.dy)) {
-                            const positions = placeWordOnBoard(board, word, r, c, dir.dx, dir.dy, lockGrid);
-                            requiredWordsInfo.push({ word, positions, direction: dir.name });
-                            break;
-                        }
-                    }
-                }
-            };
-            
-            const shuffledWords = _.shuffle(selectedRequiredWords);
-            const numDiagonal = Math.max(6, Math.floor(shuffledWords.length * 0.4));
-            const diagonalWords = shuffledWords.slice(0, numDiagonal);
-            const otherWords = shuffledWords.slice(numDiagonal);
-
-            placeWords(diagonalWords, directions.diagonal);
-            placeWords(otherWords, straightDirections);
-
+            const placeWords = (wordsToPlace, availableDirections) => { for (const word of wordsToPlace) { for (let attempt = 0; attempt < 200; attempt++) { const dir = _.sample(availableDirections); const r = _.random(rows - 1); const c = _.random(cols - 1); if (canPlaceRequiredWord(board, word, r, c, dir.dx, dir.dy)) { const positions = placeWordOnBoard(board, word, r, c, dir.dx, dir.dy, lockGrid); requiredWordsInfo.push({ word, positions, direction: dir.name }); break; } } } };
+            const shuffledWords = _.shuffle(selectedRequiredWords); const numDiagonal = Math.max(6, Math.floor(shuffledWords.length * 0.4)); const diagonalWords = shuffledWords.slice(0, numDiagonal); const otherWords = shuffledWords.slice(numDiagonal);
+            placeWords(diagonalWords, directions.diagonal); placeWords(otherWords, straightDirections);
             if (requiredWordsInfo.length < selectedRequiredWords.length * 0.8) continue;
-
-            const requiredWordsSet = new Set(requiredWordsInfo.map(w => w.word));
-            const fillerWords = potentialWords.filter(w => !requiredWordsSet.has(w));
-            const wordsByLength = _.groupBy(fillerWords, 'length');
-
+            const requiredWordsSet = new Set(requiredWordsInfo.map(w => w.word)); const fillerWords = potentialWords.filter(w => !requiredWordsSet.has(w)); const wordsByLength = _.groupBy(fillerWords, 'length');
             const sortedFillerWords = _.sortBy(fillerWords, w => -w.length);
-            for (const word of sortedFillerWords) {
-                for (let attempt = 0; attempt < 100; attempt++) {
-                    const dir = _.sample(allDirections);
-                    const r = _.random(rows - 1);
-                    const c = _.random(cols - 1);
-                    if (canPlaceFillerWord(board, lockGrid, word, r, c, dir.dx, dir.dy)) {
-                        placeWordOnBoard(board, word, r, c, dir.dx, dir.dy);
-                        break; 
-                    }
-                }
-            }
-            
-            for(let pass = 0; pass < 2; pass++) { 
-                for (let r = 0; r < rows; r++) {
-                    for (let c = 0; c < cols; c++) {
-                        if(board[r][c] === '') {
-                            for (const dir of allDirections) {
-                                let gapLen = 0;
-                                while(c + gapLen * dir.dy >= 0 && c + gapLen * dir.dy < cols && r + gapLen * dir.dx >= 0 && r + gapLen * dir.dx < rows && board[r + gapLen * dir.dx][c + gapLen * dir.dy] === '' && !lockGrid[r + gapLen * dir.dx][c + gapLen * dir.dy]) {
-                                    gapLen++;
-                                }
-                                if (gapLen > 1) {
-                                    for (let len = gapLen; len >= 2; len--) {
-                                        if (wordsByLength[len]) {
-                                            placeWordOnBoard(board, _.sample(wordsByLength[len]), r, c, dir.dx, dir.dy);
-                                            break; 
-                                        }
-                                    }
-                                    break; 
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
+            for (const word of sortedFillerWords) { for (let attempt = 0; attempt < 100; attempt++) { const dir = _.sample(allDirections); const r = _.random(rows - 1); const c = _.random(cols - 1); if (canPlaceFillerWord(board, lockGrid, word, r, c, dir.dx, dir.dy)) { placeWordOnBoard(board, word, r, c, dir.dx, dir.dy); break; } } }
+            for(let pass = 0; pass < 2; pass++) { for (let r = 0; r < rows; r++) { for (let c = 0; c < cols; c++) { if(board[r][c] === '') { for (const dir of allDirections) { let gapLen = 0; while(c + gapLen * dir.dy >= 0 && c + gapLen * dir.dy < cols && r + gapLen * dir.dx >= 0 && r + gapLen * dir.dx < rows && board[r + gapLen * dir.dx][c + gapLen * dir.dy] === '' && !lockGrid[r + gapLen * dir.dx][c + gapLen * dir.dy]) { gapLen++; } if (gapLen > 1) { for (let len = gapLen; len >= 2; len--) { if (wordsByLength[len]) { placeWordOnBoard(board, _.sample(wordsByLength[len]), r, c, dir.dx, dir.dy); break; } } break; } } } } } }
             for (let r = 0; r < rows; r++) { for (let c = 0; c < cols; c++) { if (board[r][c] === '') { board[r][c] = charSets[language][Math.floor(Math.random() * charSets[language].length)]; } } }
-
-            const unlockedCells = [];
-            for (let r = 0; r < rows; r++) { for (let c = 0; c < cols; c++) { if (!lockGrid[r][c]) unlockedCells.push({r, c}); } }
-
+            const unlockedCells = []; for (let r = 0; r < rows; r++) { for (let c = 0; c < cols; c++) { if (!lockGrid[r][c]) unlockedCells.push({r, c}); } }
             let scatteredHiddenLetterPositions = [];
-            if (unlockedCells.length >= hiddenWord.length) {
-                const cellsForHidden = _.sampleSize(unlockedCells, hiddenWord.length);
-                cellsForHidden.forEach((cell, i) => {
-                    scatteredHiddenLetterPositions.push({ row: cell.r, col: cell.c, originalLetter: board[cell.r][cell.c] });
-                    board[cell.r][cell.c] = hiddenWord[i];
-                });
-            } else { continue; }
-            
+            if (unlockedCells.length >= hiddenWord.length) { const cellsForHidden = _.sampleSize(unlockedCells, hiddenWord.length); cellsForHidden.forEach((cell, i) => { scatteredHiddenLetterPositions.push({ row: cell.r, col: cell.c, originalLetter: board[cell.r][cell.c] }); board[cell.r][cell.c] = hiddenWord[i]; }); } else { continue; }
             return { board, words: requiredWordsInfo, hiddenWord, scatteredHiddenLetterPositions };
         }
-        
-        console.error("Tahta oluşturma denemeleri başarısız oldu.");
-        return null;
-    } catch (e) {
-        console.error(`createBoard kritik hatası:`, e);
-        return null;
-    }
-}
+        console.error("Tahta oluşturma denemeleri başarısız oldu."); return null;
+    } catch (e) { console.error(`createBoard kritik hatası:`, e); return null; }
+  }
 
-
-  function Modal({ isOpen, message, isSuccess, onClose, language }) { const t = translations[language]; if (!isOpen) return null; return ( <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4"> <div className="bg-white p-6 rounded-xl shadow-2xl max-w-sm w-full text-center"> <h3 className={`text-xl font-semibold mb-3 ${isSuccess ? 'text-green-600' : 'text-red-600'}`}> {isSuccess ? t.congrats : t.error} </h3> <p className="text-gray-700 mb-6">{message}</p> <button onClick={onClose} className={`px-5 py-2 rounded-lg text-white font-medium text-sm transition duration-300 ${isSuccess ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'}`}> {isSuccess ? t.continueButton : t.tryAgainButton} </button> </div> </div> ); }
+  function Modal({ isOpen, message, isSuccess, onClose, language }) { const t = translations[language]; if (!isOpen) return null; return ( <div class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4"> <div class="bg-white p-6 rounded-xl shadow-2xl max-w-sm w-full text-center"> <h3 class={`text-xl font-semibold mb-3 ${isSuccess ? 'text-green-600' : 'text-red-600'}`}> {isSuccess ? t.congrats : t.error} </h3> <p class="text-gray-700 mb-6">{message}</p> <button onClick={onClose} class={`px-5 py-2 rounded-lg text-white font-medium text-sm transition duration-300 ${isSuccess ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'}`}> {isSuccess ? t.continueButton : t.tryAgainButton} </button> </div> </div> ); }
   
-  function HomePage({ startGame, language, setLanguage }) { const t = translations[language] || translations['en']; if (!t) { return <div className="p-4 text-center">Dil yüklenemedi...</div>; } return ( <div className="container mx-auto px-4 lg:px-8 xl:px-12 py-8 text-center flex flex-col justify-center items-center h-full"> <div className="bg-gradient-to-br from-indigo-500 to-purple-600 text-white p-6 rounded-lg shadow-lg mb-6 w-full max-w-xs"> <h1 className="text-3xl lg:text-4xl font-bold">{t?.title || 'Kelime Avı'}</h1> </div> <div className="bg-gradient-to-b from-indigo-100 to-purple-100 p-6 rounded-2xl shadow-xl max-w-md lg:max-w-lg w-full mb-8"> <h2 className="text-2xl lg:text-3xl font-bold text-indigo-700 mb-4">{t?.rulesTitle || 'Kurallar'}</h2> <ul className="text-left list-disc pl-5 space-y-2 text-base lg:text-lg text-gray-800"> {(t?.rules || []).map((rule, index) => <li key={index}>{rule}</li>)} </ul> </div> <div className="flex flex-col sm:flex-row justify-center items-center gap-3 lg:gap-4 mb-8 w-full max-w-md"> <div className="flex items-center gap-2 w-full sm:w-auto"> <label htmlFor="language-select" className="text-sm lg:text-base font-medium text-gray-700">{t?.language || 'Dil'}:</label> <select id="language-select" value={language} onChange={(e) => setLanguage(e.target.value)} className="bg-white border border-gray-300 text-gray-900 text-sm lg:text-base rounded-lg focus:ring-indigo-500 focus:border-indigo-500 p-2 w-full"> <option value="tr">{t?.turkish || 'Türkçe'}</option> <option value="en">{t?.english || 'English'}</option> </select> </div> <button onClick={() => startGame('easyMode')} className="w-full sm:w-auto bg-green-600 text-white px-6 py-2 rounded-lg font-semibold lg:text-lg hover:bg-green-700 transition duration-300 shadow-md"> {t?.easyMode || 'Kolay Mod'} </button> <button onClick={() => startGame('hardMode')} className="w-full sm:w-auto bg-red-600 text-white px-6 py-2 rounded-lg font-semibold lg:text-lg hover:bg-red-700 transition duration-300 shadow-md"> {t?.hardMode || 'Zor Mod'} </button> </div> <div className="w-full text-center py-2 text-xs lg:text-sm text-gray-500 mt-auto"> {t?.footer || `© ${new Date().getFullYear()} Ozcelik Inc.`} </div> </div> ); }
+  function HomePage({ startGame, language, setLanguage }) { const t = translations[language] || translations['en']; if (!t) { return <div class="p-4 text-center">Dil yüklenemedi...</div>; } return ( <div class="container mx-auto px-4 lg:px-8 xl:px-12 py-8 text-center flex flex-col justify-center items-center h-full"> <div class="bg-gradient-to-br from-indigo-500 to-purple-600 text-white p-6 rounded-lg shadow-lg mb-6 w-full max-w-xs"> <h1 class="text-3xl lg:text-4xl font-bold">{t?.title || 'Kelime Avı'}</h1> </div> <div class="bg-gradient-to-b from-indigo-100 to-purple-100 p-6 rounded-2xl shadow-xl max-w-md lg:max-w-lg w-full mb-8"> <h2 class="text-2xl lg:text-3xl font-bold text-indigo-700 mb-4">{t?.rulesTitle || 'Kurallar'}</h2> <ul class="text-left list-disc pl-5 space-y-2 text-base lg:text-lg text-gray-800"> {(t?.rules || []).map((rule, index) => <li key={index}>{rule}</li>)} </ul> </div> <div class="flex flex-col sm:flex-row justify-center items-center gap-3 lg:gap-4 mb-8 w-full max-w-md"> <div class="flex items-center gap-2 w-full sm:w-auto"> <label htmlFor="language-select" class="text-sm lg:text-base font-medium text-gray-700">{t?.language || 'Dil'}:</label> <select id="language-select" value={language} onChange={(e) => setLanguage(e.target.value)} class="bg-white border border-gray-300 text-gray-900 text-sm lg:text-base rounded-lg focus:ring-indigo-500 focus:border-indigo-500 p-2 w-full"> <option value="tr">{t?.turkish || 'Türkçe'}</option> <option value="en">{t?.english || 'English'}</option> </select> </div> <button onClick={() => startGame('easyMode')} class="w-full sm:w-auto bg-green-600 text-white px-6 py-2 rounded-lg font-semibold lg:text-lg hover:bg-green-700 transition duration-300 shadow-md"> {t?.easyMode || 'Kolay Mod'} </button> <button onClick={() => startGame('hardMode')} class="w-full sm:w-auto bg-red-600 text-white px-6 py-2 rounded-lg font-semibold lg:text-lg hover:bg-red-700 transition duration-300 shadow-md"> {t?.hardMode || 'Zor Mod'} </button> </div> <div class="w-full text-center py-2 text-xs lg:text-sm text-gray-500 mt-auto"> {t?.footer || `© ${new Date().getFullYear()} Ozcelik Inc.`} </div> </div> ); }
 
   function WordHunt({ goToHome, language, mode }) {
        const t = translations[language] || translations['en'];
@@ -281,21 +170,101 @@
 
       React.useEffect(() => { setIsLoading(true); setGameState(null); const timerId = setTimeout(() => { let newGameState = createBoard(level, language); if (!newGameState || !newGameState.board || newGameState.board.length === 0) { setModal({isOpen: true, message: "Tahta oluşturulamadı. Lütfen sayfayı yenileyin.", isSuccess: false}); } setGameState(newGameState); setIsLoading(false); setSelectedCells([]); setFoundWords([]); setHiddenWordGuess(''); setIsSwiping(false); }, 100); return () => clearTimeout(timerId); }, [language, level]);
       
-    React.useEffect(() => {
+       React.useEffect(() => {
+        if (mode === 'hardMode') {
+          setHardModeHintState('flashing'); 
+          const fadeTimer = setTimeout(() => setHardModeHintState('fading'), 4000); 
+          const hideTimer = setTimeout(() => setHardModeHintState('hidden'), 6000); 
+          return () => { clearTimeout(fadeTimer); clearTimeout(hideTimer); };
+        } else {
+          setHardModeHintState('hidden'); 
+        }
+      }, [level, mode]);
+    
+      const playSound = React.useCallback((soundId) => { const sound = document.getElementById(soundId); if (sound) { sound.currentTime = 0; sound.play().catch(e => {}); } }, []);
+      const playCorrectSound = React.useCallback(() => playSound('correctSound'), [playSound]);
+      const playWrongSound = React.useCallback(() => playSound('wrongSound'), [playSound]);
+
+      const getCellFromCoordinates = React.useCallback((clientX, clientY) => {
+          try { const grid = gridRef.current; if (!grid || !gameState?.board || !gameState.board[0]) return null; const rect = grid.getBoundingClientRect(); const cols = gameState.board[0].length; const rows = gameState.board.length; if (cols === 0 || rows === 0) return null; const cellWidth = rect.width / cols; const cellHeight = rect.height / rows; const x = clientX - rect.left; const y = clientY - rect.top; const col = Math.min(cols - 1, Math.max(0, Math.floor(x / cellWidth))); const row = Math.min(rows - 1, Math.max(0, Math.floor(y / cellHeight))); if (clientX >= rect.left && clientX <= rect.right && clientY >= rect.top && clientY <= rect.bottom) return { row, col }; return null; } catch (e) { return null; }
+      }, [gameState]);
+
+      const allRequiredWordsFound = gameState?.words?.length > 0 && foundWords.length === gameState.words.length;
+      const isCellPartOfFoundRequiredWord = React.useCallback((r, c) => {
+          return gameState?.words?.some(w => foundWords.includes(w.word) && w.positions.some(p => p.row === r && p.col === c));
+      }, [gameState, foundWords]);
+      const isCellSelected = React.useCallback((r, c) => selectedCells.some(cell => cell.row === r && cell.col === c), [selectedCells]);
+      
+      const handleInteractionStart = React.useCallback((clientX, clientY) => {
+          if (allRequiredWordsFound || isLoading || !gameState) return;
+          const cell = getCellFromCoordinates(clientX, clientY);
+          if (cell) {
+              const canStart = !isCellPartOfFoundRequiredWord(cell.row, cell.col);
+              if (canStart) {
+                  setIsSwiping(true);
+                  setSelectedCells([cell]);
+                  setSwipeDirectionInfo({ dx: 0, dy: 0 });
+              }
+          }
+      }, [allRequiredWordsFound, isLoading, gameState, getCellFromCoordinates, isCellPartOfFoundRequiredWord]);
+      
+      const handleInteractionMove = React.useCallback(
+        _.throttle((clientX, clientY) => {
+          if (!isSwiping || !selectedCells?.length || allRequiredWordsFound || isLoading || !gameState) return;
+          const currentCell = getCellFromCoordinates(clientX, clientY);
+          if (!currentCell) return;
+          const lastCell = selectedCells[selectedCells.length - 1];
+          if (currentCell.row === lastCell.row && currentCell.col === lastCell.col) return;
+          if (selectedCells.length > 1 && currentCell.row === selectedCells[selectedCells.length - 2]?.row && currentCell.col === selectedCells[selectedCells.length - 2]?.col) {
+            setSelectedCells(prev => prev.slice(0, -1));
+            if (selectedCells.length === 2) { setSwipeDirectionInfo({ dx: 0, dy: 0 }); }
+            return;
+          }
+          const isAlreadySelected = isCellSelected(currentCell.row, currentCell.col);
+          const isLocked = isCellPartOfFoundRequiredWord(currentCell.row, currentCell.col);
+          if (isAlreadySelected || isLocked) return;
+          const dx = currentCell.row - lastCell.row; const dy = currentCell.col - lastCell.col;
+          if (Math.abs(dx) > 1 || Math.abs(dy) > 1 || (dx === 0 && dy === 0)) return;
+          if (selectedCells.length === 1) {
+            const currentDir = { dx: Math.sign(dx), dy: Math.sign(dy) };
+            setSwipeDirectionInfo(currentDir);
+            setSelectedCells(prev => [...prev, currentCell]);
+          } else {
+            const startCell = selectedCells[0]; const totalDx = currentCell.row - startCell.row; const totalDy = currentCell.col - startCell.col;
+            let isDirectionallyCorrect = false;
+            if (swipeDirectionInfo.dx === 0 || swipeDirectionInfo.dy === 0) {
+              if ( (Math.sign(totalDx) === swipeDirectionInfo.dx) && (Math.sign(totalDy) === swipeDirectionInfo.dy) ) { isDirectionallyCorrect = true; }
+            } else {
+              if ( (Math.sign(totalDx) === swipeDirectionInfo.dx) && (Math.sign(totalDy) === swipeDirectionInfo.dy) && (Math.abs(totalDx) === Math.abs(totalDy)) ) { isDirectionallyCorrect = true; }
+            }
+            if (isDirectionallyCorrect) { setSelectedCells(prev => [...prev, currentCell]); }
+          }
+        }, 20),
+        [isSwiping, selectedCells, swipeDirectionInfo, allRequiredWordsFound, isLoading, gameState, getCellFromCoordinates, isCellSelected, isCellPartOfFoundRequiredWord]
+      );
+      
+      const handleInteractionEnd = React.useCallback(() => {
+          if (!isSwiping || !selectedCells?.length || isLoading || !gameState) {
+              if (selectedCells.length > 0) setSelectedCells([]);
+              if (isSwiping) setIsSwiping(false);
+              return;
+          }
+          const word = selectedCells.map(c => gameState.board?.[c.row]?.[c.col] || '').join('');
+          const target = gameState.words?.find(w => w.word === word);
+          if (target && !foundWords.includes(word)) {
+              setFoundWords(prev => [...prev, word]);
+              playCorrectSound();
+          }
+          setSelectedCells([]);
+          setIsSwiping(false);
+      }, [isSwiping, selectedCells, isLoading, gameState, foundWords, playCorrectSound]);
+      
+      React.useEffect(() => {
         const grid = gridRef.current;
         if (!grid) return;
-        const handleTouchStart = (e) => {
-            e.preventDefault();
-            handleInteractionStart(e.touches[0].clientX, e.touches[0].clientY);
-        };
-        const handleTouchMove = (e) => {
-            e.preventDefault();
-            handleInteractionMove(e.touches[0].clientX, e.touches[0].clientY);
-        };
-        const handleTouchEnd = (e) => {
-            e.preventDefault();
-            handleInteractionEnd();
-        };
+        const handleTouchStart = (e) => { e.preventDefault(); handleInteractionStart(e.touches[0].clientX, e.touches[0].clientY); };
+        const handleTouchMove = (e) => { e.preventDefault(); handleInteractionMove(e.touches[0].clientX, e.touches[0].clientY); };
+        const handleTouchEnd = (e) => { e.preventDefault(); handleInteractionEnd(); };
         grid.addEventListener('touchstart', handleTouchStart, { passive: false });
         grid.addEventListener('touchmove', handleTouchMove, { passive: false });
         grid.addEventListener('touchend', handleTouchEnd, { passive: false });
@@ -307,144 +276,32 @@
             grid.removeEventListener('touchcancel', handleTouchEnd);
         };
       }, [handleInteractionStart, handleInteractionMove, handleInteractionEnd]);
-    
-       React.useEffect(() => {
-        if (mode === 'hardMode') {
-          // 1. Animasyonu başlat
-          setHardModeHintState('flashing'); 
-          
-          // 2. 4 saniye sonra flaş efektini durdur ve solma (fade) efektini başlat
-          const fadeTimer = setTimeout(() => setHardModeHintState('fading'), 4000); 
-          
-          // 3. Toplam 6 saniye sonra elementi tamamen DOM'dan kaldır
-          const hideTimer = setTimeout(() => setHardModeHintState('hidden'), 6000); 
-          
-          return () => { 
-            clearTimeout(fadeTimer);
-            clearTimeout(hideTimer);
-          };
-        } else {
-          setHardModeHintState('hidden'); 
-        }
-      }, [level, mode]);
-    
-      const playSound = (soundId) => { const sound = document.getElementById(soundId); if (sound) { sound.currentTime = 0; sound.play().catch(e => {}); } };
-      const playCorrectSound = () => playSound('correctSound');
-      const playWrongSound = () => playSound('wrongSound');
 
-      const getCellFromCoordinates = (clientX, clientY) => { try { const grid = gridRef.current; if (!grid || !gameState?.board || !gameState.board[0]) return null; const rect = grid.getBoundingClientRect(); const cols = gameState.board[0].length; const rows = gameState.board.length; if (cols === 0 || rows === 0) return null; const cellWidth = rect.width / cols; const cellHeight = rect.height / rows; const x = clientX - rect.left; const y = clientY - rect.top; const col = Math.min(cols - 1, Math.max(0, Math.floor(x / cellWidth))); const row = Math.min(rows - 1, Math.max(0, Math.floor(y / cellHeight))); if (clientX >= rect.left && clientX <= rect.right && clientY >= rect.top && clientY <= rect.bottom) return { row, col }; return null; } catch (e) { return null; } };
-      const allRequiredWordsFound = gameState?.words?.length > 0 && foundWords.length === gameState.words.length;
-      const isCellPartOfFoundRequiredWord = (r, c) => gameState?.words?.some(w => foundWords.includes(w.word) && w.positions.some(p => p.row === r && p.col === c));
-      const isCellScatteredHiddenLetter = (r, c) => gameState?.scatteredHiddenLetterPositions.some(p => p.row === r && p.col === c);
-
-      const isCellSelected = (r, c) => selectedCells.some(cell => cell.row === r && cell.col === c);
-
-      const handleInteractionStart = (clientX, clientY) => {
-          if (allRequiredWordsFound || isLoading || !gameState) return;
-          const cell = getCellFromCoordinates(clientX, clientY);
-          if (cell) {
-              const canStart = !isCellPartOfFoundRequiredWord(cell.row, cell.col);
-              if (canStart) {
-                  setIsSwiping(true);
-                  setSelectedCells([cell]);
-                  setSwipeDirectionInfo({ dx: 0, dy: 0 });
-              }
-          }
-      };
-      
-      const handleInteractionMove = React.useCallback(
-        _.throttle((clientX, clientY) => {
-          if (!isSwiping || !selectedCells?.length || allRequiredWordsFound || isLoading || !gameState) return;
-
-          const currentCell = getCellFromCoordinates(clientX, clientY);
-          if (!currentCell) return;
-
-          const lastCell = selectedCells[selectedCells.length - 1];
-          if (currentCell.row === lastCell.row && currentCell.col === lastCell.col) return;
-
-          if (selectedCells.length > 1 && currentCell.row === selectedCells[selectedCells.length - 2]?.row && currentCell.col === selectedCells[selectedCells.length - 2]?.col) {
-            setSelectedCells(prev => prev.slice(0, -1));
-            if (selectedCells.length === 2) {
-              setSwipeDirectionInfo({ dx: 0, dy: 0 });
-            }
-            return;
-          }
-
-          const isAlreadySelected = isCellSelected(currentCell.row, currentCell.col);
-          const isLocked = isCellPartOfFoundRequiredWord(currentCell.row, currentCell.col);
-
-          if (isAlreadySelected || isLocked) return;
-
-          const dx = currentCell.row - lastCell.row;
-          const dy = currentCell.col - lastCell.col;
-
-          if (Math.abs(dx) > 1 || Math.abs(dy) > 1 || (dx === 0 && dy === 0)) return;
-
-          if (selectedCells.length === 1) {
-            const currentDir = { dx: Math.sign(dx), dy: Math.sign(dy) };
-            setSwipeDirectionInfo(currentDir);
-            setSelectedCells(prev => [...prev, currentCell]);
-          } else {
-            const startCell = selectedCells[0];
-            const totalDx = currentCell.row - startCell.row;
-            const totalDy = currentCell.col - startCell.col;
-
-            let isDirectionallyCorrect = false;
-            if (swipeDirectionInfo.dx === 0 || swipeDirectionInfo.dy === 0) {
-              if ( (Math.sign(totalDx) === swipeDirectionInfo.dx) && (Math.sign(totalDy) === swipeDirectionInfo.dy) ) {
-                isDirectionallyCorrect = true;
-              }
-            }
-            else {
-              if ( (Math.sign(totalDx) === swipeDirectionInfo.dx) && (Math.sign(totalDy) === swipeDirectionInfo.dy) && (Math.abs(totalDx) === Math.abs(totalDy)) ) {
-                 isDirectionallyCorrect = true;
-              }
-            }
-
-            if (isDirectionallyCorrect) {
-              setSelectedCells(prev => [...prev, currentCell]);
-            }
-          }
-        }, 20),
-        [isSwiping, selectedCells, swipeDirectionInfo, allRequiredWordsFound, isLoading, gameState]
-      );
-      
-      const handleInteractionEnd = () => { if (!isSwiping || !selectedCells?.length || isLoading || !gameState) { if (selectedCells.length > 0) setSelectedCells([]); if (isSwiping) setIsSwiping(false); return; } const word = selectedCells.map(c => gameState.board?.[c.row]?.[c.col] || '').join(''); const target = gameState.words?.find(w => w.word === word); if (target && !foundWords.includes(word)) { setFoundWords(prev => [...prev, word]); playCorrectSound(); } setSelectedCells([]); setIsSwiping(false); };
       const handleNextLevel = () => { if (level < 59) { setLevel(p => p + 1); } else { setModal({ isOpen: true, message: t.gameCompleted, isSuccess: true }); } };
       
       const handleHiddenWordSubmit = () => {
-          if (!allRequiredWordsFound) {
-              setModal({ isOpen: true, message: t.allWordsRequired, isSuccess: false });
-              playWrongSound();
-              return;
-          }
-          if (customToUpperCase(hiddenWordGuess.trim()) === gameState?.hiddenWord) {
-              setModal({ isOpen: true, message: t.successMessage(gameState.hiddenWord), isSuccess: true });
-              playCorrectSound();
-          } else {
-              setModal({ isOpen: true, message: t.wrongGuess, isSuccess: false });
-              playWrongSound();
-              setHiddenWordGuess('');
-          }
+          if (!allRequiredWordsFound) { setModal({ isOpen: true, message: t.allWordsRequired, isSuccess: false }); playWrongSound(); return; }
+          if (customToUpperCase(hiddenWordGuess.trim()) === gameState?.hiddenWord) { setModal({ isOpen: true, message: t.successMessage(gameState.hiddenWord), isSuccess: true }); playCorrectSound(); } 
+          else { setModal({ isOpen: true, message: t.wrongGuess, isSuccess: false }); playWrongSound(); setHiddenWordGuess(''); }
       };
 
       const closeModal = () => { const wasSuccess = modal.isSuccess; const wasGameCompletedMessage = modal.message === t.gameCompleted; const wasBoardErrorMessage = modal.message.includes("Tahta oluşturulamadı"); const wasHiddenWordSuccess = wasSuccess && !wasGameCompletedMessage && !wasBoardErrorMessage; setModal({ isOpen: false, message: '', isSuccess: false }); if (wasHiddenWordSuccess) { handleNextLevel(); } else if (wasGameCompletedMessage && wasSuccess) { goToHome(); } else if (wasBoardErrorMessage && !wasSuccess) { goToHome(); } };
 
-      if (isLoading) { return ( <div className="flex items-center justify-center h-full text-lg lg:text-xl font-semibold text-indigo-700">Seviye {level + 1} Yükleniyor...</div> ); }
-      if (!gameState || !gameState.board || !Array.isArray(gameState.board) || gameState.board.length === 0) { return ( <div className="flex flex-col items-center justify-center h-full text-lg lg:text-xl font-semibold text-red-600 p-4"> <p>Üzgünüz, bu seviye yüklenirken bir sorun oluştu.</p> <button onClick={goToHome} className="mt-4 bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 lg:text-lg">Ana Sayfaya Dön</button> <Modal isOpen={modal.isOpen} message={modal.message} isSuccess={modal.isSuccess} onClose={closeModal} language={language}/> </div> ); }
+      if (isLoading) { return ( <div class="flex items-center justify-center h-full text-lg lg:text-xl font-semibold text-indigo-700">Seviye {level + 1} Yükleniyor...</div> ); }
+      if (!gameState || !gameState.board || !Array.isArray(gameState.board) || gameState.board.length === 0) { return ( <div class="flex flex-col items-center justify-center h-full text-lg lg:text-xl font-semibold text-red-600 p-4"> <p>Üzgünüz, bu seviye yüklenirken bir sorun oluştu.</p> <button onClick={goToHome} class="mt-4 bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 lg:text-lg">Ana Sayfaya Dön</button> <Modal isOpen={modal.isOpen} message={modal.message} isSuccess={modal.isSuccess} onClose={closeModal} language={language}/> </div> ); }
 
        let theme; if (mode === 'hardMode') { theme = { bg: 'bg-red-50', foundCell: 'bg-red-300', hiddenWordCell: 'bg-blue-400 text-white font-bold', wordBg: 'bg-red-200', gridBg: 'bg-red-100', button: 'bg-red-600 hover:bg-red-700', inputBorder: 'border-red-300 focus:border-red-500', selectedCell: 'bg-yellow-400', obscuredCell: 'bg-gray-300 text-transparent opacity-60' }; } else { theme = { bg: 'bg-indigo-50', foundCell: 'bg-green-300', hiddenWordCell: 'bg-blue-400 text-white font-bold', wordBg: 'bg-indigo-200', gridBg: 'bg-indigo-100', button: 'bg-indigo-600 hover:bg-indigo-700', inputBorder: 'border-indigo-300 focus:border-indigo-500', selectedCell: 'bg-yellow-300', obscuredCell: 'bg-gray-300 text-transparent opacity-60' }; }
        const gridCols = gameState.board[0].length; const gridRows = gameState.board.length;
        const textSizeClass = "text-[3.2vmin] sm:text-[2.9vmin] md:text-[2.7vmin] lg:text-[2.5vmin]";
 
        return (
-         <div className={`container mx-auto px-2 sm:px-4 lg:px-6 xl:px-8 py-4 text-center h-full flex flex-col ${theme.bg} overflow-hidden`}>
-           <div className="flex-1 flex flex-col lg:flex-row lg:gap-4 xl:gap-6 overflow-hidden">
+         <div class={`container mx-auto px-2 sm:px-4 lg:px-6 xl:px-8 py-4 text-center h-full flex flex-col ${theme.bg} overflow-hidden`}>
+           <div class="flex-1 flex flex-col lg:flex-row lg:gap-4 xl:gap-6 overflow-hidden">
 
-             <div className="w-full lg:w-3/5 xl:w-2/3 flex flex-col py-2 order-1 lg:h-full">
-               <h2 className="text-xl lg:text-2xl xl:text-3xl font-semibold text-indigo-800 mb-3 flex-shrink-0">{t.level} {level + 1}</h2>
-               <div className="flex flex-grow items-center justify-center w-full px-1 max-w-2xl mx-auto">
-                 <div ref={gridRef} className={`grid gap-0.5 ${theme.gridBg} p-1 rounded-lg shadow-md w-full`}
+             <div class="w-full lg:w-3/5 xl:w-2/3 flex flex-col py-2 order-1 lg:h-full">
+               <h2 class="text-xl lg:text-2xl xl:text-3xl font-semibold text-indigo-800 mb-3 flex-shrink-0">{t.level} {level + 1}</h2>
+               <div class="flex flex-grow items-center justify-center w-full px-1 max-w-2xl mx-auto">
+                 <div ref={gridRef} class={`grid gap-0.5 ${theme.gridBg} p-1 rounded-lg shadow-md w-full`}
                       style={{ gridTemplateColumns: `repeat(${gridCols}, minmax(0, 1fr))`, aspectRatio: `${gridCols} / ${gridRows}` }}
                       onMouseDown={(e) => handleInteractionStart(e.clientX, e.clientY)}
                       onMouseMove={(e) => { if(isSwiping) handleInteractionMove(e.clientX, e.clientY);}}
@@ -453,81 +310,61 @@
                      row.map((letter, colIndex) => {
                        const isSelected = isCellSelected(rowIndex, colIndex);
                        const isFoundRequiredPart = isCellPartOfFoundRequiredWord(rowIndex, colIndex);
-                       const isHiddenLetterCell = isCellScatteredHiddenLetter(rowIndex, colIndex);
-                       let cellClass = 'bg-white';
-                       let textClass = 'text-gray-800';
-                       
-                       if (allRequiredWordsFound) {
-                         if (isHiddenLetterCell) {
-                           cellClass = theme.hiddenWordCell;
-                           textClass = 'text-white';
-                         } else {
-                           cellClass = theme.obscuredCell;
-                         }
-                       } else {
-                         if (isSelected) {
-                           cellClass = theme.selectedCell;
-                           textClass = 'text-black font-bold';
-                         } else if (isFoundRequiredPart) {
-                           cellClass = theme.foundCell;
-                           textClass = 'text-gray-600 opacity-75';
-                         }
-                       }
-                       return ( <div key={`${rowIndex}-${colIndex}`} className={`flex items-center justify-center text-center font-semibold border border-gray-200/50 rounded aspect-square ${textSizeClass} ${cellClass} ${textClass} transition-colors duration-150 select-none`} > {letter || ''} </div> );
+                       const isHiddenLetterCell = gameState?.scatteredHiddenLetterPositions.some(p => p.row === rowIndex && p.col === colIndex);
+                       let cellClass = 'bg-white'; let textClass = 'text-gray-800';
+                       if (allRequiredWordsFound) { if (isHiddenLetterCell) { cellClass = theme.hiddenWordCell; textClass = 'text-white'; } else { cellClass = theme.obscuredCell; } } 
+                       else { if (isSelected) { cellClass = theme.selectedCell; textClass = 'text-black font-bold'; } else if (isFoundRequiredPart) { cellClass = theme.foundCell; textClass = 'text-gray-600 opacity-75'; } }
+                       return ( <div key={`${rowIndex}-${colIndex}`} class={`flex items-center justify-center text-center font-semibold border border-gray-200/50 rounded aspect-square ${textSizeClass} ${cellClass} ${textClass} transition-colors duration-150 select-none`} > {letter || ''} </div> );
                      })
                    )}
                  </div>
                </div>
              </div>
 
-             <div className="w-full lg:w-2/5 xl:w-1/3 flex flex-col gap-4 lg:h-full lg:overflow-y-auto py-2 px-2 order-2 lg:order-2">
-               <div className="flex-shrink-0">
-                 <h3 className="text-lg lg:text-xl xl:text-2xl font-semibold text-indigo-800 mb-2">{t.words} ({foundWords.length}/{gameState.words.length})</h3>
-                <div className={`
-        border-l-4 border-amber-500 text-amber-800 p-3 rounded-lg shadow-md mb-3 text-sm
-        transition-opacity duration-2000 ease-in-out  /* Solma animasyon süresi 2 saniye */
-        ${hardModeHintState === 'flashing' ? 'animate-flashing opacity-100' : ''}
-        ${hardModeHintState === 'fading' ? 'opacity-0' : ''}
-        ${hardModeHintState === 'hidden' ? 'hidden' : ''}
-      `}>
-        Oyun alanında bulduğunuz kelimeler, doğru bir şekilde bulundukça burada görüntülenecektir.
-      </div>
+             <div class="w-full lg:w-2/5 xl:w-1/3 flex flex-col gap-4 lg:h-full lg:overflow-y-auto py-2 px-2 order-2 lg:order-2">
+               <div class="flex-shrink-0">
+                 <h3 class="text-lg lg:text-xl xl:text-2xl font-semibold text-indigo-800 mb-2">{t.words} ({foundWords.length}/{gameState.words.length})</h3>
+                <div class={`
+                    border-l-4 border-amber-500 text-amber-800 p-3 rounded-lg shadow-md mb-3 text-sm
+                    transition-opacity duration-2000 ease-in-out
+                    ${hardModeHintState === 'flashing' ? 'animate-flashing opacity-100' : ''}
+                    ${hardModeHintState === 'fading' ? 'opacity-0' : ''}
+                    ${hardModeHintState === 'hidden' ? 'hidden' : ''}
+                  `}>
+                    Oyun alanında bulduğunuz kelimeler, doğru bir şekilde bulundukça burada görüntülenecektir.
+                  </div>
 
-                 <div className="flex flex-wrap justify-center gap-1.5 max-h-[20vh] md:max-h-[25vh] lg:max-h-[calc(50vh-60px)] xl:max-h-[calc(60vh-60px)] overflow-y-auto p-2 bg-gray-100 rounded-lg scrollbar-thin">
-                   {gameState.words.map(({ word }) => { const isFound = foundWords.includes(word); const isHiddenInHardMode = mode === 'hardMode' && !isFound; return ( <span key={word} className={`px-2.5 py-1 rounded-md ${isFound ? 'bg-gray-300 text-gray-500 line-through' : isHiddenInHardMode ? 'bg-gray-300 opacity-0 pointer-events-none' : theme.wordBg + ' text-gray-800'} text-xs sm:text-sm lg:text-base font-medium overflow-hidden text-ellipsis whitespace-nowrap transition-all duration-300`} style={{ minWidth: '65px', textAlign: 'center' }} > {isHiddenInHardMode ? '???' : word} </span> ); })}
+                 <div class="flex flex-wrap justify-center gap-1.5 max-h-[20vh] md:max-h-[25vh] lg:max-h-[calc(50vh-60px)] xl:max-h-[calc(60vh-60px)] overflow-y-auto p-2 bg-gray-100 rounded-lg scrollbar-thin">
+                   {gameState.words.map(({ word }) => { const isFound = foundWords.includes(word); const isHiddenInHardMode = mode === 'hardMode' && !isFound; return ( <span key={word} class={`px-2.5 py-1 rounded-md ${isFound ? 'bg-gray-300 text-gray-500 line-through' : isHiddenInHardMode ? 'bg-gray-300 opacity-0 pointer-events-none' : theme.wordBg + ' text-gray-800'} text-xs sm:text-sm lg:text-base font-medium overflow-hidden text-ellipsis whitespace-nowrap transition-all duration-300`} style={{ minWidth: '65px', textAlign: 'center' }} > {isHiddenInHardMode ? '???' : word} </span> ); })}
                  </div>
                </div>
-               <div className="flex-shrink-0 mt-2 lg:mt-4">
-                 <div className="flex flex-col gap-2">
+               <div class="flex-shrink-0 mt-2 lg:mt-4">
+                 <div class="flex flex-col gap-2">
                    <input
                       type="text"
                       value={hiddenWordGuess}
                       onChange={(e) => setHiddenWordGuess(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                          handleHiddenWordSubmit();
-                        }
-                      }}
-                      className={`border-2 ${theme.inputBorder} p-2 rounded-lg text-sm lg:text-base focus:outline-none focus:ring-2 focus:ring-indigo-300 h-10 lg:h-11 w-full`}
+                      onKeyDown={(e) => { if (e.key === 'Enter') { handleHiddenWordSubmit(); } }}
+                      class={`border-2 ${theme.inputBorder} p-2 rounded-lg text-sm lg:text-base focus:outline-none focus:ring-2 focus:ring-indigo-300 h-10 lg:h-11 w-full`}
                       placeholder={t.hiddenWordPlaceholder}
                       disabled={!allRequiredWordsFound}
                       aria-label={t.hiddenWordPlaceholder}
                     />
-                   <button onClick={handleHiddenWordSubmit} className={`${theme.button} text-white px-4 py-2 rounded-lg hover:opacity-90 text-sm lg:text-base h-10 lg:h-11 font-medium transition duration-300 w-full disabled:opacity-50 disabled:cursor-not-allowed`} disabled={!allRequiredWordsFound}> {t.checkButton} </button>
-                   <button onClick={goToHome} className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 text-sm lg:text-base h-10 lg:h-11 font-medium transition duration-300 w-full"> {t.homeButton} </button>
+                   <button onClick={handleHiddenWordSubmit} class={`${theme.button} text-white px-4 py-2 rounded-lg hover:opacity-90 text-sm lg:text-base h-10 lg:h-11 font-medium transition duration-300 w-full disabled:opacity-50 disabled:cursor-not-allowed`} disabled={!allRequiredWordsFound}> {t.checkButton} </button>
+                   <button onClick={goToHome} class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 text-sm lg:text-base h-10 lg:h-11 font-medium transition duration-300 w-full"> {t.homeButton} </button>
                  </div>
                </div>
              </div>
            </div>
 
 
-           <div className="w-full text-center py-2 text-xs lg:text-sm text-gray-500 mt-auto"> {t.footer} </div>
+           <div class="w-full text-center py-2 text-xs lg:text-sm text-gray-500 mt-auto"> {t.footer} </div>
            <Modal isOpen={modal.isOpen} message={modal.message} isSuccess={modal.isSuccess} onClose={closeModal} language={language}/>
          </div>
        );
   }
 
-  function App() { const [isGameStarted, setIsGameStarted] = React.useState(false); const [language, setLanguage] = React.useState('tr'); const [mode, setMode] = React.useState('easyMode'); const startGame = (selectedMode) => { setMode(selectedMode); setIsGameStarted(true); }; const goToHome = () => setIsGameStarted(false); return ( <ErrorBoundary> <div className="h-full w-full overflow-hidden"> {isGameStarted ? ( <WordHunt goToHome={goToHome} language={language} mode={mode} /> ) : ( <HomePage startGame={startGame} language={language} setLanguage={setLanguage} /> )} </div> </ErrorBoundary> ); }
+  function App() { const [isGameStarted, setIsGameStarted] = React.useState(false); const [language, setLanguage] = React.useState('tr'); const [mode, setMode] = React.useState('easyMode'); const startGame = (selectedMode) => { setMode(selectedMode); setIsGameStarted(true); }; const goToHome = () => setIsGameStarted(false); return ( <ErrorBoundary> <div class="h-full w-full overflow-hidden"> {isGameStarted ? ( <WordHunt goToHome={goToHome} language={language} mode={mode} /> ) : ( <HomePage startGame={startGame} language={language} setLanguage={setLanguage} /> )} </div> </ErrorBoundary> ); }
   
   try { const rootElement = document.getElementById('root'); if (typeof ReactDOM !== 'undefined' && rootElement) { ReactDOM.render(<App />, rootElement); } else { throw new Error('ReactDOM or root element not found'); } } catch (e) { console.error("ReactDOM.render critical error:", e); const root = document.getElementById('root'); if (root) root.innerHTML = `<div class="p-4 text-red-600">Uygulama başlatılırken kritik hata oluştu: ${e.message}</div>`; }
 

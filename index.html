@@ -81,10 +81,7 @@
   };
  
   const boardSizes = [];
-  const getHiddenWordLength = (level) => {
-      const stage = Math.floor(level / 6);
-      return Math.min(9, 5 + Math.floor(stage / 2));
-  };
+
   const initialRowsConfig = [7, 9, 11, 13, 15];
   const initialColsConfig = [8, 9, 10, 11, 12];
 
@@ -92,14 +89,19 @@
       const stage = Math.floor(level / 6);
       const configIndex = Math.floor(stage / 2);
       const levelInStage = level % 6;
+
       let baseRows = initialRowsConfig[configIndex];
       let baseCols = initialColsConfig[configIndex];
+
       let r = baseRows + Math.floor(levelInStage / 3);
       let c = baseCols + Math.floor(levelInStage / 2);
+
       r = Math.max(7, Math.min(16, r));
       c = Math.max(8, Math.min(22, c));
       if (c <= r && r > 7) c = r + 1;
-      boardSizes.push({ rows: r, cols: c, hiddenWordLength: getHiddenWordLength(level) });
+
+      // HATA DÜZELTİLDİ: hiddenWordLength kaldırıldı
+      boardSizes.push({ rows: r, cols: c });
   }
 
   const directions = {
@@ -114,41 +116,112 @@
   function canPlaceRequiredWord(board, word, r, c, dr, dc) { const rows = board.length; const cols = board[0].length; for (let i = 0; i < word.length; i++) { const nr = r + i * dr; const nc = c + i * dc; if (nr < 0 || nr >= rows || nc < 0 || nc >= cols || board[nr][nc] !== '') return false; } return true; }
   function canPlaceFillerWord(board, lockGrid, word, r, c, dr, dc) { const rows = board.length; const cols = board[0].length; for (let i = 0; i < word.length; i++) { const nr = r + i * dr; const nc = c + i * dc; if (nr < 0 || nr >= rows || nc < 0 || nc >= cols || lockGrid[nr][nc] || (board[nr][nc] !== '' && board[nr][nc] !== word[i])) { return false; } } return true; }
   
-  function createBoard(level, language) {
+// SON NİHAİ VERSİYON - DİNAMİK GİZLİ KELİME MANTIĞI
+
+function createBoard(level, language) {
     try {
-        const config = boardSizes[level]; if (!config) { console.error(`Geçersiz seviye config: ${level}.`); return null; }
-        const { rows, cols, hiddenWordLength } = config;
-        let boardAttempts = 0;
-        while (boardAttempts < 50) {
-            boardAttempts++;
+        // boardSizes içindeki `hiddenWordLength` referansı kaldırıldı.
+        const staticConfig = boardSizes[level];
+        if (!staticConfig) { console.error(`Geçersiz seviye config: ${level}.`); return null; }
+        const { rows, cols } = staticConfig;
+
+        for (let attempt = 0; attempt < 50; attempt++) {
             const board = Array(rows).fill(null).map(() => Array(cols).fill(''));
             const lockGrid = Array(rows).fill(null).map(() => Array(cols).fill(false));
-            const requiredWordsInfo = [];
-            const potentialWords = (wordLists[language] || []).filter(w => w && w.length >= 2).map(customToUpperCase);
-            const suitableHiddenWords = potentialWords.filter(w => w.length === hiddenWordLength);
-            if (suitableHiddenWords.length === 0) { console.error(`${hiddenWordLength} harfli bir gizli kelime ana listede bulunamadı.`); continue; }
+            let placedWordsInfo = [];
+
+            const allWords = (wordLists[language] || []).filter(w => w && w.length >= 2).map(customToUpperCase);
+            let potentialWords = _.shuffle(allWords);
+
+            // Önceki gibi yardımcı fonksiyonlar
+            const canPlaceWithoutOverlap = (word, r, c, dir) => {
+                for (let i = 0; i < word.length; i++) {
+                    const nr = r + i * dir.dx; const nc = c + i * dir.dy;
+                    if (nr < 0 || nr >= rows || nc < 0 || nc >= cols || lockGrid[nr][nc]) return false;
+                }
+                return true;
+            };
+            const placeAndLockWord = (word, r, c, dir) => {
+                const positions = [];
+                for (let i = 0; i < word.length; i++) {
+                    const nr = r + i * dir.dx; const nc = c + i * dir.dy;
+                    board[nr][nc] = word[i]; lockGrid[nr][nc] = true; positions.push({ row: nr, col: nc });
+                }
+                placedWordsInfo.push({ word, positions, direction: dir.name });
+            };
+
+            // 1. ZORUNLU ÇAPRAZ KELİMELERİ YERLEŞTİR
+            const MIN_DIAGONALS = 5;
+            let diagonalCount = 0;
+            let wordsForDiagonals = potentialWords.filter(w => Math.min(rows, cols) >= w.length);
+            for (const word of wordsForDiagonals) {
+                if (diagonalCount >= MIN_DIAGONALS) break;
+                let availablePositions = [];
+                for (let r = 0; r < rows; r++) { for (let c = 0; c < cols; c++) { for (const dir of directions.diagonal) { if (canPlaceWithoutOverlap(word, r, c, dir)) availablePositions.push({ r, c, dir }); } } }
+                if (availablePositions.length > 0) { const { r, c, dir } = _.sample(availablePositions); placeAndLockWord(word, r, c, dir); diagonalCount++; }
+            }
+            if (diagonalCount < MIN_DIAGONALS) continue;
+
+            // 2. DÜZ KELİMELERİ YERLEŞTİR
+            const targetWordCount = 12 + Math.floor(level / 6);
+            let wordsForStraight = potentialWords.filter(w => !placedWordsInfo.some(p => p.word === w));
+            for (const word of wordsForStraight) {
+                if(placedWordsInfo.length >= targetWordCount) break;
+                let availablePositions = [];
+                for (let r = 0; r < rows; r++) { for (let c = 0; c < cols; c++) { for (const dir of straightDirections) { if (canPlaceWithoutOverlap(word, r, c, dir)) availablePositions.push({ r, c, dir }); } } }
+                if (availablePositions.length > 0) { const { r, c, dir } = _.sample(availablePositions); placeAndLockWord(word, r, c, dir); }
+            }
+
+            // *** YENİ MANTIK BURADA BAŞLIYOR ***
+
+            // 3. BOŞ HÜCRELERİ BUL VE GİZLİ KELİME UZUNLUĞUNU BELİRLE
+            const emptyCells = [];
+            for (let r = 0; r < rows; r++) { for (let c = 0; c < cols; c++) { if (!lockGrid[r][c]) emptyCells.push({ r, c }); } }
+
+            const availableSpace = emptyCells.length;
+            // Kalan boşluk sayısına göre gizli kelime uzunluğunu 5 ile 10 arasında belirle
+            const targetHiddenWordLength = _.clamp(availableSpace, 5, 10);
+            
+            // Eğer en az 5 boşluk bile yoksa, bu deneme başarısızdır.
+            if (availableSpace < 5) continue;
+
+            // 4. UYGUN GİZLİ KELİMEYİ SEÇ VE YERLEŞTİR
+            const suitableHiddenWords = allWords.filter(w => w.length === targetHiddenWordLength && !placedWordsInfo.some(p => p.word === w));
+            if (suitableHiddenWords.length === 0) continue; // Uygun kelime yoksa yeniden dene
+            
             const hiddenWord = _.sample(suitableHiddenWords);
-            const baseWordCount = 7 + Math.floor(level / 6);
-            const targetWordCount = Math.max(10, baseWordCount);
-            const wordsAvailableForSampling = potentialWords.filter(w => w !== hiddenWord);
-            const selectedRequiredWords = _.sampleSize(wordsAvailableForSampling, Math.min(targetWordCount, wordsAvailableForSampling.length));
-            const placeWords = (wordsToPlace, availableDirections) => { for (const word of wordsToPlace) { for (let attempt = 0; attempt < 200; attempt++) { const dir = _.sample(availableDirections); const r = _.random(rows - 1); const c = _.random(cols - 1); if (canPlaceRequiredWord(board, word, r, c, dir.dx, dir.dy)) { const positions = placeWordOnBoard(board, word, r, c, dir.dx, dir.dy, lockGrid); requiredWordsInfo.push({ word, positions, direction: dir.name }); break; } } } };
-            const shuffledWords = _.shuffle(selectedRequiredWords); const numDiagonal = Math.max(6, Math.floor(shuffledWords.length * 0.4)); const diagonalWords = shuffledWords.slice(0, numDiagonal); const otherWords = shuffledWords.slice(numDiagonal);
-            placeWords(diagonalWords, directions.diagonal); placeWords(otherWords, straightDirections);
-            if (requiredWordsInfo.length < selectedRequiredWords.length * 0.8) continue;
-            const requiredWordsSet = new Set(requiredWordsInfo.map(w => w.word)); const fillerWords = potentialWords.filter(w => !requiredWordsSet.has(w)); const wordsByLength = _.groupBy(fillerWords, 'length');
-            const sortedFillerWords = _.sortBy(fillerWords, w => -w.length);
-            for (const word of sortedFillerWords) { for (let attempt = 0; attempt < 100; attempt++) { const dir = _.sample(allDirections); const r = _.random(rows - 1); const c = _.random(cols - 1); if (canPlaceFillerWord(board, lockGrid, word, r, c, dir.dx, dir.dy)) { placeWordOnBoard(board, word, r, c, dir.dx, dir.dy); break; } } }
-            for(let pass = 0; pass < 2; pass++) { for (let r = 0; r < rows; r++) { for (let c = 0; c < cols; c++) { if(board[r][c] === '') { for (const dir of allDirections) { let gapLen = 0; while(c + gapLen * dir.dy >= 0 && c + gapLen * dir.dy < cols && r + gapLen * dir.dx >= 0 && r + gapLen * dir.dx < rows && board[r + gapLen * dir.dx][c + gapLen * dir.dy] === '' && !lockGrid[r + gapLen * dir.dx][c + gapLen * dir.dy]) { gapLen++; } if (gapLen > 1) { for (let len = gapLen; len >= 2; len--) { if (wordsByLength[len]) { placeWordOnBoard(board, _.sample(wordsByLength[len]), r, c, dir.dx, dir.dy); break; } } break; } } } } } }
-            for (let r = 0; r < rows; r++) { for (let c = 0; c < cols; c++) { if (board[r][c] === '') { board[r][c] = charSets[language][Math.floor(Math.random() * charSets[language].length)]; } } }
-            const unlockedCells = []; for (let r = 0; r < rows; r++) { for (let c = 0; c < cols; c++) { if (!lockGrid[r][c]) unlockedCells.push({r, c}); } }
-            let scatteredHiddenLetterPositions = [];
-            if (unlockedCells.length >= hiddenWord.length) { const cellsForHidden = _.sampleSize(unlockedCells, hiddenWord.length); cellsForHidden.forEach((cell, i) => { scatteredHiddenLetterPositions.push({ row: cell.r, col: cell.c, originalLetter: board[cell.r][cell.c] }); board[cell.r][cell.c] = hiddenWord[i]; }); } else { continue; }
-            return { board, words: requiredWordsInfo, hiddenWord, scatteredHiddenLetterPositions };
+            const cellsForHidden = _.sampleSize(emptyCells, targetHiddenWordLength);
+            const scatteredHiddenLetterPositions = [];
+            
+            cellsForHidden.forEach((cell, i) => {
+                board[cell.r][cell.c] = hiddenWord[i];
+                // Bu hücreyi artık dolu olarak işaretle ki rastgele harf yazılmasın
+                lockGrid[cell.r][cell.c] = true; 
+                scatteredHiddenLetterPositions.push({ row: cell.r, col: cell.c });
+            });
+            
+            // 5. VARSA KALAN SON BOŞLUKLARI DOLDUR
+            for (let r = 0; r < rows; r++) {
+                for (let c = 0; c < cols; c++) {
+                    if (board[r][c] === '') {
+                        board[r][c] = _.sample(charSets[language]);
+                    }
+                }
+            }
+            
+            // BAŞARILI BİR TAHTA OLUŞTURULDU
+            const finalWords = _.sortBy(placedWordsInfo, 'word');
+            return { board, words: finalWords, hiddenWord, scatteredHiddenLetterPositions };
         }
-        console.error("Tahta oluşturma denemeleri başarısız oldu."); return null;
-    } catch (e) { console.error(`createBoard kritik hatası:`, e); return null; }
-  }
+        
+        throw new Error("Tahta oluşturma denemeleri başarısız oldu. Bu beklenmedik bir durum, lütfen kelime listesini veya tahta boyutlarını kontrol edin.");
+    } catch (e) {
+        console.error(`createBoard kritik hatası:`, e);
+        const root = document.getElementById('root');
+        if(root) root.innerHTML = `<div class="p-4 text-red-600">Tahta oluşturulurken kritik bir hata oluştu: ${e.message}</div>`;
+        return null;
+    }
+}
 
   function Modal({ isOpen, message, isSuccess, onClose, language }) { const t = translations[language]; if (!isOpen) return null; return ( <div class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4"> <div class="bg-white p-6 rounded-xl shadow-2xl max-w-sm w-full text-center"> <h3 class={`text-xl font-semibold mb-3 ${isSuccess ? 'text-green-600' : 'text-red-600'}`}> {isSuccess ? t.congrats : t.error} </h3> <p class="text-gray-700 mb-6">{message}</p> <button onClick={onClose} class={`px-5 py-2 rounded-lg text-white font-medium text-sm transition duration-300 ${isSuccess ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'}`}> {isSuccess ? t.continueButton : t.tryAgainButton} </button> </div> </div> ); }
   

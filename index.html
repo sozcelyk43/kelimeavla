@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="tr">
 <head>
@@ -396,11 +397,10 @@ function WordHunt({ goToHome, language, mode, stats, onStatsChange }) {
 
 
 const MobileKeyboard = ({ onKeyPress }) => {
-    // YENİ: Klavye düzeni Türkçe Q'ya göre güncellendi.
     const rows = [
       ['E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', 'Ğ', 'Ü'],
       ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'Ş', 'İ'],
-      ['Z', 'X', 'C', 'V', 'B', 'N', 'M', 'Ö', 'Ç', 'Sil']
+      ['Z', 'X', 'C', 'V', 'B', 'N', 'M', 'Ö', 'Ç']
     ];
 
     return (
@@ -410,8 +410,7 @@ const MobileKeyboard = ({ onKeyPress }) => {
             {row.map((key) => (
               <button
                 key={key}
-                // Tuşa basıldığında küçük bir geri bildirim efekti için active:scale-95 eklendi
-                className={`flex-1 bg-gray-300 text-gray-800 font-semibold rounded-md shadow-md py-3 text-sm focus:outline-none active:scale-95 transition-transform ${key === 'Sil' ? 'bg-red-400 text-white' : ''}`}
+                className="flex-1 bg-gray-300 text-gray-800 font-semibold rounded-md shadow-md py-3 text-sm focus:outline-none active:scale-95 transition-transform"
                 onClick={() => onKeyPress(key)}
               >
                 {key}
@@ -419,15 +418,10 @@ const MobileKeyboard = ({ onKeyPress }) => {
             ))}
           </div>
         ))}
-        <div className="flex justify-center mt-1">
-          <button className="bg-green-500 text-white font-semibold rounded-md shadow-md px-8 py-3 text-sm focus:outline-none active:scale-95 transition-transform" onClick={() => onKeyPress('Onayla')}>
-            Onayla
-          </button>
-        </div>
+        {}
       </div>
     );
   };
-
 
 
 
@@ -873,16 +867,12 @@ const handleHiddenWordSubmit = () => {
                               </p>
                             )}
                             
-                            {/* DÜZELTME: Mobil ve Masaüstü giriş mantığı daha temiz hale getirildi */}
+{/* DÜZELTME: Bu blok, klavye ve tüm aksiyon butonlarını içerir */}
                             {allRequiredWordsFound && (
                                 <>
                                     {isMobile ? (
                                         <MobileKeyboard onKeyPress={(key) => {
-                                            if (key === 'Sil') {
-                                                setHiddenWordGuess(prev => prev.slice(0, -1));
-                                            } else if (key === 'Onayla') {
-                                                handleHiddenWordSubmit();
-                                            } else if (key.length === 1 && hiddenWordGuess.length < gameState.hiddenWord.length) {
+                                            if (key.length === 1 && hiddenWordGuess.length < gameState.hiddenWord.length) {
                                                 setHiddenWordGuess(prev => prev + key);
                                             }
                                         }} />
@@ -901,20 +891,18 @@ const handleHiddenWordSubmit = () => {
                                         />
                                     )}
 
-                                    <div className="flex gap-2">
-                                        {!isMobile && (
-                                            <button onClick={handleHiddenWordSubmit} className={`${theme.button} text-white px-4 py-2 rounded-lg text-base font-medium transition duration-300 w-full disabled:opacity-50 disabled:cursor-not-allowed`} disabled={!allRequiredWordsFound}> {t.checkButton} </button>
-                                        )}
-                                        <button onClick={handleHintClick} className={`bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg text-base font-medium transition duration-300 ${isMobile ? 'w-full' : 'w-auto'} disabled:opacity-50 disabled:cursor-not-allowed`} disabled={!allRequiredWordsFound || isHintDisabled}>
-                                            💡 İpucu Al ({isHintDisabled ? 'X' : '100P'})
-                                        </button>
+                                    {/* YENİ: MOBİL VE MASAÜSTÜ İÇİN ORTAK, TEK SIRA AKSİYON BUTONLARI */}
+                                    <div className="flex items-stretch justify-center gap-2 mt-2">
+                                        <button title="Ana Sayfa" onClick={goToHome} className="bg-gray-500 text-white rounded-lg flex-1 py-2 text-2xl hover:bg-gray-600 transition-transform active:scale-95">🏠</button>
+                                        <button title="İpucu Al" onClick={handleHintClick} className="bg-yellow-500 text-white rounded-lg flex-1 py-2 text-2xl hover:bg-yellow-600 transition-transform active:scale-95" disabled={isHintDisabled}>💡</button>
+                                        <button title="Sil" onClick={() => setHiddenWordGuess(prev => prev.slice(0, -1))} className="bg-red-500 text-white rounded-lg flex-1 py-2 text-xl font-bold hover:bg-red-600 transition-transform active:scale-95">SİL</button>
+                                        <button title="Onayla" onClick={handleHiddenWordSubmit} className="bg-green-500 text-white rounded-lg flex-1 py-2 font-bold hover:bg-green-600 transition-transform active:scale-95">ONAYLA</button>
                                     </div>
                                 </>
                             )}
-                           <button onClick={goToHome} className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 text-base font-medium transition duration-300 w-full"> {t.homeButton} </button>
                          </div>
                     </div>
-</div>
+                </div>
             </div>
             
             <div className="w-full text-center py-1 text-xs text-gray-500 mt-auto flex-shrink-0"> {t.footer} </div>

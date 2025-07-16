@@ -11,8 +11,6 @@
   <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
-
-
   <script src="wordstr.js"></script>
   <script src="wordsen.js"></script>
 
@@ -44,21 +42,15 @@
   </style>
 </head>
 <body class="h-[100vh] flex flex-col overflow-hidden">
-
 <div id="root" class="flex-1 overflow-hidden"></div>
-
 <audio id="correctSound" preload="auto" src="sounds/correct.mp3">Tarayıcınız ses etiketini desteklemiyor.</audio>
 <audio id="wrongSound" preload="auto" src="sounds/wrong.mp3">Tarayıcınız ses etiketini desteklemiyor.</audio>
 <audio id="achievementSound" preload="auto" src="sounds/achievement.mp3">Tarayıcınız ses etiketini desteklemiyor.</audio>
-
-
 <script type="text/babel">
-  // --- HATA YAKALAMA VE GLOBAL AYARLAR ---
   window.onerror = function (msg, url, lineNo, columnNo, error) { console.error(`Global error: ${msg}\nURL: ${url}\nLine: ${lineNo}\nColumn: ${columnNo}\nError:`, error); const root = document.getElementById('root'); if (root) root.innerHTML = `<div class="p-4 text-red-600">Beklenmedik bir hata oluştu. Lütfen sayfayı yenileyin. Hata: ${msg}</div>`; return false; };
   function customToUpperCase(str) { if (typeof str !== 'string') return ''; try { return str.replace(/i/g, 'İ').replace(/ı/g, 'I').replace(/ğ/g, 'Ğ').replace(/ü/g, 'Ü').replace(/ş/g, 'Ş').replace(/ö/g, 'Ö').replace(/ç/g, 'Ç').toUpperCase(); } catch (err) { console.error('customToUpperCase hatası:', err); return (str || '').toUpperCase(); } }
   class ErrorBoundary extends React.Component { state = { hasError: false }; static getDerivedStateFromError(error) { return { hasError: true }; } componentDidCatch(error, errorInfo) { console.error("ErrorBoundary yakaladı:", error, errorInfo); } render() { if (this.state.hasError) { return <div className="p-4 text-red-600">Beklenmedik bir hata oluştu. Lütfen sayfayı yenileyin.</div>; } return this.props.children; } }
 
-  // --- DOKUNSAL GERİ BİLDİRİM (HAPTIC FEEDBACK) ---
   const vibrate = (pattern) => {
     if ('vibrate' in navigator) {
       if (pattern === 'success') navigator.vibrate(50);
@@ -68,23 +60,27 @@
     }
   };
 
-  // --- ÇEVİRİLER VE OYUN SABİTLERİ ---
   const translations = {
-    tr: {
-        title: "Kelime Avı", easyMode: "Kolay Mod", hardMode: "Zor Mod", timedMode: "Zamanlı Mod",
-        level: "Seviye", words: "Kelimeler", hiddenWord: "Gizli Sözcük", hiddenWordPlaceholder: "Gizli sözcüğü girin",
-        checkButton: "Kontrol Et", homeButton: "Ana Sayfa", footer: `© ${new Date().getFullYear()} Ozcelik Inc. Tüm hakları saklıdır.`,
-        congrats: "Tebrikler!", error: "Hata!", successMessage: (word) => `Harika! Gizli sözcüğü buldunuz: ${word}`,
-        allWordsRequired: "Önce tüm kelimeleri bulmalısınız!", wrongGuess: "Yanlış tahmin! Tekrar deneyin.",
-        gameCompleted: "Tebrikler! Oyunu başarıyla tamamladınız!", timeUp: "Süre Bitti!",
-        finalScore: (score) => `Skorunuz: ${score}`, continueButton: "Devam Et", tryAgainButton: "Tekrar Dene",
-        language: "Dil", turkish: "Türkçe", english: "English", achievements: "Başarılar", highScore: "Yüksek Skor", score: "Puan"
-    },
-    en: {
-        title: "Word Hunt", easyMode: "Easy Mode", hardMode: "Hard Mode", timedMode: "Timed Mode",
-        level: "Level", words: "Words", score: "Score", highScore: "High Score",
-    }
-  };
+  tr: {
+    title: "Kelime Avı",    easyMode: "Kolay Mod",    hardMode: "Zor Mod",    timedMode: "Zamanlı Mod",    level: "Seviye",
+    words: "Kelimeler",    hiddenWord: "Gizli Sözcük",    hiddenWordPlaceholder: "Gizli sözcüğü girin",    checkButton: "Kontrol Et",
+    homeButton: "Ana Sayfa",    footer: `© ${new Date().getFullYear()} Ozcelik Inc. Tüm hakları saklıdır.`,    congrats: "Tebrikler!",
+    error: "Hata!",    successMessage: (word) => `Harika! Gizli sözcüğü buldunuz: ${word}`,    allWordsRequired: "Önce tüm kelimeleri bulmalısınız!",
+    wrongGuess: "Yanlış tahmin! Tekrar deneyin.",    gameCompleted: "Tebrikler! Oyunu başarıyla tamamladınız!",    timeUp: "Süre Bitti!",
+    finalScore: (score) => `Skorunuz: ${score}`,    continueButton: "Devam Et",    tryAgainButton: "Tekrar Dene",    language: "Dil",
+    turkish: "Türkçe",    english: "English",    achievements: "Başarılar",    highScore: "Yüksek Skor",    score: "Puan"
+  },
+  en: {
+    title: "Word Hunt",    easyMode: "Easy Mode",    hardMode: "Hard Mode",    timedMode: "Timed Mode",    level: "Level",    words: "Words",
+    hiddenWord: "Hidden Word",    hiddenWordPlaceholder: "Enter the hidden word",    checkButton: "Check",
+    homeButton: "Home",    footer: `© ${new Date().getFullYear()} Ozcelik Inc. All rights reserved.`,    congrats: "Congratulations!",
+    error: "Error!",    successMessage: (word) => `Great! You found the hidden word: ${word}`,    allWordsRequired: "You must find all the words first!",
+    wrongGuess: "Wrong guess! Try again.",    gameCompleted: "Congratulations! You've successfully completed the game!",
+    timeUp: "Time's Up!",    finalScore: (score) => `Your Score: ${score}`,    continueButton: "Continue",    tryAgainButton: "Try Again",
+    language: "Language",    turkish: "Turkish",    english: "English",    achievements: "Achievements",    highScore: "High Score",    score: "Score"
+  }
+};
+
   const charSets = { tr: 'ABCÇDEFGĞHIİJKLMNOÖPRSŞTUÜVYZ'.split(''), en: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('') };
   const wordLists = { tr: typeof wordListTr !== 'undefined' ? wordListTr : [], en: typeof wordListEn !== 'undefined' ? wordListEn : [] };
 
@@ -92,7 +88,6 @@
   const initialRowsConfig = [7, 9, 11, 13, 15];
   const initialColsConfig = [8, 9, 10, 11, 12];
   
-  // DÜZELTME: Bu döngü daha önce kapatılmamıştı, şimdi düzeltildi.
   for (let level = 0; level < 60; level++) {
       const stage = Math.floor(level / 6);
       const configIndex = Math.floor(stage / 2);
@@ -107,7 +102,6 @@
       boardSizes.push({ rows: r, cols: c });
   } 
 
-  // DÜZELTME: Bu değişkenler döngünün dışına taşındı.
   const directions = {
       diagonal: [ { name: 'down-right', dx: 1, dy: 1 }, { name: 'down-left', dx: 1, dy: -1 }, { name: 'up-right', dx: -1, dy: 1 }, { name: 'up-left', dx: -1, dy: -1 } ],
       horizontal: [ { name: 'right', dx: 0, dy: 1 }, { name: 'left', dx: 0, dy: -1 } ],
@@ -117,14 +111,13 @@
   const straightDirections = [...directions.horizontal, ...directions.vertical];
 
  const initialAchievements = {
-    // KALDIRILDI: FIRST_WORD
-    FIFTY_WORDS: { name: 'Kelime Canavarı', description: 'Toplamda 50 kelime buldun.', unlocked: false, icon: '👾' }, // GÜNCELLENDİ
+    FIFTY_WORDS: { name: 'Kelime Canavarı', description: 'Toplamda 50 kelime buldun.', unlocked: false, icon: '👾' },
     LEVEL_5_CLEAR: { name: 'Azimli Oyuncu', description: '5. seviyeyi tamamladın.', unlocked: false, icon: '⭐' },
     LEVEL_10_CLEAR: { name: 'Usta Oyuncu', description: '10. seviyeyi tamamladın.', unlocked: false, icon: '🏆' },
     HIGH_SCORER: { name: 'Skor Makinesi', description: 'Bir seviyede 500 puandan fazla kazandın.', unlocked: false, icon: '🚀' },
     FAST_FINISH: { name: 'Hızlı ve Öfkeli', description: 'Zamanlı modu tamamladın.', unlocked: false, icon: '⏱️' },
-    EASY_MODE_MASTER: { name: 'Kolay Mod Canavarı', description: 'Kolay modu tamamen bitirdin.', unlocked: false, icon: '😎' }, // YENİ
-    HARD_MODE_HUNTER: { name: 'Zor Mod Avcısı', description: 'Zor modu tamamen bitirdin.', unlocked: false, icon: '🔥' } // YENİ
+    EASY_MODE_MASTER: { name: 'Kolay Mod Canavarı', description: 'Kolay modu tamamen bitirdin.', unlocked: false, icon: '😎' },
+    HARD_MODE_HUNTER: { name: 'Zor Mod Avcısı', description: 'Zor modu tamamen bitirdin.', unlocked: false, icon: '🔥' }
   };
 
 
@@ -152,7 +145,6 @@
     catch (e) { console.error("İstatistikler kaydedilemedi:", e); }
   };
   
-  // --- TAHTA OLUŞTURMA FONKSİYONU ---
   function createBoard(level, language) {
     try {
         const staticConfig = boardSizes[level];
@@ -249,7 +241,6 @@
     }
   }
 
-  // --- YARDIMCI COMPONENT'LER ---
   function AchievementToast({ achievement }) {
     if (!achievement) return null;
     return (
@@ -298,12 +289,12 @@ const Cell = React.memo(function Cell({
 
 
   
-  function HomePage({ startGame, language, setLanguage, stats, setModalContent }) {
+function HomePage({ startGame, language, setLanguage, stats, setModalContent, savedGame, continueGame }) {
     const t = translations[language] || translations['en'];
 
     const openAchievements = () => {
       setModalContent({
-        isOpen: true, // DÜZELTME: Pencereyi görünür yapmak için bu satır eklendi.
+        isOpen: true,
         title: t.achievements,
         body: (
           <ul className="space-y-3 text-left max-h-[60vh] overflow-y-auto scrollbar-thin pr-2">
@@ -326,6 +317,15 @@ const Cell = React.memo(function Cell({
         <div className="bg-gradient-to-br from-indigo-500 to-purple-600 text-white p-6 rounded-lg shadow-lg mb-6 w-full max-w-xs">
           <h1 className="text-4xl font-bold">{t.title}</h1>
         </div>
+        {/* YENİ: Kayıtlı oyun varsa "Devam Et" butonu gösterilir */}
+        {savedGame && (
+          <div className="w-full max-w-md mb-6 animate-pulse">
+            <button onClick={continueGame} className="bg-purple-600 text-white px-6 py-3 rounded-lg font-semibold text-lg hover:bg-purple-700 transition duration-300 shadow-lg w-full">
+              Kayıtlı Oyuna Devam Et (Seviye {savedGame.level + 1})
+            </button>
+          </div>
+        )}
+
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6 w-full max-w-md">
           <button onClick={() => startGame('easy')} className="bg-green-600 text-white px-6 py-3 rounded-lg font-semibold text-lg hover:bg-green-700 transition duration-300 shadow-md">
             {t.easyMode}
@@ -354,24 +354,23 @@ const Cell = React.memo(function Cell({
     );
   }
 
-
-function WordHunt({ goToHome, language, mode, stats, onStatsChange }) {
+  function WordHunt({ goToHome, language, mode, stats, onStatsChange, initialSavedState }) {
        const t = translations[language] || translations['en'];
-       const [level, setLevel] = React.useState(0);
+       const [level, setLevel] = React.useState(initialSavedState?.level ?? 0);
        const [gameState, setGameState] = React.useState(null);
        const [isLoading, setIsLoading] = React.useState(true);
        const [selectedCells, setSelectedCells] = React.useState([]);
-       const [foundWords, setFoundWords] = React.useState([]);
+       const [foundWords, setFoundWords] = React.useState(initialSavedState?.foundWords ?? []);
        const [hiddenWordGuess, setHiddenWordGuess] = React.useState('');
        const [isSwiping, setIsSwiping] = React.useState(false);
        const [swipeDirectionInfo, setSwipeDirectionInfo] = React.useState({ dx: 0, dy: 0 });
        const gridRef = React.useRef(null);
        const [modalContent, setModalContent] = React.useState({ isOpen: false, title: '', children: null, type: '' });
-       const [score, setScore] = React.useState(0);
-       const [timeLeft, setTimeLeft] = React.useState(120);
+       const [score, setScore] = React.useState(initialSavedState?.score ?? 0);
+       const [timeLeft, setTimeLeft] = React.useState(initialSavedState?.timeLeft ?? 120);
        const [justFoundWordInfo, setJustFoundWordInfo] = React.useState(null);
        const [achievementToast, setAchievementToast] = React.useState(null);
-       const [revealedIndices, setRevealedIndices] = React.useState([]); 
+       const [revealedIndices, setRevealedIndices] = React.useState(initialSavedState?.revealedIndices ?? []);
        const allRequiredWordsFound = gameState?.words?.length > 0 && foundWords.length === gameState.words.length;
 
        React.useEffect(() => {
@@ -467,13 +466,12 @@ const handleInteractionMove = React.useCallback(
         _.throttle((clientX, clientY) => {
           if (!isSwiping || !selectedCells?.length || allRequiredWordsFound || isLoading || !gameState) return;
           
-          let currentCell = getCellFromCoordinates(clientX, clientY); // DÜZELTME: Değişken 'let' ile tanımlandı.
+          let currentCell = getCellFromCoordinates(clientX, clientY);
           if (!currentCell) return;
           
           const lastCell = selectedCells[selectedCells.length - 1];
           if (currentCell.row === lastCell.row && currentCell.col === lastCell.col) return;
           
-          // --- Çapraz Seçim Tolerans Mantığı ---
           if (selectedCells.length > 1 && Math.abs(swipeDirectionInfo.dx) === 1 && Math.abs(swipeDirectionInfo.dy) === 1) {
               const expectedNextRow = lastCell.row + swipeDirectionInfo.dx;
               const expectedNextCol = lastCell.col + swipeDirectionInfo.dy;
@@ -491,8 +489,7 @@ const handleInteractionMove = React.useCallback(
                   }
               }
           }
-          // --- Tolerans Mantığının Sonu ---
-          
+
           if (selectedCells.length > 1 && currentCell.row === selectedCells[selectedCells.length - 2]?.row && currentCell.col === selectedCells[selectedCells.length - 2]?.col) {
             setSelectedCells(prev => prev.slice(0, -1));
             if (selectedCells.length === 2) { setSwipeDirectionInfo({ dx: 0, dy: 0 }); }
@@ -523,22 +520,36 @@ const handleInteractionMove = React.useCallback(
 
 
 const handleInteractionEnd = React.useCallback(() => {
-          // Bu fonksiyon artık sadece sürükleme işleminin bittiğini işaretliyor.
-          // Asıl kelime kontrolünü ve diğer işlemleri yeni eklenecek useEffect yapacak.
-          if (isSwiping) {
+            if (isSwiping) {
             setIsSwiping(false);
           }
       }, [isSwiping]);
 
+       React.useEffect(() => {
+        if (gameState && !isLoading) {
+          const gameStateToSave = {
+            level: level,
+            mode: mode,
+            language: language,
+            score: score,
+            foundWords: foundWords,
+            revealedIndices: revealedIndices,
+            timeLeft: timeLeft, // Zamanlı mod için
+          };
+
+          console.log("Oyun durumu kaydediliyor:", gameStateToSave);
+          localStorage.setItem('savedGameState', JSON.stringify(gameStateToSave));
+        }
+       }, [gameState, isLoading, level, mode, language, score, foundWords, revealedIndices, timeLeft]);
+
+
+
 React.useEffect(() => {
-        // Bu effect, sadece sürükleme bittiğinde (isSwiping false olduğunda) ve
-        // seçili hücre varsa çalışır. Bu, kelime kontrolünü yapmak için en doğru zamandır.
         if (!isSwiping && selectedCells.length > 0) {
           const word = selectedCells.map(c => gameState.board?.[c.row]?.[c.col] || '').join('');
           const target = gameState.words?.find(w => w.word === word);
           
           if (target && !foundWords.includes(word)) {
-              // Kelime doğruysa yapılacak işlemler:
               setFoundWords(prev => [...prev, word]);
               const points = word.length * 10;
               const newScore = score + points;
@@ -552,16 +563,13 @@ React.useEffect(() => {
               const newStats = { ...stats, totalWordsFound: newTotalWords };
               onStatsChange(newStats);
               
-              // Başarım kontrolleri:
               if (newTotalWords >= 50) checkAndUnlockAchievement('FIFTY_WORDS', newStats);
               if (newScore > 500) checkAndUnlockAchievement('HIGH_SCORER', newStats);
 
           } else if(selectedCells.length > 1) {
-             // Kelime yanlışsa ses çal:
              playSound('wrongSound');
           }
           
-          // Her durumda, işlem bittikten sonra seçimi temizle.
           setSelectedCells([]);
         }
        }, [isSwiping]); // Bu effect'in tek bağımlılığı isSwiping'dir.
@@ -587,10 +595,8 @@ React.useEffect(() => {
       }, [handleInteractionStart, handleInteractionMove, handleInteractionEnd]);
 
 
-// Yeni eklenecek değişken (ipucu butonunu kontrol için)
-      const isHintDisabled = React.useMemo(() => {
+const isHintDisabled = React.useMemo(() => {
         if (!gameState) return true;
-        // Açılacak harf kalmadıysa veya puan yetersizse butonu pasif yap
         const unrevealedCount = gameState.hiddenWord.length - revealedIndices.length;
         return unrevealedCount <= 0 || score < 100;
       }, [gameState, revealedIndices, score]);
@@ -598,16 +604,13 @@ React.useEffect(() => {
      const handleHintClick = () => {
         if (!allRequiredWordsFound || isHintDisabled) return;
 
-        // Açılacak bir sonraki harfin indeksini bul
         let nextIndexToReveal = -1;
         for (let i = 0; i < gameState.hiddenWord.length; i++) {
-          // YENİ: Hem ilk harfi (index 0) hem de daha önce açılmış harfleri atla
           if (i !== 0 && !revealedIndices.includes(i)) {
             nextIndexToReveal = i;
             break;
           }
         }
-        
         if (nextIndexToReveal !== -1) {
           setScore(prevScore => prevScore - 100);
           setRevealedIndices(prevIndices => [...prevIndices, nextIndexToReveal]);
@@ -633,7 +636,6 @@ const handleNextLevel = () => {
         if (level < 59) {
           setLevel(p => p + 1);
         } else {
-          // YENİ: Oyun bittiğinde mod'a göre başarım kontrolü
           if (mode === 'easy') {
             checkAndUnlockAchievement('EASY_MODE_MASTER', newStats);
           } else if (mode === 'hard') {
@@ -655,7 +657,6 @@ const closeModal = () => {
       };
       
 const triggerConfetti = () => {
-    // Patlama efekti için ayarlar
     confetti({
       particleCount: 150,
       spread: 90,
@@ -671,12 +672,10 @@ const handleHiddenWordSubmit = () => {
               return; 
           }
 
-          
-
 	if (customToUpperCase(hiddenWordGuess.trim()) === gameState?.hiddenWord) { 
           playSound('correctSound'); 
           vibrate('success');
-          triggerConfetti(); // YENİ: Konfeti efekti burada tetikleniyor.
+          triggerConfetti();
 
           const handleContinue = () => {
             setModalContent({ isOpen: false, title: '', children: null, type: '' });
@@ -773,13 +772,13 @@ const handleHiddenWordSubmit = () => {
                     </div>
                 </div>
 
-                <div className="w-full lg:w-2/5 xl:w-1/3 flex flex-col gap-4 lg:h-full lg:overflow-y-auto py-2 px-2 order-2">
-                    <div>
+<div className="w-full lg:w-2/S xl:w-1/3 flex flex-col gap-4 lg:h-full lg:overflow-y-auto py-2 px-2 order-2">
+                    {/* DÜZELTME 1: Kelime listesi alanı artık koşullu olarak kayboluyor */}
+                    <div className={`transition-all duration-500 ease-in-out overflow-hidden ${allRequiredWordsFound ? 'max-h-0 opacity-0' : 'max-h-[20vh] lg:max-h-[calc(50vh-60px)] opacity-100'}`}>
                         <h3 className="text-lg lg:text-xl font-semibold text-indigo-800 mb-2">{t.words} ({foundWords.length}/{gameState.words.length})</h3>
-                        <div className="flex flex-wrap justify-center gap-1.5 max-h-[20vh] lg:max-h-[calc(50vh-60px)] overflow-y-auto p-2 bg-gray-100 rounded-lg scrollbar-thin">
+                        <div className="flex flex-wrap justify-center gap-1.5 overflow-y-auto p-2 bg-gray-100 rounded-lg scrollbar-thin">
                             {gameState.words.map(({ word }) => {
                                 const isFound = foundWords.includes(word);
-
                                 const isHiddenInHardMode = mode === 'hard' && !isFound;
                                 return (
                                     <span key={word} className={`px-2.5 py-1 rounded-md text-sm font-medium transition-all duration-500 ${isFound ? 'bg-gray-300 text-gray-500 line-through opacity-50' : isHiddenInHardMode ? 'bg-gray-400 text-transparent pointer-events-none' : theme.wordBg + ' text-gray-800'}`} style={{ minWidth: '65px', textAlign: 'center' }}>
@@ -789,24 +788,26 @@ const handleHiddenWordSubmit = () => {
                             })}
                         </div>
                     </div>
-<div className="flex-shrink-0 mt-2 lg:mt-auto">
+
+                    {/* DÜZELTME 2: Gizli kelime alanı artık koşullu olarak yukarı kayıyor */}
+                    <div className={`flex-shrink-0 mt-2 transition-all duration-500 ease-in-out ${allRequiredWordsFound ? '' : 'lg:mt-auto'}`}>
                          <div className="flex flex-col gap-2">
                             {/* --- İPUCU GÖSTERGE ALANI --- */}
                             <div className="flex justify-center items-center gap-1 bg-gray-200 p-2 rounded-lg min-h-[48px]">
-    {gameState && allRequiredWordsFound && gameState.hiddenWord.split('').map((letter, index) => (
-        <span key={index} className="flex items-center justify-center bg-white w-8 h-8 rounded text-xl font-bold text-gray-800 shadow-inner">
-            {/* YENİ: İlk harf (index 0) VEYA puanla açılan harfler gösterilir */}
-            {(index === 0 || revealedIndices.includes(index)) ? letter : ''}
-        </span>
-    ))}
-</div>
+                                {gameState && allRequiredWordsFound && gameState.hiddenWord.split('').map((letter, index) => (
+                                    <span key={index} className="flex items-center justify-center bg-white w-8 h-8 rounded text-xl font-bold text-gray-800 shadow-inner">
+                                        {(index === 0 || revealedIndices.includes(index)) ? letter : ''}
+                                    </span>
+                                ))}
+                            </div>
 
+                            {/* --- AÇIKLAYICI METİN --- */}
                             {revealedIndices.length > 0 && (
                               <p className="text-sm text-center text-gray-600 -mb-1 mt-1">
                                 Kelimenin <strong>tamamını</strong> aşağıdaki kutuya yazın.
                               </p>
                             )}
-                            
+
                            <input
                               type="text"
                               value={hiddenWordGuess}
@@ -844,25 +845,63 @@ const handleHiddenWordSubmit = () => {
     const [mode, setMode] = React.useState('easy');
     const [gameStats, setGameStats] = React.useState(loadGameStats);
     const [modalContent, setModalContent] = React.useState({ isOpen: false, title: '', body: null });
+    const [savedGameState, setSavedGameState] = React.useState(null);
+
+    React.useEffect(() => {
+      const savedGame = localStorage.getItem('savedGameState');
+      if (savedGame) {
+        console.log("Kaydedilmiş bir oyun bulundu!");
+        setSavedGameState(JSON.parse(savedGame));
+      }
+    }, []);
+
+
 
     const handleStatsChange = (newStats) => {
         setGameStats(newStats);
         saveGameStats(newStats);
     };
 
-    const startGame = (selectedMode) => {
+   const startGame = (selectedMode) => {
+        localStorage.removeItem('savedGameState');
+        setSavedGameState(null);
         setMode(selectedMode);
         setPage('game');
     };
-    const goToHome = () => setPage('home');
+
+    const continueGame = () => {
+        setLanguage(savedGameState.language);
+        setMode(savedGameState.mode);
+        setPage('game');
+    };
+  const goToHome = () => {
+      localStorage.removeItem('savedGameState');
+      setSavedGameState(null);
+      setPage('home');
+    };
 
     return (
       <ErrorBoundary>
         <div className="h-full w-full overflow-hidden">
           {page === 'game' ? (
-            <WordHunt goToHome={goToHome} language={language} mode={mode} stats={gameStats} onStatsChange={handleStatsChange} />
+            <WordHunt
+              goToHome={goToHome}
+              language={language}
+              mode={mode}
+              stats={gameStats}
+              onStatsChange={handleStatsChange}
+              initialSavedState={savedGameState} // YENİ: Kayıtlı durumu oyuna yolla
+            />
           ) : (
-            <HomePage startGame={startGame} language={language} setLanguage={setLanguage} stats={gameStats} setModalContent={setModalContent}/>
+            <HomePage
+              startGame={startGame}
+              language={language}
+              setLanguage={setLanguage}
+              stats={gameStats}
+              setModalContent={setModalContent}
+              savedGame={savedGameState} // YENİ: Kayıtlı oyun bilgisini ana sayfaya yolla
+              continueGame={continueGame}  // YENİ: Devam etme fonksiyonunu yolla
+            />
           )}
           <Modal isOpen={modalContent.isOpen} title={modalContent.title} onClose={() => setModalContent({ isOpen: false })}>
             {modalContent.body}

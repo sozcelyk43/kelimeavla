@@ -373,8 +373,8 @@ const Cell = React.memo(function Cell({
 
 
 function WordHunt({ goToHome, language, mode, stats, onStatsChange }) {
-	  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
+const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
        const t = translations[language] || translations['en'];
        const [level, setLevel] = React.useState(0);
        const [gameState, setGameState] = React.useState(null);
@@ -393,7 +393,7 @@ function WordHunt({ goToHome, language, mode, stats, onStatsChange }) {
        const [revealedIndices, setRevealedIndices] = React.useState([]); 
        const allRequiredWordsFound = gameState?.words?.length > 0 && foundWords.length === gameState.words.length;
        const hiddenWordInputRef = React.useRef(null);
-
+       const hintDisplayRef = React.useRef(null);
 
 
 const MobileKeyboard = ({ onKeyPress }) => {
@@ -516,7 +516,6 @@ const MobileKeyboard = ({ onKeyPress }) => {
 
 const throttledMove = React.useMemo(() => 
         _.throttle((clientX, clientY) => {
-          // Mantığın kendisi değişmiyor, sadece React.useCallback dışına alındı.
           if (!isSwiping || !selectedCells?.length || allRequiredWordsFound || isLoading || !gameState) return;
           
           let currentCell = getCellFromCoordinates(clientX, clientY);
@@ -525,53 +524,56 @@ const throttledMove = React.useMemo(() =>
           const lastCell = selectedCells[selectedCells.length - 1];
           if (currentCell.row === lastCell.row && currentCell.col === lastCell.col) return;
           
-          // --- Çapraz Seçim Tolerans Mantığı ---
-          if (selectedCells.length > 1 && Math.abs(swipeDirectionInfo.dx) === 1 && Math.abs(swipeDirectionInfo.dy) === 1) {
-              const expectedNextRow = lastCell.row + swipeDirectionInfo.dx;
-              const expectedNextCol = lastCell.col + swipeDirectionInfo.dy;
-              
-              if(currentCell.row !== expectedNextRow || currentCell.col !== expectedNextCol) {
-                  const neighbors = [
-                      { row: currentCell.row + 1, col: currentCell.col }, { row: currentCell.row - 1, col: currentCell.col },
-                      { row: currentCell.row, col: currentCell.col + 1 }, { row: currentCell.row, col: currentCell.col - 1 }
-                  ];
-                  for(const neighbor of neighbors) {
-                      if(neighbor.row === expectedNextRow && neighbor.col === expectedNextCol) {
-                          currentCell = neighbor;
-                          break;
-                      }
-                  }
-              }
-          }
-          
           if (selectedCells.length > 1 && currentCell.row === selectedCells[selectedCells.length - 2]?.row && currentCell.col === selectedCells[selectedCells.length - 2]?.col) {
             setSelectedCells(prev => prev.slice(0, -1));
             if (selectedCells.length === 2) { setSwipeDirectionInfo({ dx: 0, dy: 0 }); }
             return;
           }
+          
           const isAlreadySelected = isCellSelected(currentCell.row, currentCell.col);
           const isLocked = isCellPartOfFoundRequiredWord(currentCell.row, currentCell.col);
           if (isAlreadySelected || isLocked) return;
-          const dx = currentCell.row - lastCell.row; const dy = currentCell.col - lastCell.col;
-          if (Math.abs(dx) > 1 || Math.abs(dy) > 1 || (dx === 0 && dy === 0)) return;
+          
+          // --- YENİ VE DAHA BASİT YÖN MANTIĞI ---
+
+          // 1. Seçim Başlangıcı: İlk iki harf yönü belirler.
           if (selectedCells.length === 1) {
-            const currentDir = { dx: Math.sign(dx), dy: Math.sign(dy) };
-            setSwipeDirectionInfo(currentDir);
+            const dx = currentCell.row - lastCell.row;
+            const dy = currentCell.col - lastCell.col;
+            
+            // Hareket sadece 8 yöne (düz ve çapraz) olabilir.
+            if (Math.abs(dx) > 1 || Math.abs(dy) > 1 || (dx === 0 && dy === 0)) return;
+            
+            const direction = { dx: Math.sign(dx), dy: Math.sign(dy) };
+            setSwipeDirectionInfo(direction);
             setSelectedCells(prev => [...prev, currentCell]);
+
+          // 2. Seçimin Devamı: Belirlenen yönde ilerle.
           } else {
-            const startCell = selectedCells[0]; const totalDx = currentCell.row - startCell.row; const totalDy = currentCell.col - startCell.col;
-            let isDirectionallyCorrect = false;
-            if (swipeDirectionInfo.dx === 0 || swipeDirectionInfo.dy === 0) {
-              if ( (Math.sign(totalDx) === swipeDirectionInfo.dx) && (Math.sign(totalDy) === swipeDirectionInfo.dy) ) { isDirectionallyCorrect = true; }
-            } else {
-              if ( (Math.sign(totalDx) === swipeDirectionInfo.dx) && (Math.sign(totalDy) === swipeDirectionInfo.dy) && (Math.abs(totalDx) === Math.abs(totalDy)) ) { isDirectionallyCorrect = true; }
+            // Olması gereken bir sonraki hücreyi hesapla
+            const expectedNextRow = lastCell.row + swipeDirectionInfo.dx;
+            const expectedNextCol = lastCell.col + swipeDirectionInfo.dy;
+            
+            let cellToAdd = null;
+
+            // Dokunulan hücre, tam olarak beklenen hücre mi?
+            if (currentCell.row === expectedNextRow && currentCell.col === expectedNextCol) {
+              cellToAdd = currentCell;
+            } 
+            // Tolerans: Dokunulan hücre, beklenen hücrenin hemen yanı mı? (Çapraz seçimleri kolaylaştırır)
+            else if (Math.abs(currentCell.row - expectedNextRow) <= 1 && Math.abs(currentCell.col - expectedNextCol) <= 1) {
+              // Eğer öyleyse, beklenen hücreyi seçime ekle, dokunulanı değil. Bu, yolu düzeltir.
+              cellToAdd = { row: expectedNextRow, col: expectedNextCol };
             }
-            if (isDirectionallyCorrect) { setSelectedCells(prev => [...prev, currentCell]); }
+
+            // Eğer eklenecek geçerli bir hücre varsa ve bu hücre daha önce seçilmemişse ekle.
+            if (cellToAdd && !isCellSelected(cellToAdd.row, cellToAdd.col) && !isCellPartOfFoundRequiredWord(cellToAdd.row, cellToAdd.col)) {
+              setSelectedCells(prev => [...prev, cellToAdd]);
+            }
           }
         }, 20),
         [isSwiping, selectedCells, swipeDirectionInfo, allRequiredWordsFound, isLoading, gameState, getCellFromCoordinates, isCellSelected, isCellPartOfFoundRequiredWord]
       );
-
 
 const handleInteractionEnd = React.useCallback(() => {
           if (isSwiping) {
@@ -731,15 +733,27 @@ const handleHiddenWordSubmit = () => {
               playSound('wrongSound'); 
               vibrate('error');
               setHiddenWordGuess('');
-
-              // DÜZELTME: Sadece masaüstünde var olan input'a animasyon uygula
-              if (hiddenWordInputRef.current) {
+              
+              // YENİ: Cihaza göre doğru elementi titretme
+              if (isMobile) {
+                if (hintDisplayRef.current) {
+                  hintDisplayRef.current.classList.add('shake-animation');
+                  setTimeout(() => {
+                    if (hintDisplayRef.current) {
+                      hintDisplayRef.current.classList.remove('shake-animation');
+                    }
+                  }, 300);
+                }
+              } else {
+                if (hiddenWordInputRef.current) {
                   hiddenWordInputRef.current.classList.add('shake-animation');
                   setTimeout(() => {
+                    if (hiddenWordInputRef.current) {
                       hiddenWordInputRef.current.classList.remove('shake-animation');
+                    }
                   }, 300);
+                }
               }
-              // Not: Titreme efekti sadece masaüstünde görünecektir, bu beklenen bir davranıştır.
           }
       };
       
@@ -846,7 +860,7 @@ const handleHiddenWordSubmit = () => {
     <div className={`flex-shrink-0 transition-all duration-500 ease-in-out ${allRequiredWordsFound ? 'mt-0' : 'mt-2 lg:mt-auto'}`}>
                          <div className="flex flex-col gap-2">
                             {/* DÜZELTME: BU ALAN ARTIK HEM İPUCU HEM DE KULLANICININ YAZDIĞINI GÖSTERİYOR */}
-                            <div className="flex justify-center items-center gap-1 bg-gray-200 p-2 rounded-lg min-h-[48px]">
+                            <div ref={hintDisplayRef} className="flex justify-center items-center gap-1 bg-gray-200 p-2 rounded-lg min-h-[48px]">
                                 {gameState && allRequiredWordsFound && Array.from({ length: gameState.hiddenWord.length }).map((_, index) => {
                                     // Öncelik kullanıcının yazdığı harfta
                                     const char = hiddenWordGuess[index];

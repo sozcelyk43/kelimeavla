@@ -276,7 +276,7 @@
     );
   }
 
-  const Cell = React.memo(function Cell({
+const Cell = React.memo(function Cell({
     letter, isSelected, isFoundRequiredPart, isHiddenLetterCell, isTheExactFirstCell, allRequiredWordsFound, isJustFound, theme
   }) {
     let cellClass = 'bg-white';
@@ -290,13 +290,14 @@
       else if (isFoundRequiredPart) { cellClass = theme.foundCell; textClass = 'text-gray-600 opacity-75'; }
     }
     return (
-      <div className={`flex items-center justify-center text-center font-semibold border border-gray-200/50 rounded aspect-square text-[clamp(12px,3vmin,24px)] ${cellClass} ${textClass} transition-all duration-150 select-none ${allRequiredWordsFound && isTheExactFirstCell ? 'hidden-word-start-letter' : ''}`}>
+      <div className={`flex items-center justify-center text-center font-semibold border border-gray-200/50 rounded aspect-square text-[clamp(12px,3vmin,24px)] ${cellClass} ${textClass} transition-all duration-150 select-none`}>
         {letter || ''}
       </div>
     );
   });
+
+
   
-  // --- ANA SAYFA COMPONENT'İ ---
   function HomePage({ startGame, language, setLanguage, stats, setModalContent }) {
     const t = translations[language] || translations['en'];
 
@@ -594,21 +595,20 @@ React.useEffect(() => {
         return unrevealedCount <= 0 || score < 100;
       }, [gameState, revealedIndices, score]);
       
-      // Yeni ipucu fonksiyonu
-      const handleHintClick = () => {
+     const handleHintClick = () => {
         if (!allRequiredWordsFound || isHintDisabled) return;
 
         // Açılacak bir sonraki harfin indeksini bul
         let nextIndexToReveal = -1;
         for (let i = 0; i < gameState.hiddenWord.length; i++) {
-          if (!revealedIndices.includes(i)) {
+          // YENİ: Hem ilk harfi (index 0) hem de daha önce açılmış harfleri atla
+          if (i !== 0 && !revealedIndices.includes(i)) {
             nextIndexToReveal = i;
             break;
           }
         }
         
         if (nextIndexToReveal !== -1) {
-          // Puanı düşür ve açılan harfi state'e ekle
           setScore(prevScore => prevScore - 100);
           setRevealedIndices(prevIndices => [...prevIndices, nextIndexToReveal]);
         }
@@ -793,14 +793,14 @@ const handleHiddenWordSubmit = () => {
                          <div className="flex flex-col gap-2">
                             {/* --- İPUCU GÖSTERGE ALANI --- */}
                             <div className="flex justify-center items-center gap-1 bg-gray-200 p-2 rounded-lg min-h-[48px]">
-                                {gameState && allRequiredWordsFound && gameState.hiddenWord.split('').map((letter, index) => (
-                                    <span key={index} className="flex items-center justify-center bg-white w-8 h-8 rounded text-xl font-bold text-gray-800 shadow-inner">
-                                        {revealedIndices.includes(index) ? letter : ''}
-                                    </span>
-                                ))}
-                            </div>
+    {gameState && allRequiredWordsFound && gameState.hiddenWord.split('').map((letter, index) => (
+        <span key={index} className="flex items-center justify-center bg-white w-8 h-8 rounded text-xl font-bold text-gray-800 shadow-inner">
+            {/* YENİ: İlk harf (index 0) VEYA puanla açılan harfler gösterilir */}
+            {(index === 0 || revealedIndices.includes(index)) ? letter : ''}
+        </span>
+    ))}
+</div>
 
-                            {/* --- YENİ: AÇIKLAYICI METİN --- */}
                             {revealedIndices.length > 0 && (
                               <p className="text-sm text-center text-gray-600 -mb-1 mt-1">
                                 Kelimenin <strong>tamamını</strong> aşağıdaki kutuya yazın.

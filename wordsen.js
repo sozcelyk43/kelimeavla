@@ -71,7 +71,7 @@ const wordListEn = [
   "seaside", "dock", "wharf", "pier", "jetty", "breakwater", "lighthouse", "buoy", "beacon", "anchor", "chain", "net", "trap", "hook", "line", "sinker",
   "float", "bobber", "lure", "bait", "rod", "reel", "pole", "spear", "harpoon", "trident", "bow", "arrow", "quiver", "sling", "catapult", "cannon", "gun",
   "rifle", "pistol", "revolver", "shotgun", "musket", "carbine", "bullet", "cartridge", "shell", "primer", "fuse", "grenade", "bomb", "missile", "rocket",
-  "torpedo", "mine", "explosive", "detonator", "dynamite", "tnt", "c4", "napalm", "biological", "weapon", "armor", "shield", "helmet", "plate", "mail",
+  "torpedo", "mine", "explosive", "detonator", "dynamite", "tnt", "napalm", "biological", "weapon", "armor", "shield", "helmet", "plate", "mail",
   "gauntlet", "greave", "sabatons", "vambrace", "pauldron", "cuirass", "tasset", "fauld", "gorget", "sword", "blade", "dagger", "axe", "hatchet", "mace",
   "club", "flail", "hammer", "lance", "pike", "halberd", "glaive", "scythe", "sickle", "staff", "wand", "scepter", "orb", "crown", "tiara", "diadem",
   "circlet", "ring", "amulet", "talisman", "charm", "pendant", "necklace", "bracelet", "bangle", "cuff", "watch", "clock", "timer", "stopwatch", "hourglass",

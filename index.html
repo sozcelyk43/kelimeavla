@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="tr">
 <head>
@@ -86,23 +87,73 @@
     }
   };
 
-  // --- ÇEVİRİLER VE OYUN SABİTLERİ ---
-  const translations = {
-    tr: {
-        title: "Kelime Avı", easyMode: "Kolay Mod", hardMode: "Zor Mod", timedMode: "Zamanlı Mod",
-        level: "Seviye", words: "Kelimeler", hiddenWord: "Gizli Sözcük", hiddenWordPlaceholder: "Gizli sözcüğü girin",
-        checkButton: "Kontrol Et", homeButton: "Ana Sayfa", footer: `© ${new Date().getFullYear()} Ozcelik Inc. Tüm hakları saklıdır.`,
-        congrats: "Tebrikler!", error: "Hata!", successMessage: (word) => `Harika! Gizli sözcüğü buldunuz: ${word}`,
-        allWordsRequired: "Önce tüm kelimeleri bulmalısınız!", wrongGuess: "Yanlış tahmin! Tekrar deneyin.",
-        gameCompleted: "Tebrikler! Oyunu başarıyla tamamladınız!", timeUp: "Süre Bitti!",
-        finalScore: (score) => `Skorunuz: ${score}`, continueButton: "Devam Et", tryAgainButton: "Tekrar Dene",
-        language: "Dil", turkish: "Türkçe", english: "English", achievements: "Başarılar", highScore: "Yüksek Skor", score: "Puan"
-    },
-    en: {
-        title: "Word Hunt", easyMode: "Easy Mode", hardMode: "Hard Mode", timedMode: "Timed Mode",
-        level: "Level", words: "Words", score: "Score", highScore: "High Score",
-    }
-  };
+ const translations = {
+  tr: {
+      title: "Kelime Avı",
+      easyMode: "KOLAY", // DEĞİŞİKLİK BURADA
+      hardMode: "ZOR",   // DEĞİŞİKLİK BURADA
+      timedEasyMode: "ZAMANLI KOLAY",
+      timedHardMode: "ZAMANLI ZOR",
+      continueGame: (level) => `Devam Et (Seviye ${level})`,
+      level: "Seviye",
+      words: "Kelimeler",
+      hiddenWord: "Gizli Sözcük",
+      hiddenWordPlaceholder: "Gizli sözcüğü girin",
+      checkButton: "Kontrol Et",
+      homeButton: "Ana Sayfa",
+      footer: `© ${new Date().getFullYear()} Ozcelik Inc. Tüm hakları saklıdır.`,
+      congrats: "Tebrikler!",
+      error: "Hata!",
+      successMessage: (word) => `Harika! Gizli sözcüğü buldunuz: ${word}`,
+      allWordsRequired: "Önce tüm kelimeleri bulmalısınız!",
+      wrongGuess: "Yanlış tahmin! Tekrar deneyin.",
+      gameCompleted: "Tebrikler! Oyunu başarıyla tamamladınız!",
+      timeUp: "Süre Bitti!",
+      finalScore: (score) => `Skorunuz: ${score}`,
+      continueButton: "Devam Et",
+      tryAgainButton: "Tekrar Dene",
+      language: "Dil",
+      turkish: "Türkçe",
+      english: "English",
+      achievements: "Başarılar",
+      highScore: "Yüksek Skor",
+      score: "Puan"
+  },
+  en: {
+      title: "Word Hunt",
+      easyMode: "EASY", // DEĞİŞİKLİK BURADA
+      hardMode: "HARD", // DEĞİŞİKLİK BURADA
+      timedEasyMode: "Timed Easy",
+      timedHardMode: "Timed Hard",
+      continueGame: (level) => `Continue (Level ${level})`,
+      level: "Level",
+      words: "Words",
+      hiddenWord: "Hidden Word",
+      hiddenWordPlaceholder: "Enter the hidden word",
+      checkButton: "Check",
+      homeButton: "Homepage",
+      footer: `© ${new Date().getFullYear()} Ozcelik Inc. All rights reserved.`,
+      congrats: "Congratulations!",
+      error: "Error!",
+      successMessage: (word) => `Awesome! You found the hidden word: ${word}`,
+      allWordsRequired: "You must find all the words first!",
+      wrongGuess: "Wrong guess! Try again.",
+      gameCompleted: "Congratulations! You have successfully completed the game!",
+      timeUp: "Time's Up!",
+      finalScore: (score) => `Your Score: ${score}`,
+      continueButton: "Continue",
+      tryAgainButton: "Try Again",
+      language: "Language",
+      turkish: "Türkçe",
+      english: "English",
+      achievements: "Achievements",
+      highScore: "High Score",
+      score: "Score"
+  }
+};
+
+
+
   const charSets = { tr: 'ABCÇDEFGĞHIİJKLMNOÖPRSŞTUÜVYZ'.split(''), en: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('') };
   const wordLists = { tr: typeof wordListTr !== 'undefined' ? wordListTr : [], en: typeof wordListEn !== 'undefined' ? wordListEn : [] };
 
@@ -395,12 +446,11 @@ function HomePage({ startGame, language, setLanguage, stats, setModalContent, sa
       });
     };
 
-    const GameButton = ({ onClick, text, icon: IconName, colorClass, wide = false }) => (
-      <button onClick={onClick} className={`group w-full max-w-sm h-16 flex items-center justify-center gap-3 px-6 text-white font-bold text-lg rounded-full shadow-lg transition-all duration-300 transform hover:scale-105 hover:shadow-2xl ${colorClass} ${wide ? 'sm:col-span-2' : ''}`}>
-        <hero-icon name={IconName} class="w-7 h-7 transition-transform duration-300 group-hover:rotate-[-15deg]" />
-        <span>{text}</span>
-      </button>
-    );
+    const GameButton = ({ onClick, text, colorClass }) => (
+  <button onClick={onClick} className={`w-full max-w-xs h-16 flex items-center justify-center gap-3 px-6 text-white font-bold text-lg rounded-full shadow-lg transition-all duration-300 transform hover:scale-105 hover:shadow-xl ${colorClass}`}>
+    <span>{text}</span>
+  </button>
+);
 
     return (
       <div className="container mx-auto px-4 py-8 text-center flex flex-col justify-center items-center h-full bg-gray-50">
@@ -410,36 +460,34 @@ function HomePage({ startGame, language, setLanguage, stats, setModalContent, sa
           </h1>
         </div>
         
-        <div className="w-full max-w-sm flex flex-col items-center gap-4">
-          {savedGame && typeof savedGame.level !== 'undefined' && (
-            <button onClick={continueGame} className="w-full max-w-sm h-16 flex items-center justify-center gap-3 px-6 bg-purple-600 text-white font-bold text-lg rounded-full shadow-lg transition-all duration-300 transform hover:scale-105 hover:shadow-2xl animate-pulse">
-              <hero-icon name="play-pause" class="w-7 h-7"></hero-icon>
-              <span>Devam Et (Seviye {savedGame.level + 1})</span>
-            </button>
-          )}
+        <div className="w-full max-w-xs flex flex-col items-center gap-4">
+  {savedGame && typeof savedGame.level !== 'undefined' && (
+    <button onClick={continueGame} className="w-full h-16 flex items-center justify-center gap-3 px-6 bg-[#A78BFA] hover:bg-[#9975F8] text-white font-bold text-lg rounded-full shadow-lg transition-all duration-300 transform hover:scale-105 hover:shadow-xl animate-pulse">
+      <span>▶️ {t.continueGame(savedGame.level + 1)}</span>
+    </button>
+  )}
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
-  <GameButton onClick={() => startGame('easy')} text={t.easyMode} icon="sun" colorClass="bg-green-400 hover:bg-green-500" />
-  <GameButton onClick={() => startGame('hard')} text={t.hardMode} icon="fire" colorClass="bg-red-400 hover:bg-red-500" />
-  <GameButton onClick={() => startGame('timed-easy')} text="Zamanlı Kolay" icon="clock" colorClass="bg-green-700 hover:bg-green-800" wide={true} />
-  <GameButton onClick={() => startGame('timed-hard')} text="Zamanlı Zor" icon="bolt" colorClass="bg-red-700 hover:bg-red-800" wide={true} />
+  <div className="w-full grid grid-cols-2 gap-4">
+      <GameButton onClick={() => startGame('easy')} text={`😊 ${t.easyMode}`} colorClass="bg-[#63e6be] hover:bg-[#4ddab0] col-span-1" />
+      <GameButton onClick={() => startGame('hard')} text={`🔥 ${t.hardMode}`} colorClass="bg-[#ff8a80] hover:bg-[#ff7066] col-span-1" />
+  </div>
+  <GameButton onClick={() => startGame('timed-easy')} text={`⏱️ ${t.timedEasyMode}`} colorClass="bg-green-700 hover:bg-green-800" />
+  <GameButton onClick={() => startGame('timed-hard')} text={`⚡ ${t.timedHardMode}`} colorClass="bg-red-800 hover:bg-red-900" />
+
 </div>
-        </div>
 
-        <div className="flex flex-col sm:flex-row justify-center items-center gap-4 w-full max-w-md mt-8">
-          <div className="flex items-center gap-2">
-            <label htmlFor="language-select" className="font-medium text-gray-700">{t.language}:</label>
-            <select id="language-select" value={language} onChange={(e) => setLanguage(e.target.value)} className="bg-white border border-gray-300 text-gray-900 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 p-2 shadow-sm">
-              <option value="tr">{t.turkish}</option>
-              <option value="en">{t.english}</option>
-            </select>
-          </div>
-          <button onClick={openAchievements} className="bg-yellow-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-yellow-600 transition duration-300 shadow-md flex items-center gap-2">
-            <hero-icon name="trophy" class="w-5 h-5"></hero-icon>
-            {t.achievements}
-          </button>
-        </div>
-        
+        <div className="flex justify-center items-center gap-4 w-full max-w-xs mt-8">
+  <div className="flex items-center gap-2">
+    <label htmlFor="language-select" className="font-medium text-gray-700">{t.language}:</label>
+    <select id="language-select" value={language} onChange={(e) => setLanguage(e.target.value)} className="bg-white border border-gray-300 text-gray-900 rounded-md focus:ring-indigo-500 focus:border-indigo-500 p-2 shadow-sm">
+      <option value="tr">{t.turkish}</option>
+      <option value="en">{t.english}</option>
+    </select>
+  </div>
+  <button onClick={openAchievements} className="bg-yellow-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-yellow-600 transition duration-300 shadow-md flex items-center gap-2">
+    <span>🏆 {t.achievements}</span>
+  </button>
+</div>
         <div className="w-full text-center py-4 text-sm text-gray-500 mt-auto">{t.footer}</div>
       </div>
     );
@@ -742,7 +790,8 @@ const handleGoHomeClick = () => {
               playSound('wrongSound'); 
               return; 
           }
-          if (customToUpperCase(hiddenWordGuess.trim()) === gameState?.hiddenWord) { 
+          const fullGuess = gameState.hiddenWord[0] + customToUpperCase(hiddenWordGuess.trim());
+if (fullGuess === gameState?.hiddenWord) {
               playSound('correctSound'); 
               vibrate('success');
               triggerConfetti();
@@ -821,9 +870,9 @@ const handleGoHomeClick = () => {
                 </div>
 
                 <div className="w-full lg:w-2/5 xl:w-1/3 flex flex-col gap-4 lg:h-full lg:overflow-y-auto py-2 px-2 order-2">
-                    <div className={`transition-all duration-500 ease-in-out overflow-hidden ${allRequiredWordsFound ? 'max-h-0 opacity-0' : 'max-h-[20vh] lg:max-h-[calc(50vh-60px)] opacity-100'}`}>
+                    <div className={`transition-all duration-500 ease-in-out overflow-hidden ${allRequiredWordsFound ? 'max-h-0 opacity-0' : 'opacity-100'} flex flex-col`}>
                         <h3 className="text-lg lg:text-xl font-semibold text-indigo-800 mb-2">{t.words} ({foundWords.length}/{gameState.words.length})</h3>
-                        <div className="flex flex-wrap justify-center gap-1.5 overflow-y-auto p-2 bg-gray-100 rounded-lg scrollbar-thin">
+                        <div className="flex flex-wrap justify-center content-center gap-1.5 p-2 bg-gray-100 rounded-lg">
                             {gameState.words.map(({ word }) => {
                                 const isFound = foundWords.includes(word);
 				const isHiddenInHardMode = (mode === 'hard' || mode === 'timed-hard') && !isFound;
@@ -832,21 +881,26 @@ const handleGoHomeClick = () => {
                         </div>
                     </div>
 
-                    <div className={`flex-shrink-0 transition-all duration-500 ease-in-out ${allRequiredWordsFound ? 'mt-0' : 'mt-2 lg:mt-auto'}`}>
-                         <div className="flex flex-col gap-2">
-                            <div ref={hintDisplayRef} className="flex justify-center items-center gap-1 bg-gray-200 p-2 rounded-lg min-h-[48px]">
-                                {gameState && allRequiredWordsFound && Array.from({ length: gameState.hiddenWord.length }).map((_, index) => {
-                                    const char = hiddenWordGuess[index];
-                                    const hintChar = (index === 0 || revealedIndices.includes(index)) ? gameState.hiddenWord[index] : '';
-                                    return (<span key={index} className="flex items-center justify-center bg-white w-8 h-8 rounded text-xl font-bold text-gray-800 shadow-inner">{char || hintChar}</span>);
-                                })}
-                            </div>
+                 {allRequiredWordsFound && (
+                        <div className={`flex-shrink-0 transition-all duration-500 ease-in-out mt-2 lg:mt-auto`}>
+                             <div className="flex flex-col gap-2">
+                                <div ref={hintDisplayRef} className="flex justify-center items-center gap-1 bg-gray-200 p-2 rounded-lg min-h-[48px]">
+                                    {gameState && allRequiredWordsFound && Array.from({ length: gameState.hiddenWord.length }).map((_, index) => {
+    if (index === 0) {
+        // İlk harf her zaman ipucu olarak gösterilir ve farklı bir stili vardır.
+        return (<span key={index} className="flex items-center justify-center bg-blue-200 w-8 h-8 rounded text-xl font-bold text-gray-800 shadow-inner">{gameState.hiddenWord[0]}</span>);
+    }
+    // Sonraki harfler için kullanıcının tahmini veya diğer ipuçları gösterilir.
+    const char = hiddenWordGuess[index - 1] || ''; // Kullanıcı tahmini 2. harften başladığı için index-1 kullanıyoruz.
+    const hintChar = revealedIndices.includes(index) ? gameState.hiddenWord[index] : '';
+    return (<span key={index} className="flex items-center justify-center bg-white w-8 h-8 rounded text-xl font-bold text-gray-800 shadow-inner">{char || hintChar}</span>);
+})}
+                                </div>
 
-                            {allRequiredWordsFound && (
                                 <>
-                                    {isMobile ? (<MobileKeyboard onKeyPress={(key) => { if (key.length === 1 && hiddenWordGuess.length < gameState.hiddenWord.length) { setHiddenWordGuess(prev => prev + key); } }} />
+                                    {isMobile ? (<MobileKeyboard onKeyPress={(key) => { if (key.length === 1 && hiddenWordGuess.length < gameState.hiddenWord.length - 1) { setHiddenWordGuess(prev => prev + key); } }} />
                                     ) : (
-                                        <input type="text" ref={hiddenWordInputRef} value={hiddenWordGuess} onChange={(e) => setHiddenWordGuess(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') { handleHiddenWordSubmit(); } }} className={`border-2 ${theme.inputBorder} p-1 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-indigo-300 w-full disabled:bg-gray-200`} placeholder={t.hiddenWordPlaceholder} disabled={!allRequiredWordsFound} maxLength={gameState?.hiddenWord.length} />
+                                        <input type="text" ref={hiddenWordInputRef} value={hiddenWordGuess} onChange={(e) => setHiddenWordGuess(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') { handleHiddenWordSubmit(); } }} className={`border-2 ${theme.inputBorder} p-1 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-indigo-300 w-full disabled:bg-gray-200`} placeholder={t.hiddenWordPlaceholder} disabled={!allRequiredWordsFound} maxLength={gameState?.hiddenWord.length - 1} />
                                     )}
                                     <div className="flex items-stretch justify-center gap-2 mt-1">
                                         <button title="Ana Sayfa" onClick={goToHome} className="bg-gray-500 text-white rounded-lg flex-1 py-1 text-2xl hover:bg-gray-600 transition-transform active:scale-95">🏠</button>
@@ -855,9 +909,9 @@ const handleGoHomeClick = () => {
                                         <button title="Onayla" onClick={handleHiddenWordSubmit} className="bg-green-500 text-white rounded-lg flex-1 py-1 font-bold hover:bg-green-600 transition-transform active:scale-95">ONAYLA</button>
                                     </div>
                                 </>
-                            )}
-                         </div>
-                    </div>
+                             </div>
+                        </div>
+                    )}
                 </div>
             </div>
             

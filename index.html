@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html lang="tr">
 <head>
@@ -503,6 +501,7 @@ function WordHunt({ goToHome, language, mode, stats, onStatsChange, initialSaved
   return 120;
 };
 
+	const [hiddenWordTimeLeft, setHiddenWordTimeLeft] = React.useState(null);
        const [level, setLevel] = React.useState(initialSavedState?.level ?? 0);
        const [gameState, setGameState] = React.useState(null);
        const [isLoading, setIsLoading] = React.useState(true);
@@ -544,7 +543,41 @@ function WordHunt({ goToHome, language, mode, stats, onStatsChange, initialSaved
          );
        };
 
-       React.useEffect(() => {
+React.useEffect(() => {
+    if (allRequiredWordsFound && mode.startsWith('timed') && hiddenWordTimeLeft === null) {
+        const duration = mode === 'timed-hard' ? 60 : 40;
+        setHiddenWordTimeLeft(duration);
+    }
+}, [allRequiredWordsFound, mode, hiddenWordTimeLeft]);
+
+React.useEffect(() => {
+    if (hiddenWordTimeLeft === null || modalContent.isOpen) return;
+
+    if (hiddenWordTimeLeft === 0) {
+        vibrate('error');
+        setModalContent({
+            isOpen: true,
+            title: t.timeUp,
+            children: (
+              <div>
+                <p className="text-xl mb-4">{t.finalScore(score)}</p>
+                <button onClick={goToHome} className="bg-blue-600 text-white px-5 py-2 rounded-lg font-medium">{t.homeButton}</button>
+              </div>
+            )
+        });
+        return;
+    }
+
+    const timerId = setInterval(() => {
+        setHiddenWordTimeLeft(t => (t > 0 ? t - 1 : 0));
+    }, 1000);
+
+    return () => clearInterval(timerId);
+}, [hiddenWordTimeLeft, modalContent.isOpen]);
+
+
+
+React.useEffect(() => {
          setIsLoading(true);
          setGameState(null);
          setFoundWords(initialSavedState?.level === level ? initialSavedState.foundWords : []);
@@ -553,6 +586,7 @@ function WordHunt({ goToHome, language, mode, stats, onStatsChange, initialSaved
          setScore(initialSavedState?.level === level ? initialSavedState.score : 0);
          setTimeLeft(initialSavedState?.level === level ? initialSavedState.timeLeft : getInitialTime(mode));
          setRevealedIndices(initialSavedState?.level === level ? initialSavedState.revealedIndices : []);
+         setHiddenWordTimeLeft(null); // EKLENEN SATIR: Sayaç burada sıfırlanıyor.
 
          const timerId = setTimeout(() => {
             let newGameState = createBoard(level, language);
@@ -561,6 +595,7 @@ function WordHunt({ goToHome, language, mode, stats, onStatsChange, initialSaved
          }, 150);
          return () => clearTimeout(timerId);
        }, [language, level, mode]);
+
 
        React.useEffect(() => {
         if (gameState && !isLoading) {
@@ -790,18 +825,64 @@ const handleGoHomeClick = () => {
               playSound('wrongSound'); 
               return; 
           }
-          const fullGuess = gameState.hiddenWord[0] + customToUpperCase(hiddenWordGuess.trim());
-if (fullGuess === gameState?.hiddenWord) {
+        const fullGuess = gameState.hiddenWord[0] + customToUpperCase(hiddenWordGuess.trim());
+          if (fullGuess === gameState.hiddenWord) { 
               playSound('correctSound'); 
               vibrate('success');
               triggerConfetti();
-              const handleContinue = () => { setModalContent({ isOpen: false }); handleNextLevel(); };
-              setModalContent({ 
-                  isOpen: true, 
-                  title: t.congrats, 
-                  children: (<div><p>{t.successMessage(gameState.hiddenWord)}</p><button onClick={handleContinue} className="mt-4 bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-lg">{t.continueButton}</button></div>) 
-              });
-          } else { 
+              // if (fullGuess === gameState.hiddenWord) { bloğunun içindeki
+// playSound, vibrate, triggerConfetti satırlarından SONRA bu kodu ekleyin:
+
+const currentHighScore = !mode.startsWith('timed') ? (stats.highScores[`${mode}-${level}`] || 0) : 0;
+const isNewHighScore = !mode.startsWith('timed') && score > currentHighScore;
+
+setModalContent({
+  isOpen: true,
+  title: '🎉 Seviye Tamamlandı! 🎉',
+  // Kullanıcı 'X' tuşuna basarsa da sonraki seviyeye geçsin
+  onClose: () => { closeModal(); handleNextLevel(); },
+  children: (
+    <div className="text-center p-4">
+      <div className="flex justify-around items-center my-6">
+        {/* Kazanılan Puan */}
+        <div className="flex flex-col items-center">
+          <p className="text-sm font-medium text-gray-500 uppercase tracking-wider">Skorun</p>
+          <p className="text-5xl font-bold text-green-600">{score}</p>
+          {isNewHighScore && (
+            <span className="mt-2 text-xs bg-yellow-200 text-yellow-800 font-bold px-3 py-1 rounded-full animate-pulse">
+              🚀 YENİ REKOR!
+            </span>
+          )}
+        </div>
+        
+        {/* Yüksek Skor (Süresiz Modlar İçin) */}
+        {!mode.startsWith('timed') && (
+          <div className="flex flex-col items-center">
+            <p className="text-sm font-medium text-gray-500 uppercase tracking-wider">Yüksek Skor</p>
+            <p className="text-5xl font-bold text-indigo-600">{Math.max(score, currentHighScore)}</p>
+          </div>
+        )}
+      </div>
+
+      {/* Butonlar */}
+      <div className="flex flex-col sm:flex-row gap-3 mt-8">
+        <button 
+          onClick={goToHome} 
+          className="w-full px-4 py-3 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold rounded-lg transition-all duration-300 shadow-sm transform hover:scale-105"
+        >
+          Ana Sayfaya Dön
+        </button>
+        <button 
+          onClick={() => { closeModal(); handleNextLevel(); }} 
+          className="w-full px-4 py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg transition-all duration-300 shadow-lg transform hover:scale-105"
+        >
+          Sonraki Seviye →
+        </button>
+      </div>
+    </div>
+  )
+});
+          } else {
               playSound('wrongSound'); 
               vibrate('error');
               setHiddenWordGuess('');
@@ -862,17 +943,49 @@ if (fullGuess === gameState?.hiddenWord) {
                         <button onClick={handleGoHomeClick} title="Ana Sayfa" className="flex items-center justify-center w-12 h-12 rounded-full bg-gray-200 text-gray-600 hover:bg-gray-300 transition-all active:scale-90 text-2xl">
                             🏠
                         </button>
-                        <div className="text-center"><div className="text-xs font-medium text-gray-500 uppercase tracking-wider">Seviye</div><div className="text-2xl lg:text-3xl font-bold text-indigo-700 -mt-1">{level + 1}</div></div>
-                        <div className="flex-1 text-center">{mode.startsWith('timed') && (<div className="text-2xl font-bold text-blue-600 tabular-nums">⏱️ {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}</div>)}</div>
-                        <div className="text-right"><div className="text-xs font-medium text-gray-500 uppercase tracking-wider">Puan</div><div className="text-xl font-bold text-green-600 -mt-1">{score}</div>{!mode.startsWith('timed') && <div className="text-xs text-gray-400 mt-1">Yüksek Skor: {highScore}</div>}</div>
+                        <div className="flex flex-row items-center justify-center gap-2">
+    <span className="font-semibold text-gray-700 uppercase">Seviye</span>
+    <span className="w-10 h-10 flex items-center justify-center bg-indigo-600 text-white font-bold text-xl rounded-full shadow-md">
+        {level + 1}
+    </span>
+</div>
+                       
+
+
+
+<div className="flex-1 text-center">
+    {mode.startsWith('timed') && (
+        <div className="text-2xl font-bold text-blue-600 tabular-nums">
+            ⏱️ {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
+        </div>
+    )}
+</div>
+
+
+
+<div className="flex flex-row items-center justify-end gap-4">
+    {/* Puan Grubu */}
+    <div className="flex flex-row items-baseline gap-2">
+        <span className="text-sm font-semibold text-gray-500 uppercase">Puan</span>
+        <span className="text-xl font-bold text-green-600">{score}</span>
+    </div>
+
+    {/* Yüksek Skor Grubu (Sadece süresiz modlarda görünür) */}
+    {!mode.startsWith('timed') && (
+        <div className="flex flex-row items-baseline gap-2">
+            <span className="text-sm font-semibold text-gray-400 uppercase">Yüksek Skor</span>
+            <span className="text-xl font-bold text-gray-500">{highScore}</span>
+        </div>
+    )}
+</div>
                     </div>
 
                 </div>
 
                 <div className="w-full lg:w-2/5 xl:w-1/3 flex flex-col gap-4 lg:h-full lg:overflow-y-auto py-2 px-2 order-2">
-                    <div className={`transition-all duration-500 ease-in-out overflow-hidden ${allRequiredWordsFound ? 'max-h-0 opacity-0' : 'opacity-100'} flex flex-col`}>
+                    <div className={`transition-all duration-500 ease-in-out overflow-hidden ${allRequiredWordsFound ? 'max-h-0 opacity-0' : 'max-h-[20vh] lg:max-h-[calc(50vh-60px)] opacity-100'}`}>
                         <h3 className="text-lg lg:text-xl font-semibold text-indigo-800 mb-2">{t.words} ({foundWords.length}/{gameState.words.length})</h3>
-                        <div className="flex flex-wrap justify-center content-center gap-1.5 p-2 bg-gray-100 rounded-lg">
+                        <div className="flex flex-wrap justify-center content-center gap-1.5 overflow-y-auto p-2 bg-gray-100 rounded-lg scrollbar-thin">
                             {gameState.words.map(({ word }) => {
                                 const isFound = foundWords.includes(word);
 				const isHiddenInHardMode = (mode === 'hard' || mode === 'timed-hard') && !isFound;
@@ -885,29 +998,41 @@ if (fullGuess === gameState?.hiddenWord) {
                         <div className={`flex-shrink-0 transition-all duration-500 ease-in-out mt-2 lg:mt-auto`}>
                              <div className="flex flex-col gap-2">
                                 <div ref={hintDisplayRef} className="flex justify-center items-center gap-1 bg-gray-200 p-2 rounded-lg min-h-[48px]">
-                                    {gameState && allRequiredWordsFound && Array.from({ length: gameState.hiddenWord.length }).map((_, index) => {
-    if (index === 0) {
-        // İlk harf her zaman ipucu olarak gösterilir ve farklı bir stili vardır.
-        return (<span key={index} className="flex items-center justify-center bg-blue-200 w-8 h-8 rounded text-xl font-bold text-gray-800 shadow-inner">{gameState.hiddenWord[0]}</span>);
-    }
-    // Sonraki harfler için kullanıcının tahmini veya diğer ipuçları gösterilir.
-    const char = hiddenWordGuess[index - 1] || ''; // Kullanıcı tahmini 2. harften başladığı için index-1 kullanıyoruz.
-    const hintChar = revealedIndices.includes(index) ? gameState.hiddenWord[index] : '';
-    return (<span key={index} className="flex items-center justify-center bg-white w-8 h-8 rounded text-xl font-bold text-gray-800 shadow-inner">{char || hintChar}</span>);
-})}
+                                   {gameState && allRequiredWordsFound && Array.from({ length: gameState.hiddenWord.length }).map((_, index) => {
+                                    if (index === 0) {
+                                        // İlk harfi ipucu olarak farklı bir renkte göster
+                                        return (<span key={index} className="flex items-center justify-center bg-blue-200 w-8 h-8 rounded text-xl font-bold text-gray-800 shadow-inner">{gameState.hiddenWord[0]}</span>);
+                                    }
+                                    // Kullanıcının tahminini 2. harften itibaren al (index - 1)
+                                    const char = hiddenWordGuess[index - 1] || '';
+                                    const hintChar = revealedIndices.includes(index) ? gameState.hiddenWord[index] : '';
+                                    return (<span key={index} className="flex items-center justify-center bg-white w-8 h-8 rounded text-xl font-bold text-gray-800 shadow-inner">{char || hintChar}</span>);
+                                })}
                                 </div>
 
                                 <>
                                     {isMobile ? (<MobileKeyboard onKeyPress={(key) => { if (key.length === 1 && hiddenWordGuess.length < gameState.hiddenWord.length - 1) { setHiddenWordGuess(prev => prev + key); } }} />
                                     ) : (
-                                        <input type="text" ref={hiddenWordInputRef} value={hiddenWordGuess} onChange={(e) => setHiddenWordGuess(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') { handleHiddenWordSubmit(); } }} className={`border-2 ${theme.inputBorder} p-1 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-indigo-300 w-full disabled:bg-gray-200`} placeholder={t.hiddenWordPlaceholder} disabled={!allRequiredWordsFound} maxLength={gameState?.hiddenWord.length - 1} />
+                                        <input type="text" ref={hiddenWordInputRef} value={hiddenWordGuess} onChange={(e) => setHiddenWordGuess(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') { handleHiddenWordSubmit(); } }} className={`border-2 ${theme.inputBorder} p-1 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-indigo-300 w-full disabled:bg-gray-200`} placeholder={t.hiddenWordPlaceholder} disabled={!allRequiredWordsFound} maxLength={gameState.hiddenWord.length - 1} />
                                     )}
                                     <div className="flex items-stretch justify-center gap-2 mt-1">
-                                        <button title="Ana Sayfa" onClick={goToHome} className="bg-gray-500 text-white rounded-lg flex-1 py-1 text-2xl hover:bg-gray-600 transition-transform active:scale-95">🏠</button>
-                                        <button title="İpucu Al" onClick={handleHintClick} className="bg-yellow-500 text-white rounded-lg flex-1 py-1 text-2xl hover:bg-yellow-600 transition-transform active:scale-95" disabled={isHintDisabled}>💡</button>
-                                        <button title="Sil" onClick={() => setHiddenWordGuess(prev => prev.slice(0, -1))} className="bg-red-500 text-white rounded-lg flex-1 py-1 font-bold hover:bg-red-600 transition-transform active:scale-95">SİL</button>
-                                        <button title="Onayla" onClick={handleHiddenWordSubmit} className="bg-green-500 text-white rounded-lg flex-1 py-1 font-bold hover:bg-green-600 transition-transform active:scale-95">ONAYLA</button>
-                                    </div>
+    <button title="Ana Sayfa" onClick={goToHome} className="bg-gray-500 text-white rounded-lg flex-1 py-1 text-2xl hover:bg-gray-600 transition-transform active:scale-95">🏠</button>
+    <button title="İpucu Al" onClick={handleHintClick} className="bg-yellow-500 text-white rounded-lg flex-1 py-1 text-2xl hover:bg-yellow-600 transition-transform active:scale-95" disabled={isHintDisabled}>💡</button>
+
+    {/* YENİ EKLENEN ZAMANLAYICI KODU BAŞLANGICI */}
+    {mode.startsWith('timed') && hiddenWordTimeLeft !== null && (
+        <div title="Kalan Süre" className="bg-blue-500 text-white rounded-lg flex-1 py-1 text-lg font-bold flex items-center justify-center gap-1 animate-pulse">
+            <span>⏳</span>
+            <span>
+                {Math.floor(hiddenWordTimeLeft / 60)}:{(hiddenWordTimeLeft % 60).toString().padStart(2, '0')}
+            </span>
+        </div>
+    )}
+    {/* YENİ EKLENEN ZAMANLAYICI KODU SONU */}
+
+    <button title="Sil" onClick={() => setHiddenWordGuess(prev => prev.slice(0, -1))} className="bg-red-500 text-white rounded-lg flex-1 py-1 font-bold hover:bg-red-600 transition-transform active:scale-95">SİL</button>
+    <button title="Onayla" onClick={handleHiddenWordSubmit} className="bg-green-500 text-white rounded-lg flex-1 py-1 font-bold hover:bg-green-600 transition-transform active:scale-95">ONAYLA</button>
+</div>
                                 </>
                              </div>
                         </div>
@@ -945,14 +1070,97 @@ function App() {
         saveGameStats(newStats);
     };
 
-    const startGame = (selectedMode) => {
-        // Yeni oyun başlarken eski kaydı sil.
-        localStorage.removeItem('savedGameState');
-        setSavedGameState(null);
-        setMode(selectedMode);
+const startGame = (selectedMode) => {
+    // Genel başlangıç işlemleri: Eski kaydı sil ve modu ayarla.
+    localStorage.removeItem('savedGameState');
+    setSavedGameState(null);
+    setMode(selectedMode);
+
+    // Popup'ı kapattıktan sonra oyunu başlatacak olan ortak fonksiyon.
+    const handleStartGame = () => {
+        setModalContent({ isOpen: false });
         setPage('game');
     };
-    
+
+    // ZOR MODLAR için popup içeriği
+    if (selectedMode === 'hard' || selectedMode === 'timed-hard') {
+        setModalContent({
+            isOpen: true,
+            title: '🔥 Zor Mod Uyarısı 🔥',
+            body: (
+              <div className="text-left">
+                <div className="space-y-4">
+                  <div className="flex items-start gap-4">
+                    <div className="flex-shrink-0 w-10 h-10 rounded-full bg-red-100 text-red-600 flex items-center justify-center">
+                      <hero-icon name="eye-slash" className="w-6 h-6" />
+                    </div>
+                    <p className="text-gray-700 pt-2">
+                      Bu modda kelime listesi **gizlidir**.
+                    </p>
+                  </div>
+                  <div className="flex items-start gap-4">
+                    <div className="flex-shrink-0 w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center">
+                      <hero-icon name="sparkles" className="w-6 h-6" />
+                    </div>
+                    <p className="text-gray-700 pt-2">
+                      Bulunan kelimeler listeden **otomatik** olarak silinir.
+                    </p>
+                  </div>
+                </div>
+                <div className="text-center mt-6">
+                  <p className="font-semibold text-lg text-gray-800">🏆 Başarılar!</p>
+                </div>
+                <button
+                  onClick={handleStartGame}
+                  className="mt-5 bg-red-600 text-white font-bold px-6 py-3 rounded-lg hover:bg-red-700 transition-all w-full shadow-lg transform hover:scale-105"
+                >
+                  Meydan Okumayı Kabul Et!
+                </button>
+              </div>
+            )
+        });
+    }
+    // KOLAY MODLAR için popup içeriği
+    else if (selectedMode === 'easy' || selectedMode === 'timed-easy') {
+        setModalContent({
+            isOpen: true,
+            title: '✅ Oyun Kuralları ✅',
+            body: (
+              <div className="text-left">
+                <div className="space-y-4">
+                  <div className="flex items-start gap-4">
+                    <div className="flex-shrink-0 w-10 h-10 rounded-full bg-green-100 text-green-600 flex items-center justify-center">
+                      <hero-icon name="magnifying-glass" className="w-6 h-6" />
+                    </div>
+                    <p className="text-gray-700 pt-2">
+                      Kelimeleri oyun alanından bulun.
+                    </p>
+                  </div>
+                  <div className="flex items-start gap-4">
+                    <div className="flex-shrink-0 w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center">
+                      <hero-icon name="key" className="w-6 h-6" />
+                    </div>
+                    <p className="text-gray-700 pt-2">
+                      Sonraki seviyeye geçmek için **gizli kelimeyi** girin.
+                    </p>
+                  </div>
+                </div>
+                <div className="text-center mt-6">
+                  <p className="font-semibold text-lg text-gray-800">🎉 İyi Eğlenceler!</p>
+                </div>
+                <button
+                  onClick={handleStartGame}
+                  className="mt-5 bg-green-600 text-white font-bold px-6 py-3 rounded-lg hover:bg-green-700 transition-all w-full shadow-lg transform hover:scale-105"
+                >
+                  Anladım, Başla!
+                </button>
+              </div>
+            )
+        });
+    }
+};
+
+
     const continueGame = () => {
         // Kayıtlı oyundan devam et.
         setLanguage(savedGameState.language);

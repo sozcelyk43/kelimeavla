@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
+
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Kelime Avı - Tam Sürüm</title>
-
   <script src="https://unpkg.com/react@17/umd/react.production.min.js"></script>
   <script src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -12,13 +12,11 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
   <script src="https://unpkg.com/heroicons@2.1.3/24/outline/index.js"></script>
-
-
   <script src="wordstr.js"></script>
   <script src="wordsen.js"></script>
 
-  <style>
-    body {
+<style>
+body {
       overscroll-behavior-y: none; touch-action: none; -webkit-user-select: none; user-select: none;
       height: 100vh; overflow: hidden; font-family: 'Inter', sans-serif; background-color: #f3f4f6;
     }
@@ -51,31 +49,21 @@
   100% { transform: translateX(0); }
 }
 
-.shake-animation {
-  animation: shake 0.3s ease-in-out;
-}
-
-
-
-
-  </style>
+.shake-animation {  animation: shake 0.3s ease-in-out;}
+</style>
 </head>
+
+
 <body class="h-[100vh] flex flex-col overflow-hidden">
-
 <div id="root" class="flex-1 overflow-hidden"></div>
-
 <audio id="correctSound" preload="auto" src="sounds/correct.mp3">Tarayıcınız ses etiketini desteklemiyor.</audio>
 <audio id="wrongSound" preload="auto" src="sounds/wrong.mp3">Tarayıcınız ses etiketini desteklemiyor.</audio>
 <audio id="achievementSound" preload="auto" src="sounds/achievement.mp3">Tarayıcınız ses etiketini desteklemiyor.</audio>
-
-
 <script type="text/babel">
-  // --- HATA YAKALAMA VE GLOBAL AYARLAR ---
   window.onerror = function (msg, url, lineNo, columnNo, error) { console.error(`Global error: ${msg}\nURL: ${url}\nLine: ${lineNo}\nColumn: ${columnNo}\nError:`, error); const root = document.getElementById('root'); if (root) root.innerHTML = `<div class="p-4 text-red-600">Beklenmedik bir hata oluştu. Lütfen sayfayı yenileyin. Hata: ${msg}</div>`; return false; };
   function customToUpperCase(str) { if (typeof str !== 'string') return ''; try { return str.replace(/i/g, 'İ').replace(/ı/g, 'I').replace(/ğ/g, 'Ğ').replace(/ü/g, 'Ü').replace(/ş/g, 'Ş').replace(/ö/g, 'Ö').replace(/ç/g, 'Ç').toUpperCase(); } catch (err) { console.error('customToUpperCase hatası:', err); return (str || '').toUpperCase(); } }
   class ErrorBoundary extends React.Component { state = { hasError: false }; static getDerivedStateFromError(error) { return { hasError: true }; } componentDidCatch(error, errorInfo) { console.error("ErrorBoundary yakaladı:", error, errorInfo); } render() { if (this.state.hasError) { return <div className="p-4 text-red-600">Beklenmedik bir hata oluştu. Lütfen sayfayı yenileyin.</div>; } return this.props.children; } }
 
-  // --- DOKUNSAL GERİ BİLDİRİM (HAPTIC FEEDBACK) ---
   const vibrate = (pattern) => {
     if ('vibrate' in navigator) {
       if (pattern === 'success') navigator.vibrate(50);
@@ -88,8 +76,8 @@
  const translations = {
   tr: {
       title: "Kelime Avı",
-      easyMode: "KOLAY", // DEĞİŞİKLİK BURADA
-      hardMode: "ZOR",   // DEĞİŞİKLİK BURADA
+      easyMode: "KOLAY",
+      hardMode: "ZOR",
       timedEasyMode: "ZAMANLI KOLAY",
       timedHardMode: "ZAMANLI ZOR",
       continueGame: (level) => `Devam Et (Seviye ${level})`,
@@ -98,7 +86,7 @@
       hiddenWord: "Gizli Sözcük",
       hiddenWordPlaceholder: "Gizli sözcüğü girin",
       checkButton: "Kontrol Et",
-      homeButton: "Ana Sayfa",
+      homeButton: "Anasayfa",
       footer: `© ${new Date().getFullYear()} Ozcelik Inc. Tüm hakları saklıdır.`,
       congrats: "Tebrikler!",
       error: "Hata!",
@@ -119,8 +107,8 @@
   },
   en: {
       title: "Word Hunt",
-      easyMode: "EASY", // DEĞİŞİKLİK BURADA
-      hardMode: "HARD", // DEĞİŞİKLİK BURADA
+      easyMode: "EASY",
+      hardMode: "HARD",
       timedEasyMode: "Timed Easy",
       timedHardMode: "Timed Hard",
       continueGame: (level) => `Continue (Level ${level})`,
@@ -150,31 +138,27 @@
   }
 };
 
+	const charSets = { tr: 'ABCÇDEFGĞHIİJKLMNOÖPRSŞTUÜVYZ'.split(''), en: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('') };
+	const wordLists = { tr: typeof wordListTr !== 'undefined' ? wordListTr : [], en: typeof wordListEn !== 'undefined' ? wordListEn : [] };
 
+	const boardSizes = [];
+	const initialRowsConfig = [6, 7, 9, 11, 13];
+	const initialColsConfig = [7, 8, 9, 10, 12];
 
-  const charSets = { tr: 'ABCÇDEFGĞHIİJKLMNOÖPRSŞTUÜVYZ'.split(''), en: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('') };
-  const wordLists = { tr: typeof wordListTr !== 'undefined' ? wordListTr : [], en: typeof wordListEn !== 'undefined' ? wordListEn : [] };
+  	for (let level = 0; level < 60; level++) {
+	const stage = Math.floor(level / 6);
+	const configIndex = Math.floor(stage / 2);
+	const levelInStage = level % 6;
+	let baseRows = initialRowsConfig[configIndex];
+	let baseCols = initialColsConfig[configIndex];
+	let r = baseRows + Math.floor(levelInStage / 3);
+	let c = baseCols + Math.floor(levelInStage / 2);
+	r = Math.max(7, Math.min(16, r));
+	c = Math.max(8, Math.min(22, c));
+	if (c <= r && r > 7) c = r + 1;
+	boardSizes.push({ rows: r, cols: c });
+}
 
-  const boardSizes = [];
-  const initialRowsConfig = [7, 9, 11, 13, 15];
-  const initialColsConfig = [8, 9, 10, 11, 12];
-  
-  // DÜZELTME: Bu döngü daha önce kapatılmamıştı, şimdi düzeltildi.
-  for (let level = 0; level < 60; level++) {
-      const stage = Math.floor(level / 6);
-      const configIndex = Math.floor(stage / 2);
-      const levelInStage = level % 6;
-      let baseRows = initialRowsConfig[configIndex];
-      let baseCols = initialColsConfig[configIndex];
-      let r = baseRows + Math.floor(levelInStage / 3);
-      let c = baseCols + Math.floor(levelInStage / 2);
-      r = Math.max(7, Math.min(16, r));
-      c = Math.max(8, Math.min(22, c));
-      if (c <= r && r > 7) c = r + 1;
-      boardSizes.push({ rows: r, cols: c });
-  } 
-
-  // DÜZELTME: Bu değişkenler döngünün dışına taşındı.
   const directions = {
       diagonal: [ { name: 'down-right', dx: 1, dy: 1 }, { name: 'down-left', dx: 1, dy: -1 }, { name: 'up-right', dx: -1, dy: 1 }, { name: 'up-left', dx: -1, dy: -1 } ],
       horizontal: [ { name: 'right', dx: 0, dy: 1 }, { name: 'left', dx: 0, dy: -1 } ],
@@ -219,13 +203,6 @@ const initialAchievements = {
     catch (e) { console.error("İstatistikler kaydedilemedi:", e); }
   };
   
-/**
- * Seviye için oyun tahtasını, kelimeleri ve gizli kelimeyi oluşturan ana fonksiyon.
- * Yeni kurallar: Minimum 6 çapraz kelime ve seviyeye göre artan gizli kelime uzunluğu.
- * @param {number} level - Mevcut oyun seviyesi (0'dan başlar).
- * @param {string} language - 'tr' veya 'en' gibi oyun dili.
- * @returns {object|null} Oluşturulan oyun verilerini içeren nesne veya hata durumunda null.
- */
 function createBoard(level, language) {
   try {
     const staticConfig = boardSizes[level];
@@ -235,7 +212,7 @@ function createBoard(level, language) {
     }
     const { rows, cols } = staticConfig;
 
-    for (let attempt = 0; attempt < 50; attempt++) {
+    for (let attempt = 0; attempt < 100; attempt++) {
       const board = Array(rows).fill(null).map(() => Array(cols).fill(''));
       const lockGrid = Array(rows).fill(null).map(() => Array(cols).fill(false));
       let placedWordsInfo = [];
@@ -266,19 +243,18 @@ function createBoard(level, language) {
         return true;
       };
 
-      // --- AŞAMA 1: ZORUNLU ÇAPRAZ KELİMELERİ YERLEŞTİR ---
       const minDiagonalWords = 6;
       let diagonalsPlaced = 0;
       let usedForDiagonal = [];
 
       for (const word of potentialWords) {
         if (diagonalsPlaced >= minDiagonalWords) break;
-        if (word.length > Math.min(rows, cols)) continue; // Kelime tahtaya sığmıyorsa atla
+        if (word.length > Math.min(rows, cols)) continue;
 
         let availablePositions = [];
         for (let r = 0; r < rows; r++) {
           for (let c = 0; c < cols; c++) {
-            for (const dir of directions.diagonal) { // Sadece çapraz yönleri dene
+            for (const dir of directions.diagonal) {
               if (canPlaceWithoutOverlap(word, r, c, dir)) {
                 availablePositions.push({ r, c, dir });
               }
@@ -294,9 +270,8 @@ function createBoard(level, language) {
         }
       }
       
-      if (diagonalsPlaced < minDiagonalWords) continue; // Yeterli çapraz kelime yerleşmediyse bu denemeyi atla
+      if (diagonalsPlaced < minDiagonalWords) continue;
 
-      // --- AŞAMA 2: KALAN ANA VE DOLGU KELİMELERİNİ YERLEŞTİR ---
       potentialWords = potentialWords.filter(w => !usedForDiagonal.includes(w));
       const targetTotalWordCount = 15 + Math.floor(level / 4);
 
@@ -306,7 +281,7 @@ function createBoard(level, language) {
         let availablePositions = [];
         for (let r = 0; r < rows; r++) {
           for (let c = 0; c < cols; c++) {
-            for (const dir of allDirections) { // Tüm yönleri dene
+            for (const dir of allDirections) {
               if (canPlaceWithoutOverlap(word, r, c, dir)) {
                 availablePositions.push({ r, c, dir });
               }
@@ -320,7 +295,6 @@ function createBoard(level, language) {
         }
       }
 
-      // --- AŞAMA 3: GİZLİ KELİMEYİ YENİ KURALLA YERLEŞTİR ---
       const emptyCells = [];
       for (let r = 0; r < rows; r++) {
         for (let c = 0; c < cols; c++) {
@@ -328,18 +302,26 @@ function createBoard(level, language) {
         }
       }
       
-      // YENİ KURAL: Gizli kelime uzunluğu seviyeye göre artsın (Min 5, Max 12)
       let targetHiddenWordLength = Math.min(12, 5 + Math.floor(level / 3));
 
-      if (emptyCells.length < targetHiddenWordLength) continue; // Yeterli boş alan yoksa denemeyi atla
+      if (emptyCells.length < targetHiddenWordLength) continue;
 
-      const suitableHiddenWords = allWords.filter(w => 
-          w.length === targetHiddenWordLength && !placedWordsInfo.some(p => p.word === w)
-      );
-      if (suitableHiddenWords.length === 0) continue;
+	let hiddenWord = null;
+	let currentHiddenWordLength = targetHiddenWordLength;
+
+      while (!hiddenWord && currentHiddenWordLength >= 4) {
+        const suitableHiddenWords = allWords.filter(w => 
+            w.length === currentHiddenWordLength && !placedWordsInfo.some(p => p.word === w)
+        );
+        if (suitableHiddenWords.length > 0) {
+          hiddenWord = _.sample(suitableHiddenWords);
+        } else {
+          currentHiddenWordLength--; 
+        }
+      }
       
-      const hiddenWord = _.sample(suitableHiddenWords);
-      const cellsForHidden = _.sampleSize(emptyCells, hiddenWord.length);
+      if (!hiddenWord) continue;      
+	const cellsForHidden = _.sampleSize(emptyCells, hiddenWord.length);
       const scatteredHiddenLetterPositions = [];
       
       cellsForHidden.forEach((cell, i) => {
@@ -348,7 +330,6 @@ function createBoard(level, language) {
         scatteredHiddenLetterPositions.push({ row: cell.r, col: cell.c });
       });
       
-      // --- AŞAMA 4: KALAN SON BOŞLUKLARI DOLDUR ---
       for (let r = 0; r < rows; r++) {
         for (let c = 0; c < cols; c++) {
           if (board[r][c] === '') {
@@ -361,7 +342,7 @@ function createBoard(level, language) {
       return { board, words: finalWords, hiddenWord, scatteredHiddenLetterPositions };
     }
     
-    console.error("Tahta oluşturma denemeleri 50 denemeden sonra başarısız oldu.");
+    console.error("Tahta oluşturma denemeleri 100 denemeden sonra başarısız oldu.");
     return null;
 
   } catch (e) {
@@ -371,7 +352,6 @@ function createBoard(level, language) {
 }
 
 
-  // --- YARDIMCI COMPONENT'LER ---
   function AchievementToast({ achievement }) {
     if (!achievement) return null;
     return (
@@ -420,7 +400,6 @@ const Cell = React.memo(function Cell({
 
 
   
-// YENİ HALİ
 function HomePage({ startGame, language, setLanguage, stats, setModalContent, savedGame, continueGame }) {
     const t = translations[language] || translations['en'];
 
@@ -459,11 +438,38 @@ function HomePage({ startGame, language, setLanguage, stats, setModalContent, sa
         </div>
         
         <div className="w-full max-w-xs flex flex-col items-center gap-4">
-  {savedGame && typeof savedGame.level !== 'undefined' && (
-    <button onClick={continueGame} className="w-full h-16 flex items-center justify-center gap-3 px-6 bg-[#A78BFA] hover:bg-[#9975F8] text-white font-bold text-lg rounded-full shadow-lg transition-all duration-300 transform hover:scale-105 hover:shadow-xl animate-pulse">
-      <span>▶️ {t.continueGame(savedGame.level + 1)}</span>
-    </button>
-  )}
+  {savedGame && typeof savedGame.level !== 'undefined' && (() => {
+    let modeDisplayName = '';
+    switch (savedGame.mode) {
+      case 'easy':
+        modeDisplayName = t.easyMode;
+        break;
+      case 'hard':
+        modeDisplayName = t.hardMode;
+        break;
+      case 'timed-easy':
+        modeDisplayName = t.timedEasyMode;
+        break;
+      case 'timed-hard':
+        modeDisplayName = t.timedHardMode;
+        break;
+    }
+    
+    const levelText = `${modeDisplayName} Seviye ${savedGame.level + 1}`;
+
+    return (
+      <button onClick={continueGame} className="w-full h-16 flex items-center justify-center text-center px-4 text-white rounded-full shadow-lg transition-all duration-300 transform hover:scale-105 hover:shadow-xl animate-pulse bg-[#A78BFA] hover:bg-[#9975F8]">
+        {/* Dikey ve ortalı bir yapı için flexbox kullanıyoruz */}
+        <div className="flex flex-col items-center leading-tight">
+          {/* Üst Satır */}
+          <span className="font-bold text-lg">▶️ Devam Et</span>
+          {/* Alt Satır */}
+          <span className="text-xs opacity-90 font-medium">{levelText}</span>
+        </div>
+      </button>
+    );
+  })()}
+  {/* -- YENİ KOD SONU -- */}
 
   <div className="w-full grid grid-cols-2 gap-4">
       <GameButton onClick={() => startGame('easy')} text={`😊 ${t.easyMode}`} colorClass="bg-[#63e6be] hover:bg-[#4ddab0] col-span-1" />
@@ -586,7 +592,7 @@ React.useEffect(() => {
          setScore(initialSavedState?.level === level ? initialSavedState.score : 0);
          setTimeLeft(initialSavedState?.level === level ? initialSavedState.timeLeft : getInitialTime(mode));
          setRevealedIndices(initialSavedState?.level === level ? initialSavedState.revealedIndices : []);
-         setHiddenWordTimeLeft(null); // EKLENEN SATIR: Sayaç burada sıfırlanıyor.
+         setHiddenWordTimeLeft(null);
 
          const timerId = setTimeout(() => {
             let newGameState = createBoard(level, language);
@@ -759,27 +765,67 @@ React.useEffect(() => {
          }
        };
 
-const handleGoHomeClick = () => {
-  setModalContent({
-    isOpen: true,
-    title: "Onay",
-    children: (
-      <div>
-        <p className="mb-4">Ana sayfaya dönmek istediğinize emin misiniz? Mevcut ilerlemeniz silinecektir.</p>
-        <div className="flex justify-center gap-4">
-          <button onClick={goToHome} className="bg-red-600 text-white px-5 py-2 rounded-lg font-medium">Evet</button>
-          <button onClick={closeModal} className="bg-gray-400 text-white px-5 py-2 rounded-lg font-medium">Hayır</button>
-        </div>
-      </div>
-    )
-  });
-};
+
+
+const confirmRevealWord = () => {
+         const unfoundWords = gameState.words.filter(w => !foundWords.includes(w.word));
+         
+         if (score >= 200 && unfoundWords.length > 0) {
+           const wordToReveal = _.sample(unfoundWords);
+
+           setScore(prevScore => prevScore - 200);
+
+           setFoundWords(prev => [...prev, wordToReveal.word]);
+           
+           setJustFoundWordInfo({ word: wordToReveal.word, positions: wordToReveal.positions });
+           setTimeout(() => setJustFoundWordInfo(null), 600);
+           
+           const newTotalWords = stats.totalWordsFound + 1;
+           const newStats = { ...stats, totalWordsFound: newTotalWords };
+           onStatsChange(newStats);
+           if (newTotalWords >= 50) checkAndUnlockAchievement('FIFTY_WORDS', newStats);
+           
+           playSound('correctSound');
+           vibrate('success');
+         }
+         closeModal();
+       };
+
+       const handleRevealWordClick = () => {
+         if (score < 200 || allRequiredWordsFound) return;
+
+         setModalContent({
+           isOpen: true,
+           title: '💎 Kelime Açma 💎',
+           children: (
+             <div className="text-center p-4">
+               <p className="text-lg text-gray-700 mb-6">
+                 200 puan karşılığında rastgele bir kelime oyun alanından bulunsun mu?
+               </p>
+               <div className="flex justify-center gap-4">
+                 <button 
+                   onClick={closeModal} 
+                   className="px-6 py-2 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 transition-all"
+                 >
+                   Hayır
+                 </button>
+                 <button 
+                   onClick={confirmRevealWord} 
+                   className="px-6 py-2 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 transition-all"
+                 >
+                   Evet
+                 </button>
+               </div>
+             </div>
+           )
+         });
+       };
+
+	const handleGoHomeClick = () => {goToHome();};
 
 
 
-
-
-       const handleNextLevel = () => {
+	const handleNextLevel = () => {
         const newMaxLevel = Math.max(stats.maxLevelCompleted, level);
         const newStats = { ...stats, maxLevelCompleted: newMaxLevel };
 
@@ -796,7 +842,6 @@ const handleGoHomeClick = () => {
         if (level < 59) {
           setLevel(p => p + 1);
         } else {
-          // Oyun bittiğinde mod'a göre başarım kontrolü
           if (mode === 'easy') {
             checkAndUnlockAchievement('EASY_MODE_MASTER', newStats);
           } else if (mode === 'hard') {
@@ -816,9 +861,7 @@ const handleGoHomeClick = () => {
       };
       
        const closeModal = () => setModalContent({ isOpen: false, title: '', children: null, type: '' });
-      
        const triggerConfetti = () => confetti({ particleCount: 150, spread: 90, origin: { y: 0.6 } });
-
        const handleHiddenWordSubmit = () => {
           if (!allRequiredWordsFound) { 
               setModalContent({ isOpen: true, title: t.error, children: (<div><p>{t.allWordsRequired}</p><button onClick={closeModal} className="mt-4 bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded-lg">{t.tryAgainButton}</button></div>) });
@@ -830,8 +873,6 @@ const handleGoHomeClick = () => {
               playSound('correctSound'); 
               vibrate('success');
               triggerConfetti();
-              // if (fullGuess === gameState.hiddenWord) { bloğunun içindeki
-// playSound, vibrate, triggerConfetti satırlarından SONRA bu kodu ekleyin:
 
 const currentHighScore = !mode.startsWith('timed') ? (stats.highScores[`${mode}-${level}`] || 0) : 0;
 const isNewHighScore = !mode.startsWith('timed') && score > currentHighScore;
@@ -839,12 +880,10 @@ const isNewHighScore = !mode.startsWith('timed') && score > currentHighScore;
 setModalContent({
   isOpen: true,
   title: '🎉 Seviye Tamamlandı! 🎉',
-  // Kullanıcı 'X' tuşuna basarsa da sonraki seviyeye geçsin
   onClose: () => { closeModal(); handleNextLevel(); },
   children: (
     <div className="text-center p-4">
       <div className="flex justify-around items-center my-6">
-        {/* Kazanılan Puan */}
         <div className="flex flex-col items-center">
           <p className="text-sm font-medium text-gray-500 uppercase tracking-wider">Skorun</p>
           <p className="text-5xl font-bold text-green-600">{score}</p>
@@ -855,7 +894,6 @@ setModalContent({
           )}
         </div>
         
-        {/* Yüksek Skor (Süresiz Modlar İçin) */}
         {!mode.startsWith('timed') && (
           <div className="flex flex-col items-center">
             <p className="text-sm font-medium text-gray-500 uppercase tracking-wider">Yüksek Skor</p>
@@ -864,7 +902,6 @@ setModalContent({
         )}
       </div>
 
-      {/* Butonlar */}
       <div className="flex flex-col sm:flex-row gap-3 mt-8">
         <button 
           onClick={goToHome} 
@@ -915,8 +952,9 @@ setModalContent({
 
        return (
          <div className={`container mx-auto px-2 py-4 text-center h-full flex flex-col ${theme.bg} ${allRequiredWordsFound ? 'overflow-y-auto' : 'overflow-hidden'}`}>
-            <div className="flex-1 flex flex-col lg:flex-row lg:gap-4 overflow-hidden">
-                <div className="w-full lg:w-3/5 xl:w-2/3 flex flex-col items-center justify-center order-1 lg:h-full">
+<div className="flex-1 flex flex-col lg:flex-row lg:gap-4">
+                {/* OYUN ALANI (GRID) */}
+                <div className="w-full lg:w-3/5 xl:w-2/3 flex flex-col items-center justify-center order-1">
                     <div ref={gridRef} className={`grid gap-0.5 p-1 rounded-lg shadow-md w-full max-w-2xl mx-auto ${theme.gridBg}`}
                          style={{ gridTemplateColumns: `repeat(${gridCols}, minmax(0, 1fr))`, aspectRatio: `${gridCols} / ${gridRows}` }}
                          onMouseDown={(e) => handleInteractionStart(e.clientX, e.clientY)}
@@ -938,72 +976,73 @@ setModalContent({
                             })
                         )}
                     </div>
-                    
-                    <div className={`w-full max-w-2xl mx-auto mt-3 bg-white/70 backdrop-blur-sm border border-gray-200/80 rounded-xl shadow-lg p-3 flex items-center justify-between transition-all duration-500 ease-in-out overflow-hidden ${allRequiredWordsFound ? 'max-h-0 opacity-0 p-0 border-0' : 'max-h-24 opacity-100'}`}>
-                        <button onClick={handleGoHomeClick} title="Ana Sayfa" className="flex items-center justify-center w-12 h-12 rounded-full bg-gray-200 text-gray-600 hover:bg-gray-300 transition-all active:scale-90 text-2xl">
-                            🏠
-                        </button>
-                        <div className="flex flex-row items-center justify-center gap-2">
-    <span className="font-semibold text-gray-700 uppercase">Seviye</span>
-    <span className="w-10 h-10 flex items-center justify-center bg-indigo-600 text-white font-bold text-xl rounded-full shadow-md">
-        {level + 1}
-    </span>
-</div>
-                       
-
-
-
-<div className="flex-1 text-center">
-    {mode.startsWith('timed') && (
-        <div className="text-2xl font-bold text-blue-600 tabular-nums">
-            ⏱️ {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
-        </div>
-    )}
-</div>
-
-
-
-<div className="flex flex-row items-center justify-end gap-4">
-    {/* Puan Grubu */}
-    <div className="flex flex-row items-baseline gap-2">
-        <span className="text-sm font-semibold text-gray-500 uppercase">Puan</span>
-        <span className="text-xl font-bold text-green-600">{score}</span>
-    </div>
-
-    {/* Yüksek Skor Grubu (Sadece süresiz modlarda görünür) */}
-    {!mode.startsWith('timed') && (
-        <div className="flex flex-row items-baseline gap-2">
-            <span className="text-sm font-semibold text-gray-400 uppercase">Yüksek Skor</span>
-            <span className="text-xl font-bold text-gray-500">{highScore}</span>
-        </div>
-    )}
-</div>
-                    </div>
-
                 </div>
 
-                <div className="w-full lg:w-2/5 xl:w-1/3 flex flex-col gap-4 lg:h-full lg:overflow-y-auto py-2 px-2 order-2">
-                    <div className={`transition-all duration-500 ease-in-out overflow-hidden ${allRequiredWordsFound ? 'max-h-0 opacity-0' : 'max-h-[20vh] lg:max-h-[calc(50vh-60px)] opacity-100'}`}>
-                        <h3 className="text-lg lg:text-xl font-semibold text-indigo-800 mb-2">{t.words} ({foundWords.length}/{gameState.words.length})</h3>
-                        <div className="flex flex-wrap justify-center content-center gap-1.5 overflow-y-auto p-2 bg-gray-100 rounded-lg scrollbar-thin">
+                {/* KELİMELER VE KONTROL PANELİ */}
+                {/* DEĞİŞİKLİK: Bu alanın üstündeki boşluklar (gap, py) kaldırıldı ve mobil düzende esnek büyümesi sağlandı. */}
+                <div className="w-full lg:w-2/5 xl:w-1/3 flex flex-col px-2 order-2 mt-2 lg:mt-0">
+                    {/* KELİME LİSTESİ */}
+                    {/* DEĞİŞİKLİK: "Kelimeler" başlığı (h3) kaldırıldı. */}
+                    <div className={`transition-all duration-500 ease-in-out ${allRequiredWordsFound ? 'max-h-0 opacity-0 invisible' : ''}`}>
+                        <div className="flex flex-wrap justify-center content-start gap-1.5 p-2 bg-gray-100 rounded-lg">
                             {gameState.words.map(({ word }) => {
                                 const isFound = foundWords.includes(word);
-				const isHiddenInHardMode = (mode === 'hard' || mode === 'timed-hard') && !isFound;
+                                const isHiddenInHardMode = (mode === 'hard' || mode === 'timed-hard') && !isFound;
                                 return (<span key={word} className={`px-2.5 py-1 rounded-md text-sm font-medium transition-all duration-500 ${isFound ? 'bg-gray-300 text-gray-500 line-through opacity-50' : isHiddenInHardMode ? 'bg-gray-400 text-transparent pointer-events-none' : theme.wordBg + ' text-gray-800'}`} style={{ minWidth: '65px', textAlign: 'center' }}>{isHiddenInHardMode ? '???' : word}</span>);
                             })}
                         </div>
                     </div>
+                    
+                    {/* KONTROL PANELİ */}
+                    {/* DEĞİŞİKLİK: Kelime listesi ile arasındaki boşluk azaltıldı (mt-auto yerine mt-4) */}
+                    <div className={`w-full max-w-2xl mx-auto mt-4 bg-white/70 backdrop-blur-sm border border-gray-200/80 rounded-xl shadow-lg p-3 flex flex-col gap-3 transition-all duration-500 ease-in-out ${allRequiredWordsFound ? 'max-h-0 opacity-0 p-0 border-0 invisible' : 'opacity-100'}`}>
+                        {/* --- SATIR 1: İSTATİSTİKLER --- */}
+                        <div className="flex items-center justify-around w-full flex-wrap gap-x-4 gap-y-2">
+                            <div className="flex flex-row items-center justify-center gap-2">
+                                <span className="font-semibold text-gray-700 uppercase text-xs">Seviye</span>
+                                <span className="w-9 h-9 flex items-center justify-center bg-indigo-600 text-white font-bold text-lg rounded-full shadow-md">{level + 1}</span>
+                            </div>
+                            {mode.startsWith('timed') && (
+                                <div className="text-xl font-bold text-blue-600 tabular-nums">
+                                    ⏱️ {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
+                                </div>
+                            )}
+                            <div className="flex flex-row items-baseline gap-2">
+                                <span className="text-xs font-semibold text-gray-500 uppercase">Puan</span>
+                                <span className="text-lg font-bold text-green-600">{score}</span>
+                            </div>
+                            {!mode.startsWith('timed') && (
+                                <div className="flex flex-row items-baseline gap-2">
+                                    <span className="text-xs font-semibold text-gray-400 uppercase">Yüksek Skor</span>
+                                    <span className="text-xl font-bold text-gray-500">{highScore}</span>
+                                </div>
+                            )}
+                        </div>
 
-                 {allRequiredWordsFound && (
+                        {/* --- SATIR 2: BUTONLAR --- */}
+                        <div className="flex items-center justify-center w-full gap-4">
+                            <button onClick={handleGoHomeClick} title={t.homeButton} className="flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-gray-200 text-gray-600 hover:bg-gray-300 transition-all active:scale-90 font-semibold">
+                                <span>🏠</span>
+                                <span>{t.homeButton}</span>
+                            </button>
+                            {!allRequiredWordsFound && (
+                              <button onClick={handleRevealWordClick} disabled={score < 200} className="flex flex-col justify-center items-center px-4 py-1 bg-purple-600 text-white font-semibold rounded-lg shadow-md hover:bg-purple-700 transition-all transform hover:scale-105 disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed disabled:transform-none">
+                                <div className="flex items-center gap-1"><span>🔒</span><span>Kelime Aç</span></div>
+                                <div className="text-xs opacity-80">(200 Puan)</div>
+                              </button>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* GİZLİ KELİME ALANI */}
+                    {allRequiredWordsFound && (
                         <div className={`flex-shrink-0 transition-all duration-500 ease-in-out mt-2 lg:mt-auto`}>
                              <div className="flex flex-col gap-2">
                                 <div ref={hintDisplayRef} className="flex justify-center items-center gap-1 bg-gray-200 p-2 rounded-lg min-h-[48px]">
                                    {gameState && allRequiredWordsFound && Array.from({ length: gameState.hiddenWord.length }).map((_, index) => {
                                     if (index === 0) {
-                                        // İlk harfi ipucu olarak farklı bir renkte göster
                                         return (<span key={index} className="flex items-center justify-center bg-blue-200 w-8 h-8 rounded text-xl font-bold text-gray-800 shadow-inner">{gameState.hiddenWord[0]}</span>);
                                     }
-                                    // Kullanıcının tahminini 2. harften itibaren al (index - 1)
                                     const char = hiddenWordGuess[index - 1] || '';
                                     const hintChar = revealedIndices.includes(index) ? gameState.hiddenWord[index] : '';
                                     return (<span key={index} className="flex items-center justify-center bg-white w-8 h-8 rounded text-xl font-bold text-gray-800 shadow-inner">{char || hintChar}</span>);
@@ -1016,23 +1055,17 @@ setModalContent({
                                         <input type="text" ref={hiddenWordInputRef} value={hiddenWordGuess} onChange={(e) => setHiddenWordGuess(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') { handleHiddenWordSubmit(); } }} className={`border-2 ${theme.inputBorder} p-1 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-indigo-300 w-full disabled:bg-gray-200`} placeholder={t.hiddenWordPlaceholder} disabled={!allRequiredWordsFound} maxLength={gameState.hiddenWord.length - 1} />
                                     )}
                                     <div className="flex items-stretch justify-center gap-2 mt-1">
-    <button title="Ana Sayfa" onClick={goToHome} className="bg-gray-500 text-white rounded-lg flex-1 py-1 text-2xl hover:bg-gray-600 transition-transform active:scale-95">🏠</button>
-    <button title="İpucu Al" onClick={handleHintClick} className="bg-yellow-500 text-white rounded-lg flex-1 py-1 text-2xl hover:bg-yellow-600 transition-transform active:scale-95" disabled={isHintDisabled}>💡</button>
-
-    {/* YENİ EKLENEN ZAMANLAYICI KODU BAŞLANGICI */}
-    {mode.startsWith('timed') && hiddenWordTimeLeft !== null && (
-        <div title="Kalan Süre" className="bg-blue-500 text-white rounded-lg flex-1 py-1 text-lg font-bold flex items-center justify-center gap-1 animate-pulse">
-            <span>⏳</span>
-            <span>
-                {Math.floor(hiddenWordTimeLeft / 60)}:{(hiddenWordTimeLeft % 60).toString().padStart(2, '0')}
-            </span>
-        </div>
-    )}
-    {/* YENİ EKLENEN ZAMANLAYICI KODU SONU */}
-
-    <button title="Sil" onClick={() => setHiddenWordGuess(prev => prev.slice(0, -1))} className="bg-red-500 text-white rounded-lg flex-1 py-1 font-bold hover:bg-red-600 transition-transform active:scale-95">SİL</button>
-    <button title="Onayla" onClick={handleHiddenWordSubmit} className="bg-green-500 text-white rounded-lg flex-1 py-1 font-bold hover:bg-green-600 transition-transform active:scale-95">ONAYLA</button>
-</div>
+                                        <button title={t.homeButton} onClick={goToHome} className="bg-gray-500 text-white rounded-lg flex-1 py-1 text-2xl hover:bg-gray-600 transition-transform active:scale-95">🏠</button>
+                                        <button title="İpucu Al" onClick={handleHintClick} className="bg-yellow-500 text-white rounded-lg flex-1 py-1 text-2xl hover:bg-yellow-600 transition-transform active:scale-95" disabled={isHintDisabled}>🔍</button>
+                                        {mode.startsWith('timed') && hiddenWordTimeLeft !== null && (
+                                            <div title="Kalan Süre" className="bg-blue-500 text-white rounded-lg flex-1 py-1 text-lg font-bold flex items-center justify-center gap-1 animate-pulse">
+                                                <span>⏳</span>
+                                                <span>{Math.floor(hiddenWordTimeLeft / 60)}:{(hiddenWordTimeLeft % 60).toString().padStart(2, '0')}</span>
+                                            </div>
+                                        )}
+                                        <button title="Sil" onClick={() => setHiddenWordGuess(prev => prev.slice(0, -1))} className="bg-red-500 text-white rounded-lg flex-1 py-1 font-bold hover:bg-red-600 transition-transform active:scale-95">SİL</button>
+                                        <button title="Onayla" onClick={handleHiddenWordSubmit} className="bg-green-500 text-white rounded-lg flex-1 py-1 font-bold hover:bg-green-600 transition-transform active:scale-95">ONAYLA</button>
+                                    </div>
                                 </>
                              </div>
                         </div>
@@ -1054,35 +1087,34 @@ function App() {
     const [gameStats, setGameStats] = React.useState(loadGameStats);
     const [modalContent, setModalContent] = React.useState({ isOpen: false, title: '', body: null });
     
-    // YENİ: Kayıtlı oyunu tutacak ve kullanıcıya sormak için kullanılacak state
-    const [savedGameState, setSavedGameState] = React.useState(null);
+	const [savedGameState, setSavedGameState] = React.useState(null);
 
-    // YENİ: Uygulama ilk açıldığında sadece bir kez çalışır.
-    React.useEffect(() => {
-      const savedGame = localStorage.getItem('savedGameState');
-      if (savedGame) {
-        setSavedGameState(JSON.parse(savedGame));
+	React.useEffect(() => {
+      	if (page === 'home') {
+        const savedGame = localStorage.getItem('savedGameState');
+        if (savedGame) {
+          setSavedGameState(JSON.parse(savedGame));
+        } else {
+          setSavedGameState(null);
+        }
       }
-    }, []);
+    }, [page]); 
 
-    const handleStatsChange = (newStats) => {
+	const handleStatsChange = (newStats) => {
         setGameStats(newStats);
         saveGameStats(newStats);
     };
 
-const startGame = (selectedMode) => {
-    // Genel başlangıç işlemleri: Eski kaydı sil ve modu ayarla.
-    localStorage.removeItem('savedGameState');
-    setSavedGameState(null);
-    setMode(selectedMode);
+	const startGame = (selectedMode) => {
+	localStorage.removeItem('savedGameState');
+	setSavedGameState(null);
+	setMode(selectedMode);
 
-    // Popup'ı kapattıktan sonra oyunu başlatacak olan ortak fonksiyon.
-    const handleStartGame = () => {
+	const handleStartGame = () => {
         setModalContent({ isOpen: false });
         setPage('game');
     };
 
-    // ZOR MODLAR için popup içeriği
     if (selectedMode === 'hard' || selectedMode === 'timed-hard') {
         setModalContent({
             isOpen: true,
@@ -1120,7 +1152,6 @@ const startGame = (selectedMode) => {
             )
         });
     }
-    // KOLAY MODLAR için popup içeriği
     else if (selectedMode === 'easy' || selectedMode === 'timed-easy') {
         setModalContent({
             isOpen: true,
@@ -1162,18 +1193,55 @@ const startGame = (selectedMode) => {
 
 
     const continueGame = () => {
-        // Kayıtlı oyundan devam et.
         setLanguage(savedGameState.language);
         setMode(savedGameState.mode);
-        setPage('game'); // Oyun sayfasına git. WordHunt bileşeni kendi state'ini yükleyecek.
+        setPage('game');
     };
 
-    const goToHome = () => {
-      // Ana menüye dönerken de kayıtlı oyunu sil.
-      localStorage.removeItem('savedGameState');
-      setSavedGameState(null);
-      setPage('home');
+   const goToHome = () => {
+      // Eğer oyuncu oyun sayfasındaysa, direkt ana sayfaya dönmek yerine önce onay isteyelim.
+      if (page === 'game') {
+        setModalContent({
+          isOpen: true,
+          title: "Ana Sayfaya Dön",
+          body: (
+            <div>
+              <p className="mb-4">
+                Ana sayfaya dönmek istediğinize emin misiniz? <br/>
+                <strong>İlerlemeniz kaydedildi</strong>, istediğiniz zaman devam edebilirsiniz.
+              </p>
+              <div className="flex justify-center gap-4 mt-4">
+                <button 
+                  onClick={() => { setModalContent({ isOpen: false }); setPage('home'); }} 
+                  className="px-8 py-2 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 transition-all"
+                >
+                  Evet
+                </button>
+                <button 
+                  onClick={() => setModalContent({ isOpen: false })} 
+                  className="px-8 py-2 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 transition-all"
+                >
+                  Hayır
+                </button>
+              </div>
+            </div>
+          )
+        });
+      } else {
+        // Eğer zaten ana sayfada veya başka bir sayfadaysa, direkt ana sayfaya git
+        setPage('home');
+      }
     };
+
+
+React.useEffect(() => {
+        window.appNavigator = {
+            goToHome: goToHome,
+            getCurrentPage: () => page
+        };
+    }, [page]); // page state'i her değiştiğinde bu objeyi günceller
+
+
 
     return (
       <ErrorBoundary>
@@ -1185,7 +1253,7 @@ const startGame = (selectedMode) => {
               mode={mode} 
               stats={gameStats} 
               onStatsChange={handleStatsChange} 
-              initialSavedState={savedGameState} // YENİ: Kayıtlı durumu oyuna yolla
+              initialSavedState={savedGameState}
             />
           ) : (
             <HomePage 
@@ -1194,8 +1262,8 @@ const startGame = (selectedMode) => {
               setLanguage={setLanguage} 
               stats={gameStats} 
               setModalContent={setModalContent}
-              savedGame={savedGameState} // YENİ: Kayıtlı oyun bilgisini ana sayfaya yolla
-              continueGame={continueGame}  // YENİ: Devam etme fonksiyonunu yolla
+              savedGame={savedGameState}
+              continueGame={continueGame}
             />
           )}
           <Modal isOpen={modalContent.isOpen} title={modalContent.title} onClose={() => setModalContent({ isOpen: false })}>
@@ -1205,6 +1273,18 @@ const startGame = (selectedMode) => {
       </ErrorBoundary>
     );
   }  
+// Bu fonksiyon, Android tarafından çağrılacak
+function handleAndroidBackPress() {
+  // Eğer `window.appNavigator` objesi varsa ve oyun sayfasındaysak
+  if (window.appNavigator && window.appNavigator.getCurrentPage() === 'game') {
+    // React'taki ana sayfaya dönme fonksiyonunu çağır
+    window.appNavigator.goToHome();
+    return true; // Geri tuşu işleminin JavaScript tarafından yapıldığını belirt
+  }
+  // Eğer ana sayfadaysak veya fonksiyon yoksa
+  return false; // Geri tuşu işlemini Android'e bırak (uygulamayı kapat)
+}
+
 
 ReactDOM.render(<App />, document.getElementById('root'));
 

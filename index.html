@@ -96,8 +96,15 @@ const ALL_SAVES_KEY = 'wordHuntAllSaves';
  const translations = {
   tr: {
       title: "Kelime Avı",
-      easyMode: "KOLAY",
-      hardMode: "ZOR",
+      easyMode: "KOLAY (NORMAL)",
+    leaderboard: "Liderlik",
+
+aşırı: "AŞIRI",
+    kolay: "KOLAY",
+    normal: "NORMAL",
+    zor: "ZOR",
+    süreli: "SÜRELİ",      
+hardMode: "ZOR (NORMAL)",
       timedEasyMode: "SÜRELİ KOLAY",
       timedHardMode: "SÜRELİ ZOR",
       superEasyMode: "AŞIRI KOLAY",
@@ -141,9 +148,15 @@ const ALL_SAVES_KEY = 'wordHuntAllSaves';
       levelLoadError: "Üzgünüz, bu seviye yüklenirken bir sorun oluştu."
   },
   en: {
+    leaderboard: "Leaderboard",
+    aşırı: "SUPER",
+    kolay: "EASY",
+    normal: "NORMAL",
+    zor: "HARD",
+    süreli: "TIMED",
       title: "Word Hunt",
-      easyMode: "EASY",
-      hardMode: "HARD",
+      easyMode: "EASY (NORMAL)",
+      hardMode: "HARD (NORMAL)",
       timedEasyMode: "TIMED EASY",
       timedHardMode: "TIMED HARD",
       superEasyMode: "SUPER EASY",
@@ -523,14 +536,16 @@ function LeaderboardModal({ isOpen, onClose, currentUser, language }) {
   });
   const [loading, setLoading] = React.useState(true);
 
-const tabs = [
-    { key: 'super-easy', translateKey: 'superEasyMode', activeBg: 'bg-green-500' },
-    { key: 'easy', translateKey: 'easyMode', activeBg: 'bg-teal-500' },
-    { key: 'hard', translateKey: 'hardMode', activeBg: 'bg-red-500' },
-    { key: 'timed-easy', translateKey: 'timedEasyMode', activeBg: 'bg-blue-500' },
-    { key: 'timed-hard', translateKey: 'timedHardMode', activeBg: 'bg-orange-500' }
-  ];
+  // activeBg renklerini geri ekledim, çünkü renk sorunu olmadığını belirttiniz.
+  const tabs = [
+    { key: 'super-easy', line1Key: 'aşırı',    line2Key: 'kolay',  activeBg: 'bg-green-500' },
+    { key: 'easy',       line1Key: 'kolay',    line2Key: 'normal', activeBg: 'bg-teal-500' },
+    { key: 'hard',       line1Key: 'zor',      line2Key: 'normal', activeBg: 'bg-red-500' },
+    { key: 'timed-easy', line1Key: 'süreli',   line2Key: 'kolay',  activeBg: 'bg-blue-500' },
+    { key: 'timed-hard', line1Key: 'süreli',   line2Key: 'zor',    activeBg: 'bg-orange-500' }
+  ];
 
+  // useEffect kısmı aynı kalabilir.
   React.useEffect(() => {
     if (isOpen) {
       setLoading(true);
@@ -559,25 +574,49 @@ const tabs = [
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4" onClick={onClose}>
-      <div className="bg-white p-4 sm:p-6 rounded-xl shadow-2xl max-w-lg w-full text-center relative" onClick={e => e.stopPropagation()}>
-        <h3 className="text-3xl font-bold mb-4 text-gray-800">🏆 {t.leaderboard} 🏆</h3>
-        <button onClick={onClose} className="absolute top-2 right-2 text-gray-500 hover:text-gray-800 text-3xl">&times;</button>
+      <div className="bg-white dark:bg-gray-900 p-4 sm:p-6 rounded-xl shadow-2xl max-w-lg w-full text-center relative" onClick={e => e.stopPropagation()}>
+        <h3 className="text-3xl font-bold mb-4 text-gray-800 dark:text-gray-100">🏆 {t.leaderboard} 🏆</h3>
+        <button onClick={onClose} className="absolute top-2 right-2 text-gray-500 hover:text-gray-800 dark:hover:text-gray-200 text-3xl">&times;</button>
         
-        <div className="flex mb-4 overflow-x-auto whitespace-nowrap scrollbar-thin border-b-2 border-gray-200">
-          {tabs.map(tab => (
-            <button
-              key={tab.key}
-              onClick={() => setActiveTab(tab.key)}
-              className={`px-5 py-2 text-sm sm:text-base font-bold transition-all duration-300 flex-shrink-0 rounded-t-lg ${activeTab === tab.key ? `${tab.activeBg} text-white shadow-md` : 'text-gray-500 hover:bg-gray-100'}`}
-            >
-              {t[tab.translateKey]}
-            </button>
-          ))}
-        </div>
+          <div className="flex items-center border-b-2 border-gray-200 dark:border-gray-700">
+  {tabs.map(tab => {
+    const isActive = activeTab === tab.key;
+    return (
+      <button
+        key={tab.key}
+        onClick={() => setActiveTab(tab.key)}
+        className={`
+          flex-1
+          flex flex-col justify-center items-center
+          h-14 py-1
+          text-center transition-all duration-300
+          border-x border-transparent
+          ${isActive 
+            ? `${tab.activeBg} scale-105 z-10 rounded-t-lg` 
+            : 'hover:bg-gray-100 dark:hover:bg-gray-800'
+          }`
+        }
+      >
+        <span className={`
+          block text-xs font-bold leading-tight uppercase
+          ${isActive ? 'text-white' : 'text-gray-500 dark:text-gray-400'}
+        `}>
+          {t[tab.line1Key]}
+        </span>
+        <span className={`
+          block text-xs font-semibold leading-tight uppercase
+          ${isActive ? 'text-white' : 'text-gray-500 dark:text-gray-400'}
+        `}>
+          {t[tab.line2Key]}
+        </span>
+      </button>
+    );
+  })}
+</div>
 
         <div className="min-h-[300px]">
           {loading ? (
-            <p className="text-gray-600 pt-10">Liderlik tablosu yükleniyor...</p>
+            <p className="text-gray-600 dark:text-gray-400 pt-10">Liderlik tablosu yükleniyor...</p>
           ) : (
             <LeaderboardDisplay scores={scores[activeTab]} currentUser={currentUser} language={language} />
           )}
@@ -586,6 +625,7 @@ const tabs = [
     </div>
   );
 }
+
   
 function HomePage({ startGame, language, setLanguage, stats, setModalContent, savedGame, continueGame, username }) {
     const t = translations[language] || translations['en'];
@@ -1317,7 +1357,6 @@ if (isLoading) { return ( <div className="flex items-center justify-center h-ful
     {/* Panel 3: Yüksek Skor veya Zamanlayıcı (Koşullu) */}
     <div className="flex-1 flex items-center justify-center gap-2 p-2 bg-slate-100 rounded-lg shadow-sm">
         {mode.startsWith('timed') ? (
-            // Zamanlayıcılı modda görünecek olan
             <div className="flex items-center justify-center gap-2 text-xl font-bold text-blue-600 tabular-nums">
                 <span>⏱️</span>
                 <span>
@@ -1325,7 +1364,6 @@ if (isLoading) { return ( <div className="flex items-center justify-center h-ful
                 </span>
             </div>
         ) : (
-            // Normal modda görünecek olan
             <>
                 <span className="text-sm font-semibold text-gray-600">Yüksek Skor:</span>
                 <span className="text-xl font-bold text-gray-700 tabular-nums">{highScore}</span>
@@ -1703,19 +1741,47 @@ const startGame = (selectedMode) => {
 	};
 
 const goToHome = () => {
-    
-      if (page === 'game' && typeof mode === 'object' && mode.isOneShot) {
-          setPage('home'); 
-          return;
+      if (page !== 'game') {
+        setPage('home');
+        return;
       }
 
-      if (page === 'game') {
+      const isRandomMode = typeof mode === 'object' && mode.isOneShot;
+
+      if (isRandomMode) {
+        setModalContent({
+          isOpen: true,
+          title: "Emin misiniz?",
+          body: (
+            <div>
+              <p className="mb-4 text-gray-700">
+                Bu rastgele bir oyundur ve ilerlemeniz **kaydedilmeyecektir.** <br/>
+                Yine de ana sayfaya dönmek istiyor musunuz?
+              </p>
+              <div className="flex justify-center gap-4 mt-4">
+                <button 
+                  onClick={() => { setModalContent({ isOpen: false }); setPage('home'); }} 
+                  className="px-8 py-2 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 transition-all"
+                >
+                  Evet, Çık
+                </button>
+                <button 
+                  onClick={() => setModalContent({ isOpen: false })} 
+                  className="px-8 py-2 bg-gray-600 text-white font-bold rounded-lg hover:bg-gray-700 transition-all"
+                >
+                  Hayır
+                </button>
+              </div>
+            </div>
+          )
+        });
+      } else {
         setModalContent({
           isOpen: true,
           title: "Ana Sayfaya Dön",
           body: (
             <div>
-              <p className="mb-4">
+              <p className="mb-4 text-gray-700">
                 Ana sayfaya dönmek istediğinize emin misiniz? <br/>
                 <strong>İlerlemeniz kaydedildi</strong>, istediğiniz zaman devam edebilirsiniz.
               </p>
@@ -1736,11 +1802,8 @@ const goToHome = () => {
             </div>
           )
         });
-      } else {
-        setPage('home');
       }
     };
-
 
 React.useEffect(() => {
         window.appNavigator = {
@@ -1748,8 +1811,6 @@ React.useEffect(() => {
             getCurrentPage: () => page
         };
     }, [page]);
-
-
 
     return (
       <ErrorBoundary>

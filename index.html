@@ -12,10 +12,8 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
   <script src="https://unpkg.com/heroicons@2.1.3/24/outline/index.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-
-
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
   <script src="wordstr.js"></script>
   <script src="wordsen.js"></script>
 
@@ -23,7 +21,7 @@
 body {
       overscroll-behavior-y: none; touch-action: none; -webkit-user-select: none; user-select: none;
       height: 100vh; overflow: hidden; font-family: 'Inter', sans-serif; background-color: #f3f4f6;
-    }
+      }
     .grid { touch-action: none; -webkit-tap-highlight-color: transparent; }
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
     .scrollbar-thin { scrollbar-width: thin; scrollbar-color: #9CA3AF #E5E7EB; }
@@ -51,9 +49,9 @@ body {
   50% { transform: translateX(5px); }
   75% { transform: translateX(-5px); }
   100% { transform: translateX(0); }
-}
-
+                }
 .shake-animation {  animation: shake 0.3s ease-in-out;}
+
 </style>
 </head>
 
@@ -192,12 +190,11 @@ const ALL_SAVES_KEY = 'wordHuntAllSaves';
 
 	const charSets = { tr: 'ABCÇDEFGĞHIİJKLMNOÖPRSŞTUÜVYZ'.split(''), en: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('') };
 	const wordLists = { tr: typeof wordListTr !== 'undefined' ? wordListTr : [], en: typeof wordListEn !== 'undefined' ? wordListEn : [] };
-
 	const boardSizes = [];
 	const initialRowsConfig = [6, 7, 9, 11, 13];
 	const initialColsConfig = [7, 8, 9, 10, 12];
 
-  	for (let level = 0; level < 60; level++) {
+  for (let level = 0; level < 60; level++) {
 	const stage = Math.floor(level / 6);
 	const configIndex = Math.floor(stage / 2);
 	const levelInStage = level % 6;
@@ -219,7 +216,7 @@ const ALL_SAVES_KEY = 'wordHuntAllSaves';
   const allDirections = [...directions.diagonal, ...directions.horizontal, ...directions.vertical];
   const straightDirections = [...directions.horizontal, ...directions.vertical];
 
-const initialAchievements = {
+  const initialAchievements = {
     FIFTY_WORDS: { name: 'Kelime Canavarı', description: 'Toplamda 50 kelime buldun.', unlocked: false, icon: '👾' },
     LEVEL_5_CLEAR: { name: 'Azimli Oyuncu', description: '5. seviyeyi tamamladın.', unlocked: false, icon: '⭐' },
     LEVEL_10_CLEAR: { name: 'Usta Oyuncu', description: '10. seviyeyi tamamladın.', unlocked: false, icon: '🏆' },
@@ -228,12 +225,13 @@ const initialAchievements = {
     HARD_MODE_HUNTER: { name: 'Zor Mod Avcısı', description: 'Zor modu (60 bölüm) tamamen bitirdin.', unlocked: false, icon: '🔥' },
     TIMED_EASY_MASTER: { name: 'Zamanlı Kolay Mod Canavarı', description: 'Zamanlı Kolay modu (60 bölüm) tamamen bitirdin.', unlocked: false, icon: '⏱️' },
     TIMED_HARD_MASTER: { name: 'Zamanlı Zor Mod Fatihi', description: 'Zamanlı Zor modu (60 bölüm) tamamen bitirdin.', unlocked: false, icon: '⚡' }
-  };
+                              };
 
 
   const GAME_STATS_KEY = 'wordHuntGameStats';
 
-  const loadGameStats = () => {
+  const loadGameStats = () => 
+  {
     try {
       const stats = localStorage.getItem(GAME_STATS_KEY);
       if (stats) {
@@ -250,30 +248,22 @@ const initialAchievements = {
     return { totalWordsFound: 0, maxLevelCompleted: -1, highScores: {}, achievements: initialAchievements };
   };
 
-  const saveGameStats = (stats) => {
-    try { localStorage.setItem(GAME_STATS_KEY, JSON.stringify(stats)); } 
-    catch (e) { console.error("İstatistikler kaydedilemedi:", e); }
+  const saveGameStats = (stats) => 
+  {    try { localStorage.setItem(GAME_STATS_KEY, JSON.stringify(stats)); }catch (e) { console.error("İstatistikler kaydedilemedi:", e); }
   };
   
 function createBoard(level, language, mode) {
   try {
     let rows, cols;
-
-    // YENİ KISIM: Modun "Aşırı Kolay" olup olmadığını kontrol et
     if (mode === 'super-easy') {
-        // Bu mod için özel boyut hesaplaması yapıyoruz.
-        // Bu formül, seviye ilerledikçe başlangıç (4x5) ve bitiş (7x8) boyutları arasında kademeli bir geçiş yapar.
-        const totalLevels = 60; // Toplam seviye sayısı
-        const progress = level / (totalLevels - 1); // İlerleme yüzdesi (0.0 - 1.0)
-
+        const totalLevels = 60; 
+        const progress = level / (totalLevels - 1); 
         const startRows = 4, endRows = 7;
         const startCols = 5, endCols = 8;
-
         rows = Math.round(startRows + (endRows - startRows) * progress);
         cols = Math.round(startCols + (endCols - startCols) * progress);
         
     } else {
-        // DİĞER TÜM MODLAR İÇİN ESKİ SİSTEM DEVAM EDİYOR
         const staticConfig = boardSizes[level];
         if (!staticConfig) {
           console.error(`Geçersiz seviye yapılandırması: ${level}.`);
@@ -284,32 +274,23 @@ function createBoard(level, language, mode) {
     }
 
     for (let attempt = 0; attempt < 1000; attempt++) {
-
       const board = Array(rows).fill(null).map(() => Array(cols).fill(''));
       const lockGrid = Array(rows).fill(null).map(() => Array(cols).fill(false));
       let placedWordsInfo = [];
 
  let allWords = (wordLists[language] || []).filter(w => w && w.length >= 3).map(customToUpperCase);
-      
-      // YENİ KISIM: Eğer mod "Aşırı Kolay" ise, kelimeleri 8 harf ile sınırla
-      if (mode === 'super-easy') {
-          allWords = allWords.filter(w => w.length <= 8);
-      }
-
+      if (mode === 'super-easy') {          allWords = allWords.filter(w => w.length <= 8);      }
       let potentialWords = _.shuffle(allWords);
       let targetTotalWordCount;
       let targetHiddenWordLength;
 
       if (mode === 'super-easy') {
-          // "Aşırı Kolay Mod" için çok daha düşük hedefler belirliyoruz.
-          targetTotalWordCount = 4 + Math.floor(level / 8); // 4 kelimeyle başlar, her 8 seviyede 1 artar.
-          targetHiddenWordLength = 4 + Math.floor(level / 10); // 3 harfle başlar, her 10 seviyede 1 artar.
+          targetTotalWordCount = 4 + Math.floor(level / 8); 
+          targetHiddenWordLength = 4 + Math.floor(level / 10); 
       } else {
-          // DİĞER TÜM MODLAR İÇİN SİZİN KODUNUZDAKİ ORİJİNAL FORMÜLLER KULLANILIYOR
           targetTotalWordCount = 17 + Math.floor(level / 4);
           targetHiddenWordLength = Math.min(12, 5 + Math.floor(level / 3));
       }
-
 
       const placeAndLockWord = (word, r, c, dir) => {
         const positions = [];
@@ -334,13 +315,10 @@ function createBoard(level, language, mode) {
         return true;
       };
 
-// YENİ KISIM: Moda özel minimum çapraz kelime sayısı
       let minDiagonalWords;
       if (mode === 'super-easy') {
-          // Aşırı Kolay modda harita küçük olduğu için bu sayıyı düşürüyoruz.
           minDiagonalWords = 2;
       } else {
-          // Diğer tüm modlar için standart sayı devam ediyor.
           minDiagonalWords = 6;
       }      let diagonalsPlaced = 0;
       let usedForDiagonal = [];
@@ -398,10 +376,8 @@ function createBoard(level, language, mode) {
           if (!lockGrid[r][c]) emptyCells.push({ r, c });
         }
       }
-       
 
-
-      if (emptyCells.length < targetHiddenWordLength) continue;
+  if (emptyCells.length < targetHiddenWordLength) continue;
 
 	let hiddenWord = null;
 	let currentHiddenWordLength = targetHiddenWordLength;
@@ -495,13 +471,15 @@ const Cell = React.memo(function Cell({
     );
   });
 
-function LeaderboardDisplay({ scores, currentUser }) {
+function LeaderboardDisplay({ scores, currentUser, language }) {
+  const t = translations[language] || translations['en'];
+
   if (!scores || scores.length === 0) {
-    return <p className="text-gray-600 dark:text-gray-400">Henüz kaydedilmiş bir skor yok. İlk sen ol!</p>;
+    return <p className="text-gray-600">Henüz kaydedilmiş bir skor yok. İlk sen ol!</p>;
   }
 
   return (
-    <ol className="space-y-3 text-left max-h-[60vh] overflow-y-auto scrollbar-thin pr-2">
+    <ol className="space-y-1 text-left max-h-[60vh] overflow-y-auto scrollbar-thin pr-2">
       {scores.map((score, index) => {
         const isCurrentUser = score.username === currentUser;
         const rank = index + 1;
@@ -510,12 +488,20 @@ function LeaderboardDisplay({ scores, currentUser }) {
         else if (rank === 2) rankIcon = '🥈';
         else if (rank === 3) rankIcon = '🥉';
 
+        const zebraClass = index % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-700';
+        const keyParts = score.mode.split('-');
+        const modeTranslateKey = keyParts.map((part, index) => {
+            if (index === 0) return part;
+            return part.charAt(0).toUpperCase() + part.slice(1);
+        }).join('') + 'Mode';
+        const modeName = t[modeTranslateKey] || score.mode;
+
         return (
-          <li key={score.id || index} className={`flex items-center p-3 rounded-lg transition-all ${isCurrentUser ? 'bg-blue-100 dark:bg-blue-900 scale-105 shadow-lg' : 'bg-gray-100 dark:bg-gray-800'}`}>
+          <li key={score.id || index} className={`flex items-center p-3 rounded-lg transition-all ${isCurrentUser ? 'bg-blue-100 dark:bg-blue-900 scale-105 shadow-lg' : zebraClass}`}>
             <span className="font-bold text-lg w-12 text-center text-yellow-500">{rankIcon || `#${rank}`}</span>
             <div className="flex-1">
               <p className={`font-bold ${isCurrentUser ? 'text-blue-800 dark:text-blue-300' : 'text-gray-800 dark:text-gray-200'}`}>{score.username}</p>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Seviye {score.level} - {score.mode}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">{t.level} {score.level} - {modeName}</p>
             </div>
             <span className="font-extrabold text-xl text-green-600 dark:text-green-400">{score.score}</span>
           </li>
@@ -525,45 +511,36 @@ function LeaderboardDisplay({ scores, currentUser }) {
   );
 }
 
-
-// HomePage bileşeninden önce bu yeni bileşeni ekleyin.
-function LeaderboardModal({ isOpen, onClose, currentUser }) {
-  // Hangi sekmenin aktif olduğunu tutan state
-  const [activeTab, setActiveTab] = React.useState('easy');
-  // Tüm modların skor verilerini tutacak olan state
+function LeaderboardModal({ isOpen, onClose, currentUser, language }) {
+  const t = translations[language] || translations['en'];
+  const [activeTab, setActiveTab] = React.useState('super-easy');
   const [scores, setScores] = React.useState({
+    'super-easy': [],
     easy: [],
     hard: [],
     'timed-easy': [],
     'timed-hard': []
   });
-  // Veri yüklenirken göstermek için loading state'i
   const [loading, setLoading] = React.useState(true);
 
-  // Sekmelerin tanımı
-  const tabs = [
-    { key: 'super-easy', name: 'Aşırı Kolay' }, // YENİ EKLENDİ
-    { key: 'easy', name: 'Kolay' },
-    { key: 'hard', name: 'Zor' },
-    { key: 'timed-easy', name: 'Süreli Kolay' },
-    { key: 'timed-hard', name: 'Süreli Zor' }
-  ];
+const tabs = [
+    { key: 'super-easy', translateKey: 'superEasyMode', activeBg: 'bg-green-500' },
+    { key: 'easy', translateKey: 'easyMode', activeBg: 'bg-teal-500' },
+    { key: 'hard', translateKey: 'hardMode', activeBg: 'bg-red-500' },
+    { key: 'timed-easy', translateKey: 'timedEasyMode', activeBg: 'bg-blue-500' },
+    { key: 'timed-hard', translateKey: 'timedHardMode', activeBg: 'bg-orange-500' }
+  ];
 
-  // Bu useEffect, modal açıldığında (isOpen === true) bir kez çalışır.
   React.useEffect(() => {
     if (isOpen) {
       setLoading(true);
-
-      // Her bir mod için ayrı bir Firebase sorgusu oluşturan bir dizi promise hazırlıyoruz.
       const fetchPromises = tabs.map(tab => 
         db.collection("scores")
-          .where("mode", "==", tab.key) // Mod'a göre filtrele
-          .orderBy("score", "desc")     // Puana göre sırala
-          .limit(50)                    // İlk 50'yi al
+          .where("mode", "==", tab.key)
+          .orderBy("score", "desc")
+          .limit(50)
           .get()
       );
-
-      // Tüm sorguları aynı anda çalıştırıyoruz.
       Promise.all(fetchPromises)
         .then(snapshots => {
           const newScores = {};
@@ -571,45 +548,38 @@ function LeaderboardModal({ isOpen, onClose, currentUser }) {
             const mode = tabs[index].key;
             newScores[mode] = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
           });
-          setScores(newScores); // Gelen verileri state'e kaydediyoruz.
+          setScores(newScores);
         })
-        .catch(error => {
-          console.error("Liderlik tablosu verileri çekilirken hata oluştu:", error);
-        })
-        .finally(() => {
-          setLoading(false); // Yükleme tamamlandı.
-        });
+        .catch(error => console.error("Liderlik tablosu verileri çekilirken hata oluştu:", error))
+        .finally(() => setLoading(false));
     }
-  }, [isOpen]); // Sadece isOpen değiştiğinde çalışır.
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4" onClick={onClose}>
       <div className="bg-white p-4 sm:p-6 rounded-xl shadow-2xl max-w-lg w-full text-center relative" onClick={e => e.stopPropagation()}>
-        <h3 className="text-3xl font-bold mb-4 text-gray-800">🏆 Liderlik Tablosu 🏆</h3>
+        <h3 className="text-3xl font-bold mb-4 text-gray-800">🏆 {t.leaderboard} 🏆</h3>
         <button onClick={onClose} className="absolute top-2 right-2 text-gray-500 hover:text-gray-800 text-3xl">&times;</button>
         
-        {/* Sekme Butonları (Yatay Kaydırılabilir) */}
-        <div className="flex border-b-2 border-gray-200 mb-4 overflow-x-auto whitespace-nowrap scrollbar-thin">
-          {tabs.map(tab => (
-            <button
-              key={tab.key}
-              onClick={() => setActiveTab(tab.key)}
-              // Her sekmenin sıkışmaması için 'flex-shrink-0' ekledik
-              className={`px-4 py-3 text-sm sm:text-base font-semibold transition-all duration-300 flex-shrink-0 ${activeTab === tab.key ? 'border-b-4 border-indigo-600 text-indigo-600' : 'text-gray-500 hover:bg-gray-100'}`}
-            >
-              {tab.name}
-            </button>
-          ))}
-        </div>
+        <div className="flex mb-4 overflow-x-auto whitespace-nowrap scrollbar-thin border-b-2 border-gray-200">
+          {tabs.map(tab => (
+            <button
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key)}
+              className={`px-5 py-2 text-sm sm:text-base font-bold transition-all duration-300 flex-shrink-0 rounded-t-lg ${activeTab === tab.key ? `${tab.activeBg} text-white shadow-md` : 'text-gray-500 hover:bg-gray-100'}`}
+            >
+              {t[tab.translateKey]}
+            </button>
+          ))}
+        </div>
 
-        {/* İçerik Alanı */}
         <div className="min-h-[300px]">
           {loading ? (
             <p className="text-gray-600 pt-10">Liderlik tablosu yükleniyor...</p>
           ) : (
-            <LeaderboardDisplay scores={scores[activeTab]} currentUser={currentUser} />
+            <LeaderboardDisplay scores={scores[activeTab]} currentUser={currentUser} language={language} />
           )}
         </div>
       </div>
@@ -621,7 +591,6 @@ function HomePage({ startGame, language, setLanguage, stats, setModalContent, sa
     const t = translations[language] || translations['en'];
     const [isLeaderboardOpen, setIsLeaderboardOpen] = React.useState(false);
 
-    // Başarımlar modalını açan fonksiyon (içeriği aynı)
     const openAchievements = () => {
         setModalContent({
             isOpen: true,
@@ -642,26 +611,22 @@ function HomePage({ startGame, language, setLanguage, stats, setModalContent, sa
         });
     };
 
-    // Oyun modu kartları için yeniden kullanılabilir bir bileşen.
     const ModeCard = ({ title, icon, bgColor, playTextColor, onClick }) => (
         <button
             onClick={onClick}
             className={`relative group w-full h-28 rounded-2xl p-4 flex flex-col justify-between items-start text-white overflow-hidden transition-all duration-300 transform hover:-translate-y-1 hover:shadow-xl ${bgColor}`}
         >
-            {/* EMOJİ GÖRÜNÜRLÜĞÜ ARTIRILDI (opacity-25 -> opacity-30) */}
-            <div className="absolute -right-4 -bottom-4 text-7xl opacity-30 group-hover:opacity-50 transition-all duration-300 transform group-hover:scale-110">
+            <div className="absolute -right-4 -bottom-4 text-7xl opacity-50 group-hover:opacity-70 transition-all duration-300 transform group-hover:scale-110">
                 {icon}
             </div>
             <h3 className="text-xl font-bold">{title}</h3>
-            {/* "OYNA" YAZISI RENKLENDİRİLDİ */}
             <span className={`text-sm font-bold ${playTextColor} bg-white/40 backdrop-blur-sm px-3 py-1 rounded-full`}>Oyna</span>
         </button>
     );
 
-    // "Devam Et" butonu için metinleri hazırlıyoruz.
     let continueButtonText = { mode: '', level: '' };
     if (savedGame && typeof savedGame.level !== 'undefined') {
-        const modeKey = savedGame.mode.replace('-', ''); // timed-easy -> timedeasy
+        const modeKey = savedGame.mode.replace('-', ''); 
         const modeDisplayName = t[modeKey + 'Mode'] || '';
         continueButtonText = {
             mode: modeDisplayName,
@@ -670,7 +635,6 @@ function HomePage({ startGame, language, setLanguage, stats, setModalContent, sa
     }
 
 return (
-        // Arka planı daha modern bir gradient yapıyoruz.
         <div className="h-full w-full bg-gradient-to-br from-gray-50 to-slate-200 overflow-y-auto">
             <div className="container mx-auto px-4 py-4 text-center flex flex-col items-center min-h-full">
                 {/* Başlık Alanı - Dikey mesafeyi azalttık (my-8 -> my-4) */}
@@ -729,11 +693,12 @@ return (
                 </footer>
 
                 {/* Modallar */}
-                <LeaderboardModal
-                    isOpen={isLeaderboardOpen}
-                    onClose={() => setIsLeaderboardOpen(false)}
-                    currentUser={username}
-                />
+                <LeaderboardModal 
+            isOpen={isLeaderboardOpen} 
+            onClose={() => setIsLeaderboardOpen(false)} 
+            currentUser={username}
+            language={language} 
+        />
             </div>
         </div>
     );}
@@ -770,7 +735,6 @@ function WordHunt({ goToHome, language, mode, stats, onStatsChange, initialSaved
        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 const [swipeDirectionInfo, setSwipeDirectionInfo] = React.useState(null);
 
-// Seçilen hücrelerin düz bir çizgi olup olmadığını kontrol eden fonksiyon
       const validateSelectionPath = (path) => {
           if (path.length < 2) return false;
 
@@ -779,22 +743,20 @@ const [swipeDirectionInfo, setSwipeDirectionInfo] = React.useState(null);
           const deltaRow = end.row - start.row;
           const deltaCol = end.col - start.col;
 
-          // 1. Çizgisellik Kontrolü: Yatay, dikey veya tam 45 derece çapraz mı?
           const isHorizontal = deltaRow === 0 && deltaCol !== 0;
           const isVertical = deltaCol === 0 && deltaRow !== 0;
           const isDiagonal = Math.abs(deltaRow) === Math.abs(deltaCol) && deltaRow !== 0;
 
           if (!isHorizontal && !isVertical && !isDiagonal) {
-              return false; // Geçerli bir çizgi değil
+              return false; 
           }
 
-          // 2. Boşluk Kontrolü: Arada atlanmış hücre var mı?
           const expectedLength = isDiagonal ? Math.abs(deltaRow) + 1 : Math.abs(deltaRow) + Math.abs(deltaCol) + 1;
           if (path.length !== expectedLength) {
-              return false; // Yolda boşluk var
+              return false; 
           }
           
-          return true; // Tüm kontrollerden geçti
+          return true; 
       };
 
 
@@ -834,7 +796,6 @@ React.useEffect(() => {
 try {
                 const currentSaves = JSON.parse(localStorage.getItem(ALL_SAVES_KEY)) || {};
                 delete currentSaves[mode]; // Mevcut modun kaydını sil
-                // Eğer silinen mod en son oynanan mod ise, lastPlayed'i de temizle
                 if (currentSaves.lastPlayed === mode) {
                     currentSaves.lastPlayed = null;
                 }
@@ -844,7 +805,6 @@ try {
             }        setModalContent({
             isOpen: true,
             title: t.timeUp,
-            // X butonuna basıldığında da anasayfaya gitmesi için onClose ekledik.
             onClose: goToHome,
             children: ( 
               <div>
@@ -883,14 +843,12 @@ React.useEffect(() => {
             setGameState(initialSavedState.gameState);
             setIsLoading(false);
          } else {
-            // Yoksa (yeni bir oyunsa), yeni bir harita oluştur.
             const timerId = setTimeout(() => {
 let newGameState = createBoard(level, language, mode);                setGameState(newGameState);
                 setIsLoading(false);
             }, 150);
             return () => clearTimeout(timerId);
          }
-         // --- BİTİŞ ---
 
        }, [language, level, mode]);
 
@@ -913,8 +871,8 @@ if (config?.isOneShot) {            return;        }
 
 try {
             const currentSaves = JSON.parse(localStorage.getItem(ALL_SAVES_KEY)) || {};
-            currentSaves[mode] = gameStateToSave; // Kendi modunun yuvasını güncelle
-            currentSaves.lastPlayed = mode; // Bu modu en son oynanan olarak işaretle
+            currentSaves[mode] = gameStateToSave; 
+            currentSaves.lastPlayed = mode; 
             localStorage.setItem(ALL_SAVES_KEY, JSON.stringify(currentSaves));
           } catch(e) {
             console.error("Oyun kaydedilirken hata:", e);
@@ -930,8 +888,7 @@ try {
             vibrate('error');
 try {
                 const currentSaves = JSON.parse(localStorage.getItem(ALL_SAVES_KEY)) || {};
-                delete currentSaves[mode]; // Mevcut modun kaydını sil
-                // Eğer silinen mod en son oynanan mod ise, lastPlayed'i de temizle
+                delete currentSaves[mode]; 
                 if (currentSaves.lastPlayed === mode) {
                     currentSaves.lastPlayed = null;
                 }
@@ -941,7 +898,6 @@ try {
             }            setModalContent({ 
                 isOpen: true, 
                 title: t.timeUp, 
-                // X butonuna basıldığında da anasayfaya gitmesi için onClose ekledik.
                 onClose: goToHome, 
                 children: (
                   <div>
@@ -1004,7 +960,6 @@ try {
           if (cell && !isCellPartOfFoundRequiredWord(cell.row, cell.col)) {
               setIsSwiping(true);
               setSelectedCells([cell]);
-              // Yeni seçimde yön kilidini sıfırla
               setSwipeDirectionInfo(null);
           }
        }, [allRequiredWordsFound, isLoading, gameState, getCellFromCoordinates, isCellPartOfFoundRequiredWord]);
@@ -1020,49 +975,26 @@ const throttledMove = React.useMemo(() =>
             const grid = gridRef.current;
             if (!grid) return;
 
-            // Gerekli ölçümleri al
             const rect = grid.getBoundingClientRect();
             const cols = gameState.board[0].length;
             const rows = gameState.board.length;
             const cellWidth = rect.width / cols;
             const cellHeight = rect.height / rows;
-
-            // Başlangıç hücresinin merkezini hesapla
             const startCell = selectedCells[0];
             const startCellCenterX = rect.left + startCell.col * cellWidth + cellWidth / 2;
             const startCellCenterY = rect.top + startCell.row * cellHeight + cellHeight / 2;
-
-            // Başlangıç noktasından mevcut parmak pozisyonuna olan vektörü (yönü) bul
             const vectorX = clientX - startCellCenterX;
             const vectorY = clientY - startCellCenterY;
-
-            // Vektörün açısını radyan olarak hesapla
             const angle = Math.atan2(vectorY, vectorX);
-
-            // Açıyı 8 ana yönden (0: sağ, 1: sağ-alt, 2: alt, vs.) birine oturt
             const direction = Math.round(angle / (Math.PI / 4)) & 7;
-
-            // O yöne ait birim vektörleri (dx, dy) belirle
             const directions = [
-                { dx: 0, dy: 1 },  // Sağ
-                { dx: 1, dy: 1 },  // Sağ-Alt
-                { dx: 1, dy: 0 },  // Alt
-                { dx: 1, dy: -1 }, // Sol-Alt
-                { dx: 0, dy: -1 }, // Sol
-                { dx: -1, dy: -1 },// Sol-Üst
-                { dx: -1, dy: 0 }, // Üst
-                { dx: -1, dy: 1 }  // Sağ-Üst
+                { dx: 0, dy: 1 },{ dx: 1, dy: 1 },{ dx: 1, dy: 0 },{ dx: 1, dy: -1 },
+                { dx: 0, dy: -1 },{ dx: -1, dy: -1 },{ dx: -1, dy: 0 },{ dx: -1, dy: 1 }  
             ];
             const { dx, dy } = directions[direction];
-
-            // Mevcut parmağın altındaki hücreyi bul
             const currentCell = getCellFromCoordinates(clientX, clientY);
-            if (!currentCell) return;
-            
-            // Başlangıçtan mevcut hücreye kadar olan mesafeyi hesapla
+            if (!currentCell) return;            
             const distance = Math.max(Math.abs(currentCell.row - startCell.row), Math.abs(currentCell.col - startCell.col));
-
-            // Başlangıçtan itibaren, tespit edilen yönde, mesafeye kadar olan tüm hücreleri seç
             const newSelection = [startCell];
             for (let i = 1; i <= distance; i++) {
                 const nextRow = startCell.row + i * dx;
@@ -1073,15 +1005,15 @@ const throttledMove = React.useMemo(() =>
                     if (!isCellPartOfFoundRequiredWord(cellToAdd.row, cellToAdd.col)) {
                          newSelection.push(cellToAdd);
                     } else {
-                        break; // Bulunmuş bir kelimeye denk gelirse dur
+                        break; 
                     }
                 } else {
-                    break; // Harita dışına çıkarsa dur
+                    break; 
                 }
             }
             setSelectedCells(newSelection);
 
-        }, 75), // Gecikmeyi 75ms'ye çıkardık, bu da titremeyi azaltır
+        }, 75), 
         [isSwiping, gameState, selectedCells, getCellFromCoordinates, isCellPartOfFoundRequiredWord]
     );
 
@@ -1100,27 +1032,25 @@ const throttledMove = React.useMemo(() =>
 
               if (target && !foundWords.includes(word)) {
                   setFoundWords(prev => [...prev, word]);
-                  const points = word.length * 10; // (veya dinamik puanlama mantığınız)
+                  const points = word.length * 10; 
                   const newScore = score + points;
                   setScore(newScore);
                   playSound('correctSound');
                   vibrate('success');
                   setJustFoundWordInfo({ word, positions: target.positions });
                   setTimeout(() => setJustFoundWordInfo(null), 600);
-                  // ... diğer başarım ve istatistik kodları ...
               } else {
                   playSound('wrongSound');
               }
           }
 
-         setSelectedCells([]); // Her durumda seçimi temizle
+         setSelectedCells([]); 
        }, [isSwiping, selectedCells, gameState, foundWords, score, onStatsChange, playSound]);
 
 
        const isHintDisabled = React.useMemo(() => {
         if (!gameState) return true;
         const unrevealedCount = gameState.hiddenWord.length - revealedIndices.length;
-        // Kontrolü puandan (score) altına (stats.gold) çeviriyoruz.
         return unrevealedCount <= 1 || stats.gold < 1;
        }, [gameState, revealedIndices, stats.gold]); 
       
@@ -1143,34 +1073,22 @@ const throttledMove = React.useMemo(() =>
 
 const handleRevealWithGold = () => {
          const unfoundWords = gameState.words.filter(w => !foundWords.includes(w.word));
-         
          if (stats.gold > 0 && unfoundWords.length > 0) {
            const wordToReveal = _.sample(unfoundWords);
-
-           // Altını eksilt
            onStatsChange({ ...stats, gold: stats.gold - 1 });
-
            setFoundWords(prev => [...prev, wordToReveal.word]);
-           
            setJustFoundWordInfo({ word: wordToReveal.word, positions: wordToReveal.positions });
            setTimeout(() => setJustFoundWordInfo(null), 600);
-           
            const newTotalWords = stats.totalWordsFound + 1;
            const newStats = { ...stats, totalWordsFound: newTotalWords, gold: stats.gold - 1 };
            onStatsChange(newStats);
            if (newTotalWords >= 50) checkAndUnlockAchievement('FIFTY_WORDS', newStats);
-           
            playSound('correctSound');
            vibrate('success');
          }
        };
 
-
-
 	const handleGoHomeClick = () => {goToHome();};
-
-
-
 	const handleNextLevel = () => {
         const newMaxLevel = Math.max(stats.maxLevelCompleted, level);
         const newStats = { ...stats, maxLevelCompleted: newMaxLevel };
@@ -1209,7 +1127,6 @@ const handleRevealWithGold = () => {
        const closeModal = () => setModalContent({ isOpen: false, title: '', children: null, type: '' });
        const triggerConfetti = () => confetti({ particleCount: 150, spread: 90, origin: { y: 0.6 } });
        const handleHiddenWordSubmit = () => {
-          // YENİ EKLENEN SATIR: Modun tek seferlik olup olmadığını kontrol et.
           const isOneShot = config?.isOneShot;
 
           if (!allRequiredWordsFound) { 
@@ -1232,14 +1149,8 @@ const handleRevealWithGold = () => {
               else if (mode === 'timed-hard') goldEarned = 8;
               
               const newTotalGold = (stats.gold || 0) + goldEarned;
-
-              // İstatistikleri (yeni altın miktarı dahil) güncelle
-              // Bu fonksiyon App component'indeki Firebase güncellemesini tetikleyecek
               onStatsChange({ ...stats, gold: newTotalGold });
-
               const playerUsername = localStorage.getItem('wordHuntUsername') || 'Misafir'; 
-              
-              // Skoru Firebase'e gönder
               db.collection("scores").add({
                   username: playerUsername,
                   score: score,
@@ -1255,11 +1166,9 @@ const isNewHighScore = !mode.startsWith('timed') && score > currentHighScore;
 
 setModalContent({
   isOpen: true,
-  // Yeni başlık
   title: '🎉 Harika İş! 🎉',
   onClose: () => { closeModal(); isOneShot ? goToHome() : handleNextLevel(); },
   children: (
-    // Yeni, ortalanmış ve renkli tasarım
     <div className="flex flex-col items-center gap-4 p-4">
         
         {/* Kazanılan Altın */}
@@ -1427,12 +1336,6 @@ if (isLoading) { return ( <div className="flex items-center justify-center h-ful
 </div>
 
 
-
-
-
-
-
-
                     {/* --- SATIR 2: BUTONLAR --- */}
 <div className="flex w-full items-stretch justify-center gap-2 sm:gap-3 flex-nowrap">
 
@@ -1582,8 +1485,7 @@ function UsernamePrompt({ onSave }) {
 function App() {
     const [page, setPage] = React.useState('home');
     const [language, setLanguage] = React.useState('tr');
-	const t = translations[language] || translations['en'];
-
+	  const t = translations[language] || translations['en'];
     const [mode, setMode] = React.useState('easy');
     const [gameStats, setGameStats] = React.useState(loadGameStats);
     const [modalContent, setModalContent] = React.useState({ isOpen: false, title: '', body: null });
@@ -1591,12 +1493,9 @@ function App() {
     const [username, setUsername] = React.useState('');
     const [gold, setGold] = React.useState(0); 
     const [showUsernamePrompt, setShowUsernamePrompt] = React.useState(false);
-   
-
-
- const loadUserData = async (user) => {
-        const userRef = db.collection("users").doc(user);
-        const doc = await userRef.get();
+    const loadUserData = async (user) => {
+    const userRef = db.collection("users").doc(user);
+    const doc = await userRef.get();
         if (doc.exists) {
             setUsername(user);
             setGold(doc.data().gold || 0);
@@ -1615,7 +1514,7 @@ function App() {
         }
     }, []);
 
-	React.useEffect(() => {
+	  React.useEffect(() => {
       	if (page === 'home') {
             try {
                 const saves = localStorage.getItem(ALL_SAVES_KEY);
@@ -1626,7 +1525,7 @@ function App() {
       }
     }, [page]); 
 
-	    const handleStatsChange = (newStats) => {
+	  const handleStatsChange = (newStats) => {
         saveGameStats(newStats);
         setGameStats(newStats);
 
@@ -1654,7 +1553,6 @@ function App() {
     };
 
 const startGame = (selectedMode) => {
-        // --- RASTGELE MOD İÇİN ÖZEL MANTIK ---
         if (selectedMode === 'random') {
             const playableModes = ['easy', 'hard', 'timed-easy', 'timed-hard', 'super-easy'];
             const randomModeKey = _.sample(playableModes);
@@ -1664,16 +1562,8 @@ const startGame = (selectedMode) => {
                 if (index === 0) return part;
                 return part.charAt(0).toUpperCase() + part.slice(1);
             }).join('') + 'Mode';
-
-
             const randomModeName = t[randomModeTranslateKey] || randomModeKey;
-
-
-
-
-
             const randomLevel = _.random(0, 59);
-
             setModalContent({
                 isOpen: true,
                 title: t.randomGameTitle,
@@ -1696,12 +1586,9 @@ const startGame = (selectedMode) => {
             return;
         }
 
-        // --- DİĞER MODLAR İÇİN MEVCUT AKILLI MANTIK ---
         setMode(selectedMode);
         const savedGameForMode = allSaves?.[selectedMode];
-
         if (!savedGameForMode) {
-            // --- KAYITLI OYUN OLMAYINCA GÖSTERİLECEK POPUP'LAR ---
             const handleStartGame = () => {
                 setModalContent({ isOpen: false });
                 setPage('game');
@@ -1739,7 +1626,7 @@ const startGame = (selectedMode) => {
                       </div>
                     )
                 });
-            } else { // 'easy', 'timed-easy', ve 'super-easy' modları için
+            } else { 
                 setModalContent({
                     isOpen: true,
                     title: '✅ Oyun Kuralları & Yenilikler ✅',
@@ -1773,7 +1660,6 @@ const startGame = (selectedMode) => {
                 });
             }
         } else {
-            // --- KAYITLI OYUN OLUNCA GÖSTERİLECEK POPUP ---
             const handleContinue = () => {
                 setLanguage(savedGameForMode.language);
                 setMode(savedGameForMode.mode);
@@ -1817,14 +1703,12 @@ const startGame = (selectedMode) => {
 	};
 
 const goToHome = () => {
-      // YENİ MANTIK: Eğer oyun sayfasındaysak ve mod "rastgele" ise, uyarı gösterme.
-      // "mode" state'inin bir obje olması, onun rastgele mod olduğunu gösterir.
+    
       if (page === 'game' && typeof mode === 'object' && mode.isOneShot) {
-          setPage('home'); // Uyarı göstermeden direkt anasayfaya dön.
+          setPage('home'); 
           return;
       }
 
-      // Eğer oyun sayfasındaysak ve mod normal (kaydedilebilir) ise, uyarıyı göster.
       if (page === 'game') {
         setModalContent({
           isOpen: true,
@@ -1853,7 +1737,6 @@ const goToHome = () => {
           )
         });
       } else {
-        // Eğer zaten ana sayfadaysa, direkt ana sayfaya git
         setPage('home');
       }
     };
@@ -1875,13 +1758,10 @@ React.useEffect(() => {
             <WordHunt 
               goToHome={goToHome} 
               language={language} 
-              // Eğer mode bir obje ise (rastgele mod), içindeki adı kullan. Değilse kendisini.
               mode={typeof mode === 'object' ? mode.name : mode}
               stats={{ ...gameStats, gold: gold, username: username }} 
               onStatsChange={handleStatsChange} 
-              // Kayıtlı oyunu bulurken de aynı kontrolü yap.
               initialSavedState={allSaves ? allSaves[typeof mode === 'object' ? mode.name : mode] : null}
-              // Rastgele modun config'ini gönder
               config={typeof mode === 'object' ? mode : null}
             />
          ) : (
@@ -1900,10 +1780,8 @@ React.useEffect(() => {
             {modalContent.body}
           </Modal>
         </div>
-
-
- 
-                {showUsernamePrompt && <UsernamePrompt onSave={handleSaveUsername} />}
+  
+        {showUsernamePrompt && <UsernamePrompt onSave={handleSaveUsername} />}
 
       </ErrorBoundary>
     );
@@ -1912,10 +1790,7 @@ React.useEffect(() => {
 function handleAndroidBackPress() {
   if (window.appNavigator && window.appNavigator.getCurrentPage() === 'game') {
     window.appNavigator.goToHome();
-    return true; // Geri tuşu işleminin JavaScript tarafından yapıldığını belirt
-  }
-  return false; // Geri tuşu işlemini Android'e bırak (uygulamayı kapat)
-}
+    return true;   }  return false; }
 
 ReactDOM.render(<App />, document.getElementById('root'));
 

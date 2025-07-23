@@ -1007,55 +1007,83 @@ try {
           }
        }, [allRequiredWordsFound, isLoading, gameState, getCellFromCoordinates, isCellPartOfFoundRequiredWord]);
 
+
+
+
+
 const throttledMove = React.useMemo(() =>
-         _.throttle((clientX, clientY) => {
-           if (!isSwiping || !gameState) return;
-           const currentCell = getCellFromCoordinates(clientX, clientY);
-           if (!currentCell) return;
-            const lastCell = selectedCells[selectedCells.length - 1];
-            if (!lastCell || (lastCell.row === currentCell.row && lastCell.col === currentCell.col)) return;
+        _.throttle((clientX, clientY) => {
+            if (!isSwiping || !gameState || selectedCells.length === 0) return;
 
-            // --- YENİ HİBRİT MANTIK ---
+            const grid = gridRef.current;
+            if (!grid) return;
+
+            // Gerekli ölçümleri al
+            const rect = grid.getBoundingClientRect();
+            const cols = gameState.board[0].length;
+            const rows = gameState.board.length;
+            const cellWidth = rect.width / cols;
+            const cellHeight = rect.height / rows;
+
+            // Başlangıç hücresinin merkezini hesapla
+            const startCell = selectedCells[0];
+            const startCellCenterX = rect.left + startCell.col * cellWidth + cellWidth / 2;
+            const startCellCenterY = rect.top + startCell.row * cellHeight + cellHeight / 2;
+
+            // Başlangıç noktasından mevcut parmak pozisyonuna olan vektörü (yönü) bul
+            const vectorX = clientX - startCellCenterX;
+            const vectorY = clientY - startCellCenterY;
+
+            // Vektörün açısını radyan olarak hesapla
+            const angle = Math.atan2(vectorY, vectorX);
+
+            // Açıyı 8 ana yönden (0: sağ, 1: sağ-alt, 2: alt, vs.) birine oturt
+            const direction = Math.round(angle / (Math.PI / 4)) & 7;
+
+            // O yöne ait birim vektörleri (dx, dy) belirle
+            const directions = [
+                { dx: 0, dy: 1 },  // Sağ
+                { dx: 1, dy: 1 },  // Sağ-Alt
+                { dx: 1, dy: 0 },  // Alt
+                { dx: 1, dy: -1 }, // Sol-Alt
+                { dx: 0, dy: -1 }, // Sol
+                { dx: -1, dy: -1 },// Sol-Üst
+                { dx: -1, dy: 0 }, // Üst
+                { dx: -1, dy: 1 }  // Sağ-Üst
+            ];
+            const { dx, dy } = directions[direction];
+
+            // Mevcut parmağın altındaki hücreyi bul
+            const currentCell = getCellFromCoordinates(clientX, clientY);
+            if (!currentCell) return;
             
-            // Eğer bir yön kilitlenmişse, sadece o yönde ilerlemeye izin ver
-            if (swipeDirectionInfo) {
-                const expectedNextCell = { row: lastCell.row + swipeDirectionInfo.dx, col: lastCell.col + swipeDirectionInfo.dy };
-                if (currentCell.row === expectedNextCell.row && currentCell.col === expectedNextCell.col) {
-                    setSelectedCells(prev => [...prev, currentCell]);
+            // Başlangıçtan mevcut hücreye kadar olan mesafeyi hesapla
+            const distance = Math.max(Math.abs(currentCell.row - startCell.row), Math.abs(currentCell.col - startCell.col));
+
+            // Başlangıçtan itibaren, tespit edilen yönde, mesafeye kadar olan tüm hücreleri seç
+            const newSelection = [startCell];
+            for (let i = 1; i <= distance; i++) {
+                const nextRow = startCell.row + i * dx;
+                const nextCol = startCell.col + i * dy;
+
+                if (nextRow >= 0 && nextRow < rows && nextCol >= 0 && nextCol < cols) {
+                    const cellToAdd = { row: nextRow, col: nextCol };
+                    if (!isCellPartOfFoundRequiredWord(cellToAdd.row, cellToAdd.col)) {
+                         newSelection.push(cellToAdd);
+                    } else {
+                        break; // Bulunmuş bir kelimeye denk gelirse dur
+                    }
+                } else {
+                    break; // Harita dışına çıkarsa dur
                 }
-                return;
             }
+            setSelectedCells(newSelection);
 
-            // Henüz yön kilitlenmemişse (serbest aşama)
-            const isNeighbor = Math.abs(lastCell.row - currentCell.row) <= 1 && Math.abs(lastCell.col - currentCell.col) <= 1;
-
-                        const alreadySelected = selectedCells.some(c => c.row === currentCell.row && c.col === currentCell.col);
-
-            if (isNeighbor && !alreadySelected && !isCellPartOfFoundRequiredWord(currentCell.row, currentCell.col)) {
-                const newSelection = [...selectedCells, currentCell];
-                setSelectedCells(newSelection);
+        }, 75), // Gecikmeyi 75ms'ye çıkardık, bu da titremeyi azaltır
+        [isSwiping, gameState, selectedCells, getCellFromCoordinates, isCellPartOfFoundRequiredWord]
+    );
 
 
-                // Seçim 3 harfe ulaştığında yönü tespit et ve kilitle
-                
-// Seçim 3 harfe ulaştığında, İLK ve SON harfe bakarak genel yönü tespit et ve kilitle
-                if (newSelection.length === 3) {
-                    const firstCell = newSelection[0];
-                    const thirdCell = newSelection[2];
-                    // Math.sign kullanarak 1, 0, veya -1 değeri alıyoruz. Bu, küçük sapmaları tolere eder.
-                    const dx = Math.sign(thirdCell.row - firstCell.row);
-                    // DÜZELTME: thirdCell.col yerine firstCell.col kullanıyoruz.
-                    const dy = Math.sign(thirdCell.col - firstCell.col);
-                    setSwipeDirectionInfo({ dx, dy });
-                }
-
-
-
-
-
-}
-         }, 40), [isSwiping, gameState, selectedCells, swipeDirectionInfo, getCellFromCoordinates]
-       );
 
        const handleInteractionEnd = React.useCallback(() => {
          if (!isSwiping) return;

@@ -205,8 +205,8 @@ const ALL_SAVES_KEY = 'wordHuntAllSaves';
 	let baseCols = initialColsConfig[configIndex];
 	let r = baseRows + Math.floor(levelInStage / 3);
 	let c = baseCols + Math.floor(levelInStage / 2);
-	r = Math.max(7, Math.min(16, r));
-	c = Math.max(8, Math.min(22, c));
+	r = Math.max(7, Math.min(13, r));
+	c = Math.max(8, Math.min(14, c));
 	if (c <= r && r > 7) c = r + 1;
 	boardSizes.push({ rows: r, cols: c });
 }
@@ -297,17 +297,16 @@ function createBoard(level, language, mode) {
       }
 
       let potentialWords = _.shuffle(allWords);
-// YENİ KISIM: Moda özel zorluk ayarları
       let targetTotalWordCount;
       let targetHiddenWordLength;
 
       if (mode === 'super-easy') {
           // "Aşırı Kolay Mod" için çok daha düşük hedefler belirliyoruz.
           targetTotalWordCount = 4 + Math.floor(level / 8); // 4 kelimeyle başlar, her 8 seviyede 1 artar.
-          targetHiddenWordLength = 3 + Math.floor(level / 10); // 3 harfle başlar, her 10 seviyede 1 artar.
+          targetHiddenWordLength = 4 + Math.floor(level / 10); // 3 harfle başlar, her 10 seviyede 1 artar.
       } else {
           // DİĞER TÜM MODLAR İÇİN SİZİN KODUNUZDAKİ ORİJİNAL FORMÜLLER KULLANILIYOR
-          targetTotalWordCount = 15 + Math.floor(level / 4);
+          targetTotalWordCount = 17 + Math.floor(level / 4);
           targetHiddenWordLength = Math.min(12, 5 + Math.floor(level / 3));
       }
 
@@ -490,7 +489,7 @@ const Cell = React.memo(function Cell({
       else if (isFoundRequiredPart) { cellClass = theme.foundCell; textClass = 'text-gray-600 opacity-75'; }
     }
     return (
-      <div className={`flex items-center justify-center text-center font-semibold border border-gray-200/50 rounded aspect-square text-[clamp(12px,3vmin,24px)] ${cellClass} ${textClass} transition-all duration-150 select-none`}>
+      <div className={`flex items-center justify-center text-center font-semibold border border-gray-200/50 rounded aspect-square text-[clamp(14px,4.5vmin,28px)] ${cellClass} ${textClass} transition-all duration-150 select-none`}>
         {letter || ''}
       </div>
     );
@@ -642,16 +641,18 @@ function HomePage({ startGame, language, setLanguage, stats, setModalContent, sa
     };
 
     // Oyun modu kartları için yeniden kullanılabilir bir bileşen.
-    const ModeCard = ({ title, icon, bgColor, onClick }) => (
+    const ModeCard = ({ title, icon, bgColor, playTextColor, onClick }) => (
         <button
             onClick={onClick}
-            className={`relative group w-full h-32 rounded-2xl p-4 flex flex-col justify-between items-start text-white overflow-hidden transition-all duration-300 transform hover:-translate-y-1 hover:shadow-xl ${bgColor}`}
+            className={`relative group w-full h-28 rounded-2xl p-4 flex flex-col justify-between items-start text-white overflow-hidden transition-all duration-300 transform hover:-translate-y-1 hover:shadow-xl ${bgColor}`}
         >
-            <div className="absolute -right-4 -bottom-4 text-6xl opacity-20 group-hover:opacity-30 transition-opacity duration-300">
+            {/* EMOJİ GÖRÜNÜRLÜĞÜ ARTIRILDI (opacity-25 -> opacity-30) */}
+            <div className="absolute -right-4 -bottom-4 text-7xl opacity-30 group-hover:opacity-50 transition-all duration-300 transform group-hover:scale-110">
                 {icon}
             </div>
             <h3 className="text-xl font-bold">{title}</h3>
-            <span className="text-sm font-semibold bg-white/30 backdrop-blur-sm px-3 py-1 rounded-full">Oyna</span>
+            {/* "OYNA" YAZISI RENKLENDİRİLDİ */}
+            <span className={`text-sm font-bold ${playTextColor} bg-white/40 backdrop-blur-sm px-3 py-1 rounded-full`}>Oyna</span>
         </button>
     );
 
@@ -680,16 +681,13 @@ return (
                 <main className="w-full max-w-md flex flex-col items-center gap-4"> {/* Boşluğu azalttık (gap-6 -> gap-4) */}
                     
                     {/* Oyun Modu Kartları */}
-                    <div className="w-full grid grid-cols-2 gap-3"> {/* Boşluğu azalttık (gap-4 -> gap-3) */}
-                        {/* YENİ MOD: Aşırı Kolay */}
-                        <ModeCard title={t.superEasyMode} icon="🧸" bgColor="bg-gradient-to-br from-lime-300 to-emerald-400" onClick={() => startGame('super-easy')} />
-                        {/* YENİ MOD: Rastgele */}
-                        <ModeCard title={t.randomMode} icon="🎲" bgColor="bg-gradient-to-br from-slate-400 to-gray-500" onClick={() => startGame('random')} />
-                        
-                        <ModeCard title={t.easyMode} icon="😊" bgColor="bg-gradient-to-br from-teal-400 to-green-500" onClick={() => startGame('easy')} />
-                        <ModeCard title={t.hardMode} icon="🔥" bgColor="bg-gradient-to-br from-rose-500 to-red-600" onClick={() => startGame('hard')} />
-                        <ModeCard title={t.timedEasyMode} icon="⏱️" bgColor="bg-gradient-to-br from-sky-500 to-blue-600" onClick={() => startGame('timed-easy')} />
-                        <ModeCard title={t.timedHardMode} icon="⚡" bgColor="bg-gradient-to-br from-amber-500 to-orange-600" onClick={() => startGame('timed-hard')} />
+                    <div className="w-full grid grid-cols-2 gap-3">
+                        <ModeCard title={t.superEasyMode} icon="🧸" bgColor="bg-gradient-to-br from-lime-300 to-emerald-400" playTextColor="text-emerald-900" onClick={() => startGame('super-easy')} />
+                        <ModeCard title={t.randomMode} icon="🎲" bgColor="bg-gradient-to-br from-slate-400 to-gray-500" playTextColor="text-gray-900" onClick={() => startGame('random')} />
+                        <ModeCard title={t.easyMode} icon="😊" bgColor="bg-gradient-to-br from-teal-400 to-green-500" playTextColor="text-green-900" onClick={() => startGame('easy')} />
+                        <ModeCard title={t.hardMode} icon="🔥" bgColor="bg-gradient-to-br from-rose-500 to-red-600" playTextColor="text-red-900" onClick={() => startGame('hard')} />
+                        <ModeCard title={t.timedEasyMode} icon="⏱️" bgColor="bg-gradient-to-br from-sky-500 to-blue-600" playTextColor="text-blue-900" onClick={() => startGame('timed-easy')} />
+                        <ModeCard title={t.timedHardMode} icon="⚡" bgColor="bg-gradient-to-br from-amber-500 to-orange-600" playTextColor="text-orange-900" onClick={() => startGame('timed-hard')} />
                     </div>
 
                     {/* Kontrol Paneli (Daha kompakt) */}
@@ -755,7 +753,7 @@ function WordHunt({ goToHome, language, mode, stats, onStatsChange, initialSaved
        const [foundWords, setFoundWords] = React.useState(initialSavedState?.foundWords ?? []);
        const [hiddenWordGuess, setHiddenWordGuess] = React.useState('');
        const [isSwiping, setIsSwiping] = React.useState(false);
-       const [swipeDirectionInfo, setSwipeDirectionInfo] = React.useState({ dx: 0, dy: 0 });
+
        const gridRef = React.useRef(null);
        const [modalContent, setModalContent] = React.useState({ isOpen: false, title: '', children: null, type: '' });
        const [score, setScore] = React.useState(initialSavedState?.score ?? 0);
@@ -768,6 +766,35 @@ function WordHunt({ goToHome, language, mode, stats, onStatsChange, initialSaved
        const hintDisplayRef = React.useRef(null);
        const allRequiredWordsFound = gameState?.words?.length > 0 && foundWords.length === gameState.words.length;
        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+const [swipeDirectionInfo, setSwipeDirectionInfo] = React.useState(null);
+
+// Seçilen hücrelerin düz bir çizgi olup olmadığını kontrol eden fonksiyon
+      const validateSelectionPath = (path) => {
+          if (path.length < 2) return false;
+
+          const start = path[0];
+          const end = path[path.length - 1];
+          const deltaRow = end.row - start.row;
+          const deltaCol = end.col - start.col;
+
+          // 1. Çizgisellik Kontrolü: Yatay, dikey veya tam 45 derece çapraz mı?
+          const isHorizontal = deltaRow === 0 && deltaCol !== 0;
+          const isVertical = deltaCol === 0 && deltaRow !== 0;
+          const isDiagonal = Math.abs(deltaRow) === Math.abs(deltaCol) && deltaRow !== 0;
+
+          if (!isHorizontal && !isVertical && !isDiagonal) {
+              return false; // Geçerli bir çizgi değil
+          }
+
+          // 2. Boşluk Kontrolü: Arada atlanmış hücre var mı?
+          const expectedLength = isDiagonal ? Math.abs(deltaRow) + 1 : Math.abs(deltaRow) + Math.abs(deltaCol) + 1;
+          if (path.length !== expectedLength) {
+              return false; // Yolda boşluk var
+          }
+          
+          return true; // Tüm kontrollerden geçti
+      };
+
 
        const MobileKeyboard = ({ onKeyPress }) => {
          const rows = [
@@ -969,106 +996,96 @@ try {
       
        const isCellSelected = React.useCallback((r, c) => selectedCells.some(cell => cell.row === r && cell.col === c), [selectedCells]);
 
-       const handleInteractionStart = React.useCallback((clientX, clientY) => {
-          if (allRequiredWordsFound || isLoading || !gameState) return;
-          const cell = getCellFromCoordinates(clientX, clientY);
-          if (cell && !isCellPartOfFoundRequiredWord(cell.row, cell.col)) {
-              setIsSwiping(true);
-              setSelectedCells([cell]);
-              setSwipeDirectionInfo({ dx: 0, dy: 0 });
-          }
-       }, [allRequiredWordsFound, isLoading, gameState, getCellFromCoordinates, isCellPartOfFoundRequiredWord]);
+        const handleInteractionStart = React.useCallback((clientX, clientY) => {
+          if (allRequiredWordsFound || isLoading || !gameState) return;
+          const cell = getCellFromCoordinates(clientX, clientY);
+          if (cell && !isCellPartOfFoundRequiredWord(cell.row, cell.col)) {
+              setIsSwiping(true);
+              setSelectedCells([cell]);
+              // Yeni seçimde yön kilidini sıfırla
+              setSwipeDirectionInfo(null);
+          }
+       }, [allRequiredWordsFound, isLoading, gameState, getCellFromCoordinates, isCellPartOfFoundRequiredWord]);
 
-       const throttledMove = React.useMemo(() =>
-         _.throttle((clientX, clientY) => {
-           if (!isSwiping || allRequiredWordsFound || isLoading || !gameState || !selectedCells.length) return;
-           const currentCell = getCellFromCoordinates(clientX, clientY);
-           if (!currentCell) return;
-           const lastCell = selectedCells[selectedCells.length - 1];
-           if (currentCell.row === lastCell.row && currentCell.col === lastCell.col) return;
-           if (isCellSelected(currentCell.row, currentCell.col) || isCellPartOfFoundRequiredWord(currentCell.row, currentCell.col)) return;
+const throttledMove = React.useMemo(() =>
+         _.throttle((clientX, clientY) => {
+           if (!isSwiping || !gameState) return;
+           const currentCell = getCellFromCoordinates(clientX, clientY);
+           if (!currentCell) return;
+            const lastCell = selectedCells[selectedCells.length - 1];
+            if (!lastCell || (lastCell.row === currentCell.row && lastCell.col === currentCell.col)) return;
 
-           if (selectedCells.length === 1) {
-               const dx = currentCell.row - lastCell.row;
-               const dy = currentCell.col - lastCell.col;
-               if (Math.abs(dx) <= 1 && Math.abs(dy) <= 1 && (dx !== 0 || dy !== 0)) {
-                   setSwipeDirectionInfo({ dx, dy });
-                   setSelectedCells(prev => [...prev, currentCell]);
-               }
-           } else if (selectedCells.length > 1) {
-               const expectedNextCell = { row: lastCell.row + swipeDirectionInfo.dx, col: lastCell.col + swipeDirectionInfo.dy };
-               if (currentCell.row === expectedNextCell.row && currentCell.col === expectedNextCell.col) {
-                   setSelectedCells(prev => [...prev, currentCell]);
-               }
-           }
-         }, 40), [isSwiping, selectedCells, swipeDirectionInfo, allRequiredWordsFound, isLoading, gameState, getCellFromCoordinates, isCellSelected, isCellPartOfFoundRequiredWord]
-       );
+            // --- YENİ HİBRİT MANTIK ---
+            
+            // Eğer bir yön kilitlenmişse, sadece o yönde ilerlemeye izin ver
+            if (swipeDirectionInfo) {
+                const expectedNextCell = { row: lastCell.row + swipeDirectionInfo.dx, col: lastCell.col + swipeDirectionInfo.dy };
+                if (currentCell.row === expectedNextCell.row && currentCell.col === expectedNextCell.col) {
+                    setSelectedCells(prev => [...prev, currentCell]);
+                }
+                return;
+            }
 
-       const handleInteractionEnd = React.useCallback(() => {
-         if (isSwiping) {
-           throttledMove.flush();
-           setIsSwiping(false);
-           if (selectedCells.length < 2) {
-             setSelectedCells([]);
-             setSwipeDirectionInfo({ dx: 0, dy: 0 });
-           }
-         }
-       }, [isSwiping, throttledMove, selectedCells]);
+            // Henüz yön kilitlenmemişse (serbest aşama)
+            const isNeighbor = Math.abs(lastCell.row - currentCell.row) <= 1 && Math.abs(lastCell.col - currentCell.col) <= 1;
 
-       React.useEffect(() => {
-         if (!isSwiping && selectedCells.length > 0) {
-           const rawWord = selectedCells.map(c => gameState.board?.[c.row]?.[c.col] || '').join('');
-           const word = customToUpperCase(rawWord);
-           const target = gameState.words?.find(w => w.word === word);
-           if (target && !foundWords.includes(word)) {
-             setFoundWords(prev => [...prev, word]);
+                        const alreadySelected = selectedCells.some(c => c.row === currentCell.row && c.col === currentCell.col);
 
-             // --- YENİ PUANLAMA MANTIĞI ---
-             let points = 0;
-             // Eğer mod "süreli" ise (timed-easy veya timed-hard)
-             if (mode.startsWith('timed')) {
-                // Seviye başlangıcından bu yana geçen süreyi saniye olarak hesapla
-                const elapsedTime = initialTime - timeLeft;
+            if (isNeighbor && !alreadySelected && !isCellPartOfFoundRequiredWord(currentCell.row, currentCell.col)) {
+                const newSelection = [...selectedCells, currentCell];
+                setSelectedCells(newSelection);
 
-                let multiplier = 30; // Başlangıç çarpanı
 
-                if (elapsedTime <= 20) {
-                    // İlk 20 saniye içinde bulunduysa çarpan 30'dur.
-                    multiplier = 30;
-                } else {
-                    // 20 saniyeden sonra geçen süreyi hesapla
-                    const timeAfterInitialPeriod = elapsedTime - 20;
-                    // Her 30 saniyelik dilim için çarpanı 5 azalt
-                    const reductionSteps = Math.floor(timeAfterInitialPeriod / 30);
-                    multiplier = 30 - (reductionSteps * 5);
+                // Seçim 3 harfe ulaştığında yönü tespit et ve kilitle
+                
+// Seçim 3 harfe ulaştığında, İLK ve SON harfe bakarak genel yönü tespit et ve kilitle
+                if (newSelection.length === 3) {
+                    const firstCell = newSelection[0];
+                    const thirdCell = newSelection[2];
+                    // Math.sign kullanarak 1, 0, veya -1 değeri alıyoruz. Bu, küçük sapmaları tolere eder.
+                    const dx = Math.sign(thirdCell.row - firstCell.row);
+                    // DÜZELTME: thirdCell.col yerine firstCell.col kullanıyoruz.
+                    const dy = Math.sign(thirdCell.col - firstCell.col);
+                    setSwipeDirectionInfo({ dx, dy });
                 }
 
-                // Çarpanın 10'dan aşağı düşmemesini sağla
-                points = word.length * Math.max(10, multiplier);
 
-             } else {
-                // Süreli mod değilse, standart puanlama devam eder.
-                points = word.length * 10;
-             }
 
-const newScore = score + points;
-             setScore(newScore);
-             playSound('correctSound');
-             vibrate('success');
-             setJustFoundWordInfo({ word, positions: target.positions });
-             setTimeout(() => setJustFoundWordInfo(null), 600);
-             const newTotalWords = stats.totalWordsFound + 1;
-             const newStats = { ...stats, totalWordsFound: newTotalWords };
-             onStatsChange(newStats);
-             if (newTotalWords >= 50) checkAndUnlockAchievement('FIFTY_WORDS', newStats);
-             if (newScore > 500) checkAndUnlockAchievement('HIGH_SCORER', newStats);
-           } else {
-             playSound('wrongSound');
-           }
-           setSelectedCells([]);
-           setSwipeDirectionInfo({ dx: 0, dy: 0 });
-         }
-       }, [isSwiping]);
+
+
+}
+         }, 40), [isSwiping, gameState, selectedCells, swipeDirectionInfo, getCellFromCoordinates]
+       );
+
+       const handleInteractionEnd = React.useCallback(() => {
+         if (!isSwiping) return;
+
+          throttledMove.flush();
+         setIsSwiping(false);
+          
+          if (selectedCells.length > 1 && validateSelectionPath(selectedCells)) {
+              const rawWord = selectedCells.map(c => gameState.board?.[c.row]?.[c.col] || '').join('');
+              const word = customToUpperCase(rawWord);
+              const target = gameState.words?.find(w => w.word === word);
+
+              if (target && !foundWords.includes(word)) {
+                  setFoundWords(prev => [...prev, word]);
+                  const points = word.length * 10; // (veya dinamik puanlama mantığınız)
+                  const newScore = score + points;
+                  setScore(newScore);
+                  playSound('correctSound');
+                  vibrate('success');
+                  setJustFoundWordInfo({ word, positions: target.positions });
+                  setTimeout(() => setJustFoundWordInfo(null), 600);
+                  // ... diğer başarım ve istatistik kodları ...
+              } else {
+                  playSound('wrongSound');
+              }
+          }
+
+         setSelectedCells([]); // Her durumda seçimi temizle
+       }, [isSwiping, selectedCells, gameState, foundWords, score, onStatsChange, playSound]);
+
 
        const isHintDisabled = React.useMemo(() => {
         if (!gameState) return true;
@@ -1170,7 +1187,7 @@ const handleRevealWithGold = () => {
               playSound('wrongSound'); 
               return; 
           }
-        const fullGuess = gameState.hiddenWord[0] + customToUpperCase(hiddenWordGuess.trim());
+        const fullGuess = customToUpperCase(hiddenWordGuess.trim());
           if (fullGuess === gameState.hiddenWord) { 
               playSound('correctSound'); 
               vibrate('success');
@@ -1208,48 +1225,59 @@ const isNewHighScore = !mode.startsWith('timed') && score > currentHighScore;
 
 setModalContent({
   isOpen: true,
-  title: '🎉 Seviye Tamamlandı! 🎉',
+  // Yeni başlık
+  title: '🎉 Harika İş! 🎉',
   onClose: () => { closeModal(); isOneShot ? goToHome() : handleNextLevel(); },
   children: (
-    <div className="text-center p-4">
-      <div className="flex justify-around items-center my-6">
-        <div className="flex flex-col items-center">
-          <p className="text-sm font-medium text-gray-500 uppercase tracking-wider">Skorun</p>
-          <p className="text-5xl font-bold text-green-600">{score}</p>
-          {isNewHighScore && (
-            <span className="mt-2 text-xs bg-yellow-200 text-yellow-800 font-bold px-3 py-1 rounded-full animate-pulse">
-              🚀 YENİ REKOR!
-            </span>
-          )}
-        </div>
+    // Yeni, ortalanmış ve renkli tasarım
+    <div className="flex flex-col items-center gap-4 p-4">
         
-        {!mode.startsWith('timed') && (
-          <div className="flex flex-col items-center">
-            <p className="text-sm font-medium text-gray-500 uppercase tracking-wider">Yüksek Skor</p>
-            <p className="text-5xl font-bold text-indigo-600">{Math.max(score, currentHighScore)}</p>
-          </div>
-        )}
-      </div>
+        {/* Kazanılan Altın */}
+        <div className="bg-amber-100 border-2 border-amber-300 rounded-full px-6 py-2 flex items-center gap-3 shadow-inner">
+            <span className="text-3xl">💰</span>
+            <div className="text-left">
+                <p className="text-sm font-semibold text-amber-800">Kazanılan Altın</p>
+                <p className="text-2xl font-bold text-amber-900">+{goldEarned}</p>
+            </div>
+        </div>
 
-      <div className="flex flex-col sm:flex-row gap-3 mt-8">
-        <button 
-          onClick={goToHome} 
-          className="w-full px-4 py-3 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold rounded-lg transition-all duration-300 shadow-sm transform hover:scale-105"
-        >
-          {t.returnToHomeButton}
-        </button>
-        {/* YENİDEN EKLENEN className ÖZELLİĞİ */}
-        <button 
-          onClick={() => { closeModal(); isOneShot ? goToHome() : handleNextLevel(); }} 
-          className="w-full px-4 py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg transition-all duration-300 shadow-lg transform hover:scale-105"
-        >
-          {isOneShot ? t.returnToHomeButton : t.nextLevelButton}
-        </button>
-      </div>
+        {/* Skor Bilgileri */}
+        <div className="w-full grid grid-cols-2 gap-4 text-center">
+            <div className="bg-slate-100 p-3 rounded-lg">
+                <p className="text-sm font-semibold text-gray-600 uppercase">SKORUN</p>
+                <p className="text-4xl font-bold text-green-600">{score}</p>
+                {isNewHighScore && (
+                    <span className="mt-1 inline-block text-xs bg-yellow-200 text-yellow-800 font-bold px-2 py-0.5 rounded-full animate-pulse">
+                      YENİ REKOR!
+                    </span>
+                )}
+            </div>
+            <div className="bg-slate-100 p-3 rounded-lg">
+                <p className="text-sm font-semibold text-gray-600 uppercase">YÜKSEK SKOR</p>
+                <p className="text-4xl font-bold text-indigo-600">{mode.startsWith('timed') ? '-' : Math.max(score, currentHighScore)}</p>
+            </div>
+        </div>
+
+        {/* Butonlar */}
+        <div className="w-full flex flex-col sm:flex-row gap-3 mt-4">
+            <button 
+              onClick={goToHome} 
+              className="w-full px-4 py-3 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold rounded-lg transition-all duration-300 shadow-sm"
+            >
+              {t.returnToHomeButton}
+            </button>
+            <button 
+              onClick={() => { closeModal(); isOneShot ? goToHome() : handleNextLevel(); }} 
+              className="w-full px-4 py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg transition-all duration-300 shadow-lg"
+            >
+              {isOneShot ? t.returnToHomeButton : t.nextLevelButton}
+            </button>
+        </div>
     </div>
   )
 });
-          } else {
+
+	} else {
               playSound('wrongSound'); 
               vibrate('error');
               setHiddenWordGuess('');
@@ -1314,8 +1342,8 @@ if (isLoading) { return ( <div className="flex items-center justify-center h-ful
                     {/* KELİME LİSTESİ */}
                     {/* DEĞİŞİKLİK: "Kelimeler" başlığı (h3) kaldırıldı. */}
                     <div className={`transition-all duration-500 ease-in-out ${allRequiredWordsFound ? 'max-h-0 opacity-0 invisible' : ''}`}>
-                        <div className="flex flex-wrap justify-center content-start gap-1.5 p-2 bg-gray-100 rounded-lg">
-                            {gameState.words.map(({ word }) => {
+    <div className="flex flex-wrap justify-center content-start gap-1.5 p-2 bg-gray-100 rounded-lg max-h-36 overflow-y-auto scrollbar-thin">
+        {gameState.words.map(({ word }) => {
                                 const isFound = foundWords.includes(word);
                                 const isHiddenInHardMode = (mode === 'hard' || mode === 'timed-hard') && !isFound;
                                 return (<span key={word} className={`px-2.5 py-1 rounded-md text-sm font-medium transition-all duration-500 ${isFound ? 'bg-gray-300 text-gray-500 line-through opacity-50' : isHiddenInHardMode ? 'bg-gray-400 text-transparent pointer-events-none' : theme.wordBg + ' text-gray-800'}`} style={{ minWidth: '65px', textAlign: 'center' }}>{isHiddenInHardMode ? '???' : word}</span>);
@@ -1417,21 +1445,34 @@ if (isLoading) { return ( <div className="flex items-center justify-center h-ful
                     {allRequiredWordsFound && (
                         <div className={`flex-shrink-0 transition-all duration-500 ease-in-out mt-2 lg:mt-auto`}>
                              <div className="flex flex-col gap-2">
-                                <div ref={hintDisplayRef} className="flex justify-center items-center gap-1 bg-gray-200 p-2 rounded-lg min-h-[48px]">
-                                   {gameState && allRequiredWordsFound && Array.from({ length: gameState.hiddenWord.length }).map((_, index) => {
-                                    if (index === 0) {
-                                        return (<span key={index} className="flex items-center justify-center bg-blue-200 w-8 h-8 rounded text-xl font-bold text-gray-800 shadow-inner">{gameState.hiddenWord[0]}</span>);
-                                    }
-                                    const char = hiddenWordGuess[index - 1] || '';
-                                    const hintChar = revealedIndices.includes(index) ? gameState.hiddenWord[index] : '';
-                                    return (<span key={index} className="flex items-center justify-center bg-white w-8 h-8 rounded text-xl font-bold text-gray-800 shadow-inner">{char || hintChar}</span>);
-                                })}
+                                <div className="flex flex-row items-center justify-center gap-4 bg-gray-200 p-3 rounded-lg">
+                                    {/* 1. KISIM: Renkli "İlk Harf" etiketi (sağına ayırıcı çizgi eklendi) */}
+                                    <div className="font-semibold text-indigo-600 dark:text-indigo-300 pr-4 border-r-2 border-gray-300">
+                                        İlk Harf: {gameState.hiddenWord[0]}
+                                    </div>
+
+                                    {/* 2. KISIM: Tüm harfler için giriş kutuları */}
+                                    <div ref={hintDisplayRef} className="flex justify-center items-center gap-1">
+                                        {gameState && allRequiredWordsFound && Array.from({ length: gameState.hiddenWord.length }).map((_, index) => {
+                                            const boxClass = "bg-white";
+
+                                            // Artık ilk harf için özel bir durum yok. Tüm kutular aynı mantığı kullanır.
+                                            const charToShow = hiddenWordGuess[index] || (revealedIndices.includes(index) ? gameState.hiddenWord[index] : '');
+                                            
+                                            return (
+                                                <span key={index} className={`flex items-center justify-center w-8 h-8 rounded text-xl font-bold text-gray-800 shadow-inner ${boxClass}`}>
+                                                    {charToShow}
+                                                </span>
+                                            );
+                                        })}
+                                    </div>
                                 </div>
+                              
 
                                 <>
-                                    {isMobile ? (<MobileKeyboard onKeyPress={(key) => { if (key.length === 1 && hiddenWordGuess.length < gameState.hiddenWord.length - 1) { setHiddenWordGuess(prev => prev + key); } }} />
+                                    {isMobile ? (<MobileKeyboard onKeyPress={(key) => { if (key.length === 1 && hiddenWordGuess.length < gameState.hiddenWord.length) { setHiddenWordGuess(prev => prev + key); } }} />
                                     ) : (
-                                        <input type="text" ref={hiddenWordInputRef} value={hiddenWordGuess} onChange={(e) => setHiddenWordGuess(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') { handleHiddenWordSubmit(); } }} className={`border-2 ${theme.inputBorder} p-1 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-indigo-300 w-full disabled:bg-gray-200`} placeholder={t.hiddenWordPlaceholder} disabled={!allRequiredWordsFound} maxLength={gameState.hiddenWord.length - 1} />
+                                        <input type="text" ref={hiddenWordInputRef} value={hiddenWordGuess} onChange={(e) => setHiddenWordGuess(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') { handleHiddenWordSubmit(); } }} className={`border-2 ${theme.inputBorder} p-1 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-indigo-300 w-full disabled:bg-gray-200`} placeholder={t.hiddenWordPlaceholder} disabled={!allRequiredWordsFound} maxLength={gameState.hiddenWord.length} />
                                     )}
                                     <div className="flex items-stretch justify-center gap-2 mt-1">
                                         <button title={t.homeButton} onClick={goToHome} className="bg-gray-500 text-white rounded-lg flex-1 py-1 text-2xl hover:bg-gray-600 transition-transform active:scale-95">🏠</button>
@@ -1587,7 +1628,20 @@ const startGame = (selectedMode) => {
         if (selectedMode === 'random') {
             const playableModes = ['easy', 'hard', 'timed-easy', 'timed-hard', 'super-easy'];
             const randomModeKey = _.sample(playableModes);
-            const randomModeName = t[randomModeKey.replace('-', '') + 'Mode'] || randomModeKey;
+
+            const keyParts = randomModeKey.split('-');
+            const randomModeTranslateKey = keyParts.map((part, index) => {
+                if (index === 0) return part;
+                return part.charAt(0).toUpperCase() + part.slice(1);
+            }).join('') + 'Mode';
+
+
+            const randomModeName = t[randomModeTranslateKey] || randomModeKey;
+
+
+
+
+
             const randomLevel = _.random(0, 59);
 
             setModalContent({

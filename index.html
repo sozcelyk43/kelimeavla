@@ -10,8 +10,9 @@
 	<script src="libs/react-dom.production.min.js"></script>
 	<script src="libs/babel.min.js"></script>
 	<script src="libs/lodash.min.js"></script>
-	
 	<script src="https://unpkg.com/react-beautiful-dnd@13.1.1/dist/react-beautiful-dnd.min.js"></script>
+
+	
 	
 	<script src="https://cdn.tailwindcss.com"></script> 
 	<script src="libs/confetti.browser.min.js"></script>
@@ -723,8 +724,11 @@ function HomePage({ startGame, language, setLanguage, stats, setModalContent, sa
 }
 
 function WordHunt({ goToHome, language, mode, stats, onStatsChange, initialSavedState, config }) {
-    const { DragDropContext, Droppable, Draggable } = window.ReactBeautifulDnd;
+
     const t = translations[language] || translations['en'];
+
+const { DragDropContext, Droppable, Draggable } = window.ReactBeautifulDnd;
+
     const hiddenWordContainerStyle = {       display: 'grid',       gap: '1px',        width: 'auto',        gridTemplateColumns: `repeat(${gameState?.hiddenWord?.length || 0}, minmax(0, 1fr))`,   };
     const getInitialTime = (currentMode) => { let baseTime;if (currentMode === 'timed-hard') {baseTime = 180;} else if (currentMode === 'timed-easy') {baseTime = 120;} else {return 120;}
     const timeIncrements = Math.floor(level / 12);
@@ -766,96 +770,65 @@ function WordHunt({ goToHome, language, mode, stats, onStatsChange, initialSaved
         if (path.length !== expectedLength) { return false; } return true;
     };
 
- const onDragEnd = (result) => {
+// WordHunt component'i içine...
+// BU YENİ ve GELİŞMİŞ FONKSİYONU EKLEYİN
+
+const onDragEnd = (result) => {
     const { source, destination } = result;
 
-    // 1. KURAL KONTROLLERİ (GUARD CLAUSES)
-    // ----------------------------------------------------
+    // 1. Geçerli bir alana bırakılmadıysa hiçbir şey yapma
+    if (!destination) return;
 
-    // Geçersiz bir alana bırakıldıysa hiçbir şey yapma
-    if (!destination) {
-        return;
-    }
-
-    // YENİ KURAL: Eğer kalan son harfi, dolu bir slota taşımaya çalışıyorsan işlemi engelle.
-    // Bu, "Kalan Harfler" alanının boş kalmasını garantiler.
-    if (source.droppableId === 'source-area' && sourceLetters.length === 1 && destination.droppableId === 'answer-area' && answerSlots[destination.index] !== null) {
-        return;
-    }
-
-    // YENİ KURAL: Eğer "Kalan Harfler" alanı zaten boşsa, oraya geri harf taşımayı engelle.
-    if (sourceLetters.length === 0 && destination.droppableId === 'source-area') {
-        return;
-    }
+    // 2. İpucuyla kilitlenmiş bir harfi yerinden oynatmaya çalışma
+    if (source.droppableId === 'answer-area' && hintLockedSlots.includes(source.index)) return;
+    if (destination.droppableId === 'answer-area' && hintLockedSlots.includes(destination.index)) return;
     
-    // 2. TAŞIMA İŞLEMLERİ
-    // ----------------------------------------------------
+    // State'lerin kopyalarını oluştur
+    const sourceLettersCopy = [...sourceLetters];
+    const answerSlotsCopy = [...answerSlots];
 
-    // SENARYO A: Aynı liste içinde sıralama yapılıyorsa (Takas Etme)
-    if (source.droppableId === destination.droppableId) {
-        // Sadece cevap alanı içindeki sıralamaya izin ver
-        if (source.droppableId === 'answer-area') {
-            const newSlots = [...answerSlots];
-            const [movedItem] = newSlots.splice(source.index, 1);
-            newSlots.splice(destination.index, 0, movedItem);
-            setAnswerSlots(newSlots);
-        }
-        // (Kalan harfler alanında sıralama yapmak gereksiz olduğu için o kod kaldırıldı)
-    } 
-    // SENARYO B: Listeler arasında taşıma yapılıyorsa
-    else {
-        const newSourceLetters = [...sourceLetters];
-        const newAnswerSlots = [...answerSlots];
-
-        // Durum 1: Kalan Harfler'den -> Cevap Alanı'na taşıma
-        if (source.droppableId === 'source-area' && destination.droppableId === 'answer-area') {
-            const [movedItem] = newSourceLetters.splice(source.index, 1); // Harfi kaynaktan al
-            const displacedItem = newAnswerSlots[destination.index]; // Hedefteki harfi kontrol et
-
-            newAnswerSlots[destination.index] = movedItem; // Yeni harfi hedefe koy
-
-            if (displacedItem) {
-                newSourceLetters.push(displacedItem); // Yerinden olan harfi kaynağa geri gönder
-            }
-
-            setSourceLetters(newSourceLetters);
-            setAnswerSlots(newAnswerSlots);
-        }
-        // Durum 2: Cevap Alanı'ndan -> Kalan Harfler'e taşıma
-        else if (source.droppableId === 'answer-area' && destination.droppableId === 'source-area') {
-            const movedItem = newAnswerSlots[source.index]; // Harfi cevaptan al
-            
-            if (movedItem) {
-                newSourceLetters.splice(destination.index, 0, movedItem); // Kaynağa yerleştir
-                newAnswerSlots[source.index] = null; // Cevaptaki yerini boşalt
-            }
-            
-            setSourceLetters(newSourceLetters);
-            setAnswerSlots(newAnswerSlots);
-        }
+    // 3. Sürüklenen harfi belirle
+    let draggedLetter;
+    if (source.droppableId === 'source-area') {
+        draggedLetter = sourceLettersCopy[source.index];
+    } else { // 'answer-area'
+        draggedLetter = answerSlotsCopy[source.index];
     }
+
+    // Harf sürüklenemiyorsa (boş slottan vs.) işlemi bitir
+    if (!draggedLetter) return;
+
+    // 4. Sürüklenen harfi eski yerinden kaldır
+    if (source.droppableId === 'source-area') {
+        sourceLettersCopy.splice(source.index, 1);
+    } else {
+        answerSlotsCopy[source.index] = null;
+    }
+
+    // 5. Bırakılan yerdeki harfi (varsa) al ve sürüklenen harfi o yuvaya yerleştir
+    if (destination.droppableId === 'answer-area') {
+        const letterAtDestination = answerSlotsCopy[destination.index];
+        answerSlotsCopy[destination.index] = draggedLetter;
+        
+        // Eğer bırakılan yerde başka bir harf varsa (SWAP durumu)
+        if (letterAtDestination) {
+            // O harfi, sürüklenenin geldiği yere gönder
+            if (source.droppableId === 'source-area') {
+                sourceLettersCopy.push(letterAtDestination); // Kaynağa geri gönder
+            } else { // answer-area
+                answerSlotsCopy[source.index] = letterAtDestination; // Diğer slota gönder
+            }
+        }
+    } else { // destination.droppableId === 'source-area' (Kaynağa geri bırakma)
+        sourceLettersCopy.push(draggedLetter);
+    }
+
+    // 6. Son olarak state'leri güncelle
+    setAnswerSlots(answerSlotsCopy);
+    setSourceLetters(sourceLettersCopy);
 };
 
-    const MobileKeyboard = ({ onKeyPress }) => {
-        const rows = [
-           ['E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', 'Ğ', 'Ü'],
-           ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'Ş', 'İ'],
-           ['Z', 'X', 'C', 'V', 'B', 'N', 'M', 'Ö', 'Ç']
-         ];
-         return (
-           <div className="flex flex-col gap-1 my-2">
-             {rows.map((row, index) => (
-               <div key={index} className="flex justify-center gap-1">
-                 {row.map((key) => (
-                   <button key={key} className="flex-1 bg-gray-300 text-gray-800 font-semibold rounded-md shadow-md py-2 text-sm focus:outline-none active:scale-95 transition-transform" onClick={() => onKeyPress(key)}>
-                     {key}
-                   </button>
-                 ))}
-               </div>
-             ))}
-           </div>
-         );
-    };
+
 
     const handleHiddenWordHint = () => {
         if (stats.gold < 1 || !answerSlots.includes(null)) return;
@@ -1433,62 +1406,82 @@ function WordHunt({ goToHome, language, mode, stats, onStatsChange, initialSaved
 
                         {allRequiredWordsFound && (
                             <div className="flex flex-col items-center w-full mt-4">
-                                {DragDropContext && <DragDropContext onDragEnd={onDragEnd}>
-                                    <p className="font-bold text-lg text-indigo-700">Gizli Kelimeyi Oluştur</p>
-                                    <div id="answer-area-container" className="my-2">
-                                        <Droppable droppableId="answer-area" direction="horizontal">
-                                            {(provided) => (
-                                                <div {...provided.droppableProps} ref={provided.innerRef} className="flex justify-center gap-1 p-2 bg-indigo-100 rounded-lg">
-                                                    {answerSlots.map((letter, index) => (
-                                                        
+                               
 
-
-<Draggable key={letter ? letter.id : `slot-${index}`} draggableId={letter ? letter.id : `slot-${index}`} index={index} isDragDisabled={!letter || hintLockedSlots.includes(index)}>
-    {(provided, snapshot) => (
-        <div
-            ref={provided.innerRef}
-            {...provided.draggableProps}
-            {...provided.dragHandleProps}
-            className={`
-                flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded font-bold text-xl text-gray-800
-                transition-all duration-200 ease-in-out
-                ${!letter ? 'bg-indigo-50 border-2 border-dashed border-gray-400' : 'bg-white shadow-md'}
-                ${snapshot.isDragging ? 'scale-110 -rotate-3 shadow-2xl bg-amber-200' : 'shadow-inner'}
-            `}
-        >
-            {letter ? letter.char : ''}
-        </div>
-    )}
-</Draggable>
-                                                    
-
-
-
-))}
-                                                    {provided.placeholder}
-                                                </div>
-                                            )}
-                                        </Droppable>
+{/* BU KODU EKLEYİN */}
+<DragDropContext onDragEnd={onDragEnd}>
+    <p className="font-bold text-lg text-indigo-700">Gizli Kelimeyi Oluştur</p>
+    
+    {/* Cevap Alanı */}
+    <div id="answer-area-container" className="my-2">
+        <Droppable droppableId="answer-area" direction="horizontal">
+            {(provided) => (
+                <div {...provided.droppableProps} ref={provided.innerRef} className="flex justify-center gap-1 p-2 bg-indigo-100 rounded-lg">
+                    {answerSlots.map((letter, index) => {
+                        const isLocked = hintLockedSlots.includes(index);
+                        return (
+                            <Draggable 
+                                key={letter ? letter.id : `slot-${index}`} 
+                                draggableId={letter ? letter.id : `slot-${index}`} 
+                                index={index} 
+                                isDragDisabled={isLocked || !letter}
+                            >
+                                {(provided, snapshot) => (
+                                    <div
+                                        ref={provided.innerRef}
+                                        {...provided.draggableProps}
+                                        {...provided.dragHandleProps}
+                                        className={`
+                                            flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded font-bold text-xl text-gray-800
+                                            transition-shadow duration-200 ease-in-out select-none
+                                            ${!letter ? 'bg-indigo-50 border-2 border-dashed border-gray-400' : 'bg-white shadow-md'}
+                                            ${isLocked ? 'bg-amber-200 cursor-not-allowed' : ''}
+                                            ${snapshot.isDragging ? 'scale-110 -rotate-3 shadow-2xl bg-amber-200' : ''}
+                                        `}
+                                    >
+                                        {letter ? letter.char : ''}
                                     </div>
-                                    <p className="text-sm text-gray-600 mt-2 mb-1">Kalan Harfler</p>
-                                    <Droppable droppableId="source-area" direction="horizontal">
-                                        {(provided) => (
-                                            <div {...provided.droppableProps} ref={provided.innerRef} className="flex flex-wrap justify-center items-center gap-2 p-2 bg-gray-200 rounded-lg min-h-[50px] w-full max-w-sm">
-                                                {sourceLetters.map((letter, index) => (
-                                                    <Draggable key={letter.id} draggableId={letter.id} index={index}>
-                                                        {(provided, snapshot) => (
-                                                            <div ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps} className={`flex items-center justify-center w-10 h-10 rounded-md font-bold text-gray-800 shadow-md transition-all ${snapshot.isDragging ? 'bg-yellow-300 scale-110' : 'bg-white'}`}>
-                                                                {letter.char}
-                                                            </div>
-                                                        )}
-                                                    </Draggable>
-                                                ))}
-                                                {provided.placeholder}
-                                            </div>
-                                        )}
-                                    </Droppable>
-                                </DragDropContext>}
-                                <button onClick={() => { const guess = answerSlots.map(l => l ? l.char : '').join(''); handleHiddenWordSubmit(guess); }} disabled={answerSlots.some(l => l === null)} className="mt-4 w-full max-w-sm mx-auto bg-green-500 text-white rounded-lg py-3 font-bold hover:bg-green-600 transition-transform active:scale-95 disabled:bg-gray-400 disabled:cursor-not-allowed">
+                                )}
+                            </Draggable>
+                        );
+                    })}
+                    {provided.placeholder}
+                </div>
+            )}
+        </Droppable>
+    </div>
+
+    <p className="text-sm text-gray-600 mt-2 mb-1">Kalan Harfler</p>
+    
+    {/* Kalan Harfler Alanı */}
+    <Droppable droppableId="source-area" direction="horizontal">
+        {(provided) => (
+            <div {...provided.droppableProps} ref={provided.innerRef} className="flex flex-wrap justify-center items-center gap-2 p-2 bg-gray-200 rounded-lg min-h-[50px] w-full max-w-sm">
+                {sourceLetters.map((letter, index) => (
+                    <Draggable key={letter.id} draggableId={letter.id} index={index}>
+                        {(provided, snapshot) => (
+                            <div 
+                                ref={provided.innerRef} 
+                                {...provided.draggableProps} 
+                                {...provided.dragHandleProps} 
+                                className={`
+                                    flex items-center justify-center w-10 h-10 rounded-md font-bold text-gray-800 shadow-md 
+                                    transition-all bg-white select-none
+                                    ${snapshot.isDragging ? 'bg-yellow-300 scale-110' : ''}
+                                `}
+                            >
+                                {letter.char}
+                            </div>
+                        )}
+                    </Draggable>
+                ))}
+                {provided.placeholder}
+            </div>
+        )}
+    </Droppable>
+</DragDropContext>                                
+
+<button onClick={() => { const guess = answerSlots.map(l => l ? l.char : '').join(''); handleHiddenWordSubmit(guess); }} disabled={answerSlots.some(l => l === null)} className="mt-4 w-full max-w-sm mx-auto bg-green-500 text-white rounded-lg py-3 font-bold hover:bg-green-600 transition-transform active:scale-95 disabled:bg-gray-400 disabled:cursor-not-allowed">
                                     ONAYLA
                                 </button>
                             </div>

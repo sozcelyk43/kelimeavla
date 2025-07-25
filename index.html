@@ -831,54 +831,94 @@ const onDragEnd = (result) => {
     }
     
     setAnswerSlots(answerSlotsCopy);
-    setSourceLetters(sourceLettersCopy);
+setSourceLetters(_.shuffle(sourceLettersCopy));
 };
 
 
-    const handleHiddenWordHint = () => {
-        if (stats.gold < 1 || !answerSlots.includes(null)) return;
+   // MEVCUT handleHiddenWordHint FONKSİYONUNU SİLİP, YERİNE BUNU EKLEYİN
 
-        const availableSlotsIndexes = [];
-        answerSlots.forEach((slot, index) => {
-            if (slot === null) {
-                availableSlotsIndexes.push(index);
-            }
-        });
+const handleHiddenWordHint = () => {
+    // 1. Kullanıcının altını var mı ve verilecek başka ipucu kaldı mı diye kontrol et
+    if (stats.gold < 1 || !gameState) return;
+    if (hintLockedSlots.length >= gameState.hiddenWord.length) {
+        // Tüm ipuçları zaten verilmişse bir şey yapma
+        return;
+    }
 
-        if (availableSlotsIndexes.length === 0) return;
+    // 2. Sıradaki ipucunun hangi indekste olacağını belirle (0, sonra 1, sonra 2...)
+    const hintIndex = hintLockedSlots.length;
+    const correctChar = gameState.hiddenWord[hintIndex];
 
-        const randomIndexToFill = _.sample(availableSlotsIndexes);
-        const correctChar = gameState.hiddenWord[randomIndexToFill];
+    // 3. State'leri güvenli bir şekilde değiştirmek için kopyalarını oluştur
+    const newAnswerSlots = [...answerSlots];
+    const newSourceLetters = [...sourceLetters];
 
-        const letterIndexInSource = sourceLetters.findIndex(l => l.char === correctChar);
-        
-        if (letterIndexInSource === -1) return;
+    // 4. İpucu için gereken doğru harfi bul. Harf, kaynakta veya yanlış bir cevap kutusunda olabilir.
+    let letterToMove = null;
+    let sourceOfLetter = { area: null, index: -1 };
 
-        const letterToMove = sourceLetters[letterIndexInSource];
+    // Önce "Kalan Harfler" arasında ara
+    const sourceIndex = newSourceLetters.findIndex(l => l.char === correctChar);
+    if (sourceIndex > -1) {
+        letterToMove = newSourceLetters[sourceIndex];
+        sourceOfLetter = { area: 'source', index: sourceIndex };
+    } else {
+        // Eğer kaynakta değilse, cevap kutucukları arasında (yanlış yerleştirilmiş) ara
+        const answerIndex = newAnswerSlots.findIndex((l, i) => l?.char === correctChar && !hintLockedSlots.includes(i));
+        if (answerIndex > -1) {
+            letterToMove = newAnswerSlots[answerIndex];
+            sourceOfLetter = { area: 'answer', index: answerIndex };
+        }
+    }
 
-        const newSourceLetters = [...sourceLetters];
-        newSourceLetters.splice(letterIndexInSource, 1);
-        
-        const newAnswerSlots = [...answerSlots];
-        newAnswerSlots[randomIndexToFill] = letterToMove;
+    // Eğer harf bulunamazsa (zaten doğru ve kilitli bir yerdeyse) işlemi bitir
+    if (!letterToMove) return;
 
-        setSourceLetters(newSourceLetters);
-        setAnswerSlots(newAnswerSlots);
-        setHintLockedSlots(prev => [...prev, randomIndexToFill]);
-        onStatsChange({ ...stats, gold: stats.gold - 1 });
-        playSound('correctSound');
-    };
+    // 5. İpucu verilecek kutucukta halihazırda hangi harfin olduğunu (varsa) kontrol et
+    const misplacedLetter = newAnswerSlots[hintIndex];
+
+    // 6. Taşıma/Yer Değiştirme işlemini gerçekleştir
+    // Doğru harfi, ipucu verilecek olan doğru kutucuğa yerleştir
+    newAnswerSlots[hintIndex] = letterToMove;
+    
+    // Doğru harfi eski yerinden kaldır
+    if (sourceOfLetter.area === 'source') {
+        newSourceLetters.splice(sourceOfLetter.index, 1);
+    } else { // 'answer'
+        newAnswerSlots[sourceOfLetter.index] = null; // Eski yerini şimdilik boşalt
+    }
+
+    // Eğer ipucu kutucuğunda daha önceden yanlış bir harf varsa,
+    // o harfi, doğru harfin geldiği yere geri gönder (yer değiştirme)
+    if (misplacedLetter) {
+        if (sourceOfLetter.area === 'source') {
+            newSourceLetters.push(misplacedLetter); // Kaynağa geri gönder
+        } else { // 'answer'
+            newAnswerSlots[sourceOfLetter.index] = misplacedLetter; // Eski kutucuğa takas et
+        }
+    }
+
+    // 7. Tüm state'leri güncelle
+    setHintLockedSlots(prev => [...prev, hintIndex]);
+    setAnswerSlots(newAnswerSlots);
+    setSourceLetters(_.shuffle(newSourceLetters)); // Kalan harfleri yeniden karıştır
+    onStatsChange({ ...stats, gold: stats.gold - 1 }); // Altını düş
+    playSound('correctSound'); // Sesi çal
+};
     
     React.useEffect(() => {
-        if (allRequiredWordsFound && gameState) {
-            const letters = gameState.scatteredHiddenLetterPositions.map((pos, index) => ({
-                id: `letter-${pos.row}-${pos.col}`,
-                char: gameState.board[pos.row][pos.col],
-            }));
-            setSourceLetters(letters);
-            setAnswerSlots(Array(gameState.hiddenWord.length).fill(null));
-        }
-    }, [allRequiredWordsFound, gameState]);
+    if (allRequiredWordsFound && gameState) {
+        const letters = gameState.scatteredHiddenLetterPositions.map((pos, index) => ({
+            id: `letter-${pos.row}-${pos.col}`,
+            char: gameState.board[pos.row][pos.col],
+        }));
+        
+        // YENİ KOD: Harfleri sıralamak yerine karıştırıyoruz.
+        setSourceLetters(_.shuffle(letters));
+        
+        setAnswerSlots(Array(gameState.hiddenWord.length).fill(null));
+    }
+}, [allRequiredWordsFound, gameState]);
 
     React.useEffect(() => {
         if (allRequiredWordsFound && mode.startsWith('timed') && hiddenWordTimeLeft === null) {
@@ -1436,37 +1476,39 @@ const onDragEnd = (result) => {
     isDragDisabled={isLocked || !letter}
 >
     {(provided, snapshot) => (
+        // 1. Ana kutuya 'relative' pozisyonu veriyoruz.
         <div
             ref={provided.innerRef}
             {...provided.draggableProps}
             className={`
-                group flex items-center gap-1 p-1 w-10 h-10 sm:w-12 sm:h-12 rounded font-bold text-xl text-gray-800
+                relative group w-10 h-10 sm:w-12 sm:h-12 rounded
                 transition-shadow duration-200 ease-in-out select-none
                 ${!letter ? 'bg-indigo-50 border-2 border-dashed border-gray-400' : 'bg-white shadow-md'}
                 ${isLocked ? 'bg-amber-200 cursor-not-allowed' : ''}
                 ${snapshot.isDragging ? 'scale-110 -rotate-3 shadow-2xl bg-amber-200' : ''}
             `}
         >
-            {/* TUTAMAÇ SOLA ALINDI VE İKON DEĞİŞTİ */}
+            {/* 2. Görünmez Tutamaç: Tüm kutuyu kaplayan, anında sürüklemeyi başlatan katman */}
             {!isLocked && letter && (
                 <div 
                     {...provided.dragHandleProps}
-                    className="w-5 h-full flex items-center justify-center text-gray-400 cursor-grab active:cursor-grabbing
-                               opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                    className="absolute top-0 left-0 w-full h-full cursor-grab active:cursor-grabbing z-10"
                     title="Taşımak için sürükle"
                 >
-                    ⠿
+                    {/* Bu div'in içi boş kalacak, çünkü kendisi görünmez */}
                 </div>
             )}
-            
-            {/* Kilitli harfler için boşluk, hizalamayı korur */}
-            {isLocked && <div className="w-5 h-full"></div>}
 
-            <span className="flex-grow text-center">{letter ? letter.char : ''}</span>
+            {/* 3. Harfin kendisi: Görsel olarak görünür ama sürüklemeyi başlatmaz */}
+            <div className="w-full h-full flex items-center justify-center font-bold text-xl text-gray-800">
+                <span>{letter ? letter.char : ''}</span>
+            </div>
         </div>
     )}
 </Draggable>
-    );
+
+
+);
 })}
                    {provided.placeholder}
                 </div>
@@ -1483,39 +1525,40 @@ const onDragEnd = (result) => {
                 {/* ... Droppable (source-area) içinde ... */}
 {sourceLetters.map((letter, index) => {
     return (
-       <Draggable key={letter.id} draggableId={letter.id} index={index}>
+<Draggable key={letter.id} draggableId={letter.id} index={index}>
     {(provided, snapshot) => (
+        // 1. Ana kutuya 'relative' pozisyonu veriyoruz.
         <div 
             ref={provided.innerRef} 
             {...provided.draggableProps} 
             className={`
-                group flex items-center gap-1 p-1 w-10 h-10 rounded-md font-bold text-gray-800 
+                relative group w-10 h-10 rounded-md
                 shadow-md transition-all bg-white select-none
                 ${snapshot.isDragging ? 'bg-yellow-300 scale-110' : ''}
             `}
         >
-            {/* TUTAMAÇ SOLA ALINDI VE İKON DEĞİŞTİ */}
+            {/* 2. Görünmez Tutamaç: Tüm kutuyu kaplayan, anında sürüklemeyi başlatan katman */}
             <div 
                 {...provided.dragHandleProps} 
-                className="w-5 h-full flex items-center justify-center text-gray-400 cursor-grab active:cursor-grabbing
-                           opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                className="absolute top-0 left-0 w-full h-full cursor-grab active:cursor-grabbing z-10"
                 title="Taşımak için sürükle"
             >
-                ⠿
+                {/* Bu div'in içi boş kalacak, çünkü kendisi görünmez */}
             </div>
-            <span className="flex-grow text-center">{letter.char}</span>
+
+            {/* 3. Harfin kendisi: Görsel olarak görünür ama sürüklemeyi başlatmaz */}
+            <div className="w-full h-full flex items-center justify-center font-bold text-xl text-gray-800">
+                <span>{letter.char}</span>
+            </div>
         </div>
     )}
 </Draggable>
-    );
+);
 })}
-
-
-
-                {provided.placeholder}
-            </div>
-        )}
-    </Droppable>
+{provided.placeholder}
+</div>
+)}
+</Droppable>
 </DragDropContext>                                
 
 <button onClick={() => { const guess = answerSlots.map(l => l ? l.char : '').join(''); handleHiddenWordSubmit(guess); }} disabled={answerSlots.some(l => l === null)} className="mt-4 w-full max-w-sm mx-auto bg-green-500 text-white rounded-lg py-3 font-bold hover:bg-green-600 transition-transform active:scale-95 disabled:bg-gray-400 disabled:cursor-not-allowed">

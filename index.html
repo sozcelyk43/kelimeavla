@@ -1,7 +1,5 @@
 <!DOCTYPE html>
 <html lang="tr">
-
-
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,9 +9,6 @@
 	<script src="libs/babel.min.js"></script>
 	<script src="libs/lodash.min.js"></script>
 	<script src="https://unpkg.com/react-beautiful-dnd@13.1.1/dist/react-beautiful-dnd.min.js"></script>
-
-	
-	
 	<script src="https://cdn.tailwindcss.com"></script> 
 	<script src="libs/confetti.browser.min.js"></script>
 	<script src="https://unpkg.com/heroicons@2.1.3/24/outline/index.js"></script> 
@@ -328,7 +323,7 @@ function createBoard(level, language, mode) {
                 targetTotalWordCount = 4 + Math.floor(level / 8); 
                 targetHiddenWordLength = 4 + Math.floor(level / 10); 
             } else {
-                targetTotalWordCount = Math.min(30, 17 + Math.floor(level / 4));
+    	        targetTotalWordCount = Math.min(33, 21 + Math.floor(level / 3));
     		targetHiddenWordLength = Math.min(10, 5 + Math.floor(level / 3));
             }
 
@@ -439,15 +434,27 @@ function createBoard(level, language, mode) {
                 scatteredHiddenLetterPositions.push({ row: cell.r, col: cell.c }); 
             });
       
-      const charSet = charSets[language];
+
+
+
+   
+const levelLetters = placedWordsInfo.flatMap(info => info.word.split(''));
+const uniqueLevelLetters = [...new Set(levelLetters)];
 for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
         if (!lockGrid[r][c]) {
-            board[r][c] = _.sample(charSet);
+            board[r][c] = _.sample(uniqueLevelLetters.length > 0 ? uniqueLevelLetters : charSets[language]);
         }
     }
 }
-            const finalWords = _.sortBy(placedWordsInfo, 'word');
+
+         
+
+
+
+
+
+const finalWords = _.sortBy(placedWordsInfo, 'word');
             return { board, words: finalWords, hiddenWord, scatteredHiddenLetterPositions };
         }
         console.error("Tahta oluşturma denemeleri 1000 denemeden sonra başarısız oldu.");
@@ -770,51 +777,31 @@ const { DragDropContext, Droppable, Draggable } = window.ReactBeautifulDnd;
         if (path.length !== expectedLength) { return false; } return true;
     };
 
-// WordHunt component'i içine...
-// ESKİ onDragEnd FONKSİYONUNU SİLİP BUNU EKLEYİN
-
 const onDragEnd = (result) => {
     const { source, destination } = result;
-
-    // Kural 1: Geçerli bir alana bırakılmadıysa işlemi iptal et.
     if (!destination) return;
-    
-    // Kural 2: Aynı yere geri bırakıldıysa işlemi iptal et.
     if (source.droppableId === destination.droppableId && source.index === destination.index) return;
-
-    // Kural 3: CEVAP ALANINI KİLİTLEME. 
-    // Cevap alanından sürüklenen bir harfin, Kalan Harfler alanına bırakılmasını engelle.
     if (source.droppableId === 'answer-area' && destination.droppableId === 'source-area') {
         return; // İşlemi iptal et, harf eski yerine dönsün.
     }
-
-    // Kural 4: İpucuyla kilitlenmiş bir harfi yerinden oynatmaya veya üzerine harf bırakmaya çalışma.
     if ((source.droppableId === 'answer-area' && hintLockedSlots.includes(source.index)) ||
         (destination.droppableId === 'answer-area' && hintLockedSlots.includes(destination.index))) {
         return;
     }
-
-    // --- Sürükleme Mantığı ---
     const sourceLettersCopy = [...sourceLetters];
     const answerSlotsCopy = [...answerSlots];
-
     let draggedLetter;
     if (source.droppableId === 'source-area') {
         draggedLetter = sourceLettersCopy[source.index];
     } else { // 'answer-area'
         draggedLetter = answerSlotsCopy[source.index];
     }
-
     if (!draggedLetter) return;
-
-    // Sürüklenen harfi eski yerinden kaldır
     if (source.droppableId === 'source-area') {
         sourceLettersCopy.splice(source.index, 1);
     } else {
         answerSlotsCopy[source.index] = null;
     }
-
-    // Bırakılan yerdeki harfi (varsa) al ve sürüklenen harfi o yuvaya yerleştir
     if (destination.droppableId === 'answer-area') {
         const letterAtDestination = answerSlotsCopy[destination.index];
         answerSlotsCopy[destination.index] = draggedLetter;
@@ -834,30 +821,17 @@ const onDragEnd = (result) => {
 setSourceLetters(_.shuffle(sourceLettersCopy));
 };
 
-
-   // MEVCUT handleHiddenWordHint FONKSİYONUNU SİLİP, YERİNE BUNU EKLEYİN
-
 const handleHiddenWordHint = () => {
-    // 1. Kullanıcının altını var mı ve verilecek başka ipucu kaldı mı diye kontrol et
     if (stats.gold < 1 || !gameState) return;
     if (hintLockedSlots.length >= gameState.hiddenWord.length) {
-        // Tüm ipuçları zaten verilmişse bir şey yapma
         return;
     }
-
-    // 2. Sıradaki ipucunun hangi indekste olacağını belirle (0, sonra 1, sonra 2...)
     const hintIndex = hintLockedSlots.length;
     const correctChar = gameState.hiddenWord[hintIndex];
-
-    // 3. State'leri güvenli bir şekilde değiştirmek için kopyalarını oluştur
     const newAnswerSlots = [...answerSlots];
     const newSourceLetters = [...sourceLetters];
-
-    // 4. İpucu için gereken doğru harfi bul. Harf, kaynakta veya yanlış bir cevap kutusunda olabilir.
     let letterToMove = null;
     let sourceOfLetter = { area: null, index: -1 };
-
-    // Önce "Kalan Harfler" arasında ara
     const sourceIndex = newSourceLetters.findIndex(l => l.char === correctChar);
     if (sourceIndex > -1) {
         letterToMove = newSourceLetters[sourceIndex];
@@ -870,26 +844,14 @@ const handleHiddenWordHint = () => {
             sourceOfLetter = { area: 'answer', index: answerIndex };
         }
     }
-
-    // Eğer harf bulunamazsa (zaten doğru ve kilitli bir yerdeyse) işlemi bitir
     if (!letterToMove) return;
-
-    // 5. İpucu verilecek kutucukta halihazırda hangi harfin olduğunu (varsa) kontrol et
     const misplacedLetter = newAnswerSlots[hintIndex];
-
-    // 6. Taşıma/Yer Değiştirme işlemini gerçekleştir
-    // Doğru harfi, ipucu verilecek olan doğru kutucuğa yerleştir
     newAnswerSlots[hintIndex] = letterToMove;
-    
-    // Doğru harfi eski yerinden kaldır
     if (sourceOfLetter.area === 'source') {
         newSourceLetters.splice(sourceOfLetter.index, 1);
     } else { // 'answer'
         newAnswerSlots[sourceOfLetter.index] = null; // Eski yerini şimdilik boşalt
     }
-
-    // Eğer ipucu kutucuğunda daha önceden yanlış bir harf varsa,
-    // o harfi, doğru harfin geldiği yere geri gönder (yer değiştirme)
     if (misplacedLetter) {
         if (sourceOfLetter.area === 'source') {
             newSourceLetters.push(misplacedLetter); // Kaynağa geri gönder
@@ -897,8 +859,6 @@ const handleHiddenWordHint = () => {
             newAnswerSlots[sourceOfLetter.index] = misplacedLetter; // Eski kutucuğa takas et
         }
     }
-
-    // 7. Tüm state'leri güncelle
     setHintLockedSlots(prev => [...prev, hintIndex]);
     setAnswerSlots(newAnswerSlots);
     setSourceLetters(_.shuffle(newSourceLetters)); // Kalan harfleri yeniden karıştır
@@ -906,7 +866,7 @@ const handleHiddenWordHint = () => {
     playSound('correctSound'); // Sesi çal
 };
     
-React.useEffect(() => {
+	React.useEffect(() => {
     if (allRequiredWordsFound && gameState) {
         const letters = gameState.scatteredHiddenLetterPositions.map((pos, index) => ({
             id: `letter-${pos.row}-${pos.col}`,
@@ -932,7 +892,7 @@ React.useEffect(() => {
     }
 }, [allRequiredWordsFound, gameState]);
 
-    React.useEffect(() => {
+	React.useEffect(() => {
         if (allRequiredWordsFound && mode.startsWith('timed') && hiddenWordTimeLeft === null) {
             const wordLength = gameState?.hiddenWord?.length || 5; 
             const duration = 15 + (wordLength * 5); 
@@ -940,7 +900,7 @@ React.useEffect(() => {
         }
     }, [allRequiredWordsFound, mode, hiddenWordTimeLeft, gameState]); 
 
-    React.useEffect(() => {
+	React.useEffect(() => {
         const calculateFontSize = () => {
             if (boxRef.current) {
                 const boxHeight = boxRef.current.offsetHeight;
@@ -955,7 +915,7 @@ React.useEffect(() => {
         };
     }, [gameState]);
 
-    React.useEffect(() => {
+	React.useEffect(() => {
         if (hiddenWordTimeLeft === null || modalContent.isOpen) return;
         if (hiddenWordTimeLeft === 0) {
         vibrate('error');

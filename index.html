@@ -329,7 +329,7 @@ function createBoard(level, language, mode) {
                 targetHiddenWordLength = 4 + Math.floor(level / 10); 
             } else {
                 targetTotalWordCount = Math.min(30, 17 + Math.floor(level / 4));
-                targetHiddenWordLength = Math.min(12, 5 + Math.floor(level / 3));
+    		targetHiddenWordLength = Math.min(10, 5 + Math.floor(level / 3));
             }
 
             const placeAndLockWord = (word, r, c, dir) => {
@@ -906,17 +906,29 @@ const handleHiddenWordHint = () => {
     playSound('correctSound'); // Sesi çal
 };
     
-    React.useEffect(() => {
+React.useEffect(() => {
     if (allRequiredWordsFound && gameState) {
         const letters = gameState.scatteredHiddenLetterPositions.map((pos, index) => ({
             id: `letter-${pos.row}-${pos.col}`,
-            char: gameState.board[pos.row][pos.col],
-        }));
-        
-        // YENİ KOD: Harfleri sıralamak yerine karıştırıyoruz.
-        setSourceLetters(_.shuffle(letters));
-        
-        setAnswerSlots(Array(gameState.hiddenWord.length).fill(null));
+            char: gameState.board[pos.row][pos.col],}));
+
+        if (gameState.hiddenWord.length >= 8) {
+            const firstChar = gameState.hiddenWord[0];
+            const hintLetterObject = letters.find(l => l.char === firstChar);
+            if (hintLetterObject) {
+                const finalAnswerSlots = Array(gameState.hiddenWord.length).fill(null);
+                finalAnswerSlots[0] = hintLetterObject;
+                setAnswerSlots(finalAnswerSlots);
+                const finalSourceLetters = letters.filter(l => l.id !== hintLetterObject.id);
+                setSourceLetters(_.shuffle(finalSourceLetters));
+                setHintLockedSlots([0]);
+            }
+
+        } else {
+            setSourceLetters(_.shuffle(letters));
+            setAnswerSlots(Array(gameState.hiddenWord.length).fill(null));
+            setHintLockedSlots([]); // Kilitli slot olmadığından emin ol
+        }
     }
 }, [allRequiredWordsFound, gameState]);
 
@@ -1368,31 +1380,35 @@ const handleHiddenWordHint = () => {
         <>
             <div className={`container mx-auto px-2 py-4 text-center h-full flex flex-col ${theme.bg} ${allRequiredWordsFound ? 'overflow-y-auto' : 'overflow-hidden'}`}>
                 <div className="flex-1 flex flex-col lg:flex-row lg:gap-4">
-                    <div className="w-full lg:w-3/5 xl:w-2/3 flex flex-col items-center justify-center order-1">
-                        <div ref={gridRef} className={`grid gap-0.5 p-1 rounded-lg shadow-md w-full max-w-2xl mx-auto ${theme.gridBg}`}
-                             style={{ gridTemplateColumns: `repeat(${gridCols}, minmax(0, 1fr))`, aspectRatio: `${gridCols} / ${gridRows}` }}
-                             onMouseDown={(e) => handleInteractionStart(e.clientX, e.clientY)}
-                             onMouseMove={(e) => { if(isSwiping) throttledMove(e.clientX, e.clientY);}}
-                             onMouseUp={handleInteractionEnd} 
-                             onMouseLeave={handleInteractionEnd}
-                             onTouchStart={(e) => handleInteractionStart(e.touches[0].clientX, e.touches[0].clientY)}
-                             onTouchMove={(e) => { if (isSwiping) throttledMove(e.touches[0].clientX, e.touches[0].clientY); }}
-                             onTouchEnd={handleInteractionEnd}
-                             onTouchCancel={handleInteractionEnd}
-                        >
-                            {board.map((row, rowIndex) =>
-                                row.map((letter, colIndex) => {
-                                    const isSelected = isCellSelected(rowIndex, colIndex);
-                                    const isFoundPart = isCellPartOfFoundRequiredWord(rowIndex, colIndex);
-                                    const isHiddenLetterCell = gameState.scatteredHiddenLetterPositions.some(p => p.row === rowIndex && p.col === colIndex);
-                                    const isJustFound = justFoundWordInfo?.positions.some(p => p.row === rowIndex && p.col === colIndex);
-                                    return <Cell key={`${rowIndex}-${colIndex}`} letter={letter} isSelected={isSelected} isFoundRequiredPart={isFoundPart} isHiddenLetterCell={isHiddenLetterCell} allRequiredWordsFound={allRequiredWordsFound} isJustFound={isJustFound} theme={theme} />;
-                                })
-                            )}
-                        </div>
-                    </div>
+                    
 
-                    <div className="w-full lg:w-2/5 xl:w-1/3 flex flex-1 flex-col px-2 order-2 mt-2 lg:mt-0">
+{/* YENİ KOŞUL EKLENDİ */}
+{!allRequiredWordsFound && (
+    <div className="w-full lg:w-3/5 xl:w-2/3 flex flex-col items-center justify-center order-1">
+        <div ref={gridRef} className={`grid gap-0.5 p-1 rounded-lg shadow-md w-full max-w-2xl mx-auto ${theme.gridBg}`}
+             style={{ gridTemplateColumns: `repeat(${gridCols}, minmax(0, 1fr))`, aspectRatio: `${gridCols} / ${gridRows}` }}
+             onMouseDown={(e) => handleInteractionStart(e.clientX, e.clientY)}
+             onMouseMove={(e) => { if(isSwiping) throttledMove(e.clientX, e.clientY);}}
+             onMouseUp={handleInteractionEnd} 
+             onMouseLeave={handleInteractionEnd}
+             onTouchStart={(e) => handleInteractionStart(e.touches[0].clientX, e.touches[0].clientY)}
+             onTouchMove={(e) => { if (isSwiping) throttledMove(e.touches[0].clientX, e.touches[0].clientY); }}
+             onTouchEnd={handleInteractionEnd}
+             onTouchCancel={handleInteractionEnd}
+        >
+            {board.map((row, rowIndex) =>
+                row.map((letter, colIndex) => {
+                    const isSelected = isCellSelected(rowIndex, colIndex);
+                    const isFoundPart = isCellPartOfFoundRequiredWord(rowIndex, colIndex);
+                    const isHiddenLetterCell = gameState.scatteredHiddenLetterPositions.some(p => p.row === rowIndex && p.col === colIndex);
+                    const isJustFound = justFoundWordInfo?.positions.some(p => p.row === rowIndex && p.col === colIndex);
+                    return <Cell key={`${rowIndex}-${colIndex}`} letter={letter} isSelected={isSelected} isFoundRequiredPart={isFoundPart} isHiddenLetterCell={isHiddenLetterCell} allRequiredWordsFound={allRequiredWordsFound} isJustFound={isJustFound} theme={theme} />;
+                })
+            )}
+        </div>
+    </div>
+)}
+                    <div className={`w-full ${!allRequiredWordsFound ? 'lg:w-2/5 xl:w-1/3' : 'lg:w-full justify-center'} flex flex-1 flex-col px-2 order-2 mt-2 lg:mt-0`}>
                         <div className={`transition-all duration-500 ease-in-out ${allRequiredWordsFound ? 'max-h-0 opacity-0 invisible' : ''}`}>
                             <div className="flex flex-wrap justify-center content-start gap-1.5 p-2 bg-gray-100 rounded-lg max-h-36 overflow-y-auto scrollbar-thin">
                                 {gameState.words.map(({ word }) => {
@@ -1403,51 +1419,7 @@ const handleHiddenWordHint = () => {
                             </div>
                         </div>
                         
-                        <div className="w-full max-w-2xl mx-auto mt-4 bg-white/70 backdrop-blur-sm border border-gray-200/80 rounded-xl shadow-lg p-3 flex flex-col gap-3">
-                            <div className="flex w-full flex-nowrap items-stretch gap-2 sm:gap-3">
-                                <div className="flex-1 flex items-center justify-center gap-3 p-2 bg-slate-100 rounded-lg shadow-sm">
-                                    <span className="font-semibold text-gray-700 uppercase text-xs">Seviye</span>
-                                    <span className="w-9 h-9 flex items-center justify-center bg-indigo-600 text-white font-bold text-lg rounded-full shadow-md">
-                                        {level + 1}
-                                    </span>
-                                </div>
-                                <div className="flex-1 flex items-center justify-center gap-2 p-2 bg-slate-100 rounded-lg shadow-sm">
-                                    <span className="text-sm font-semibold text-gray-600">Skor:</span>
-                                    <span className="text-xl font-bold text-green-600 tabular-nums">{score}</span>
-                                </div>
-                                <div className="flex-1 flex items-center justify-center gap-2 p-2 bg-slate-100 rounded-lg shadow-sm">
-                                    {mode.startsWith('timed') ? (
-                                        <div className="flex items-center justify-center gap-2 text-xl font-bold text-blue-600 tabular-nums">
-                                            <span>⏱️</span>
-                                            <span>{Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}</span>
-                                        </div>
-                                    ) : (
-                                        <>
-                                            <span className="text-sm font-semibold text-gray-600">Yüksek Skor:</span>
-                                            <span className="text-xl font-bold text-gray-700 tabular-nums">{highScore}</span>
-                                        </>
-                                    )}
-                                </div>
-                            </div>
-                            <div className="flex w-full items-stretch justify-center gap-2 sm:gap-3 flex-nowrap">
-    <button onClick={handleGoHomeClick} title={t.homeButton} className="flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 transition-all active:scale-95 font-semibold text-center">
-        <span>Anasayfa</span>
-        <span>🏠</span>
-    </button>
-    <div className="flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-yellow-100 text-yellow-800 font-bold text-center border-2 border-yellow-200">
-        <span>💰 {stats.gold || 0}</span>
-    </div>
-    {allRequiredWordsFound ? (
-        <button onClick={handleHiddenWordHint} disabled={stats.gold < 1} className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-sky-500 text-white font-bold rounded-lg shadow-md hover:bg-sky-600 transition-all disabled:bg-gray-400 disabled:cursor-not-allowed">
-            <span>İpucu (-1💰)</span>
-        </button>
-    ) : (
-        <button onClick={handleRevealWithGold} disabled={stats.gold < 1} className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-amber-500 text-white font-bold rounded-lg shadow-md hover:bg-amber-600 transition-all disabled:bg-gray-400 disabled:cursor-not-allowed">
-            <span>Aç (-1💰)</span>
-        </button>
-    )}
-</div>
-                        </div>
+                        
 
                         {allRequiredWordsFound && (
                             <div className="flex flex-col items-center w-full mt-4">
@@ -1461,7 +1433,8 @@ const handleHiddenWordHint = () => {
     <div id="answer-area-container" className="my-2">
         <Droppable droppableId="answer-area" direction="horizontal">
             {(provided) => (
-                <div {...provided.droppableProps} ref={provided.innerRef} className="flex justify-center gap-1 p-2 bg-indigo-100 rounded-lg">
+            <div {...provided.droppableProps} ref={provided.innerRef} className="flex justify-center flex-wrap gap-1 p-2 bg-indigo-100 rounded-lg">
+
 
 
 
@@ -1566,6 +1539,55 @@ const handleHiddenWordHint = () => {
                                 </button>
                             </div>
                         )}
+
+<div className="w-full max-w-2xl mx-auto mt-4 bg-white/70 backdrop-blur-sm border border-gray-200/80 rounded-xl shadow-lg p-3 flex flex-col gap-3">
+                            <div className="flex w-full flex-nowrap items-stretch gap-2 sm:gap-3">
+                                <div className="flex-1 flex items-center justify-center gap-3 p-2 bg-slate-100 rounded-lg shadow-sm">
+                                    <span className="font-semibold text-gray-700 uppercase text-xs">Seviye</span>
+                                    <span className="w-9 h-9 flex items-center justify-center bg-indigo-600 text-white font-bold text-lg rounded-full shadow-md">
+                                        {level + 1}
+                                    </span>
+                                </div>
+                                <div className="flex-1 flex items-center justify-center gap-2 p-2 bg-slate-100 rounded-lg shadow-sm">
+                                    <span className="text-sm font-semibold text-gray-600">Skor:</span>
+                                    <span className="text-xl font-bold text-green-600 tabular-nums">{score}</span>
+                                </div>
+                                <div className="flex-1 flex items-center justify-center gap-2 p-2 bg-slate-100 rounded-lg shadow-sm">
+                                    {mode.startsWith('timed') ? (
+                                        <div className="flex items-center justify-center gap-2 text-xl font-bold text-blue-600 tabular-nums">
+                                            <span>⏱️</span>
+                                            <span>{Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}</span>
+                                        </div>
+                                    ) : (
+                                        <>
+                                            <span className="text-sm font-semibold text-gray-600">Yüksek Skor:</span>
+                                            <span className="text-xl font-bold text-gray-700 tabular-nums">{highScore}</span>
+                                        </>
+                                    )}
+                                </div>
+                            </div>
+                            <div className="flex w-full items-stretch justify-center gap-2 sm:gap-3 flex-nowrap">
+    <button onClick={handleGoHomeClick} title={t.homeButton} className="flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 transition-all active:scale-95 font-semibold text-center">
+        <span>Anasayfa</span>
+        <span>🏠</span>
+    </button>
+    <div className="flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-yellow-100 text-yellow-800 font-bold text-center border-2 border-yellow-200">
+        <span>💰 {stats.gold || 0}</span>
+    </div>
+    {allRequiredWordsFound ? (
+        <button onClick={handleHiddenWordHint} disabled={stats.gold < 1} className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-sky-500 text-white font-bold rounded-lg shadow-md hover:bg-sky-600 transition-all disabled:bg-gray-400 disabled:cursor-not-allowed">
+            <span>İpucu (-1💰)</span>
+        </button>
+    ) : (
+        <button onClick={handleRevealWithGold} disabled={stats.gold < 1} className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-amber-500 text-white font-bold rounded-lg shadow-md hover:bg-amber-600 transition-all disabled:bg-gray-400 disabled:cursor-not-allowed">
+            <span>Aç (-1💰)</span>
+        </button>
+    )}
+</div>
+                        </div>
+
+
+
                     </div>
                 </div>
                 <div className="w-full text-center py-1 text-xs text-gray-500 mt-auto flex-shrink-0"> {t.footer} </div>

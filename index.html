@@ -771,23 +771,33 @@ const { DragDropContext, Droppable, Draggable } = window.ReactBeautifulDnd;
     };
 
 // WordHunt component'i içine...
-// BU YENİ ve GELİŞMİŞ FONKSİYONU EKLEYİN
+// ESKİ onDragEnd FONKSİYONUNU SİLİP BUNU EKLEYİN
 
 const onDragEnd = (result) => {
     const { source, destination } = result;
 
-    // 1. Geçerli bir alana bırakılmadıysa hiçbir şey yapma
+    // Kural 1: Geçerli bir alana bırakılmadıysa işlemi iptal et.
     if (!destination) return;
-
-    // 2. İpucuyla kilitlenmiş bir harfi yerinden oynatmaya çalışma
-    if (source.droppableId === 'answer-area' && hintLockedSlots.includes(source.index)) return;
-    if (destination.droppableId === 'answer-area' && hintLockedSlots.includes(destination.index)) return;
     
-    // State'lerin kopyalarını oluştur
+    // Kural 2: Aynı yere geri bırakıldıysa işlemi iptal et.
+    if (source.droppableId === destination.droppableId && source.index === destination.index) return;
+
+    // Kural 3: CEVAP ALANINI KİLİTLEME. 
+    // Cevap alanından sürüklenen bir harfin, Kalan Harfler alanına bırakılmasını engelle.
+    if (source.droppableId === 'answer-area' && destination.droppableId === 'source-area') {
+        return; // İşlemi iptal et, harf eski yerine dönsün.
+    }
+
+    // Kural 4: İpucuyla kilitlenmiş bir harfi yerinden oynatmaya veya üzerine harf bırakmaya çalışma.
+    if ((source.droppableId === 'answer-area' && hintLockedSlots.includes(source.index)) ||
+        (destination.droppableId === 'answer-area' && hintLockedSlots.includes(destination.index))) {
+        return;
+    }
+
+    // --- Sürükleme Mantığı ---
     const sourceLettersCopy = [...sourceLetters];
     const answerSlotsCopy = [...answerSlots];
 
-    // 3. Sürüklenen harfi belirle
     let draggedLetter;
     if (source.droppableId === 'source-area') {
         draggedLetter = sourceLettersCopy[source.index];
@@ -795,39 +805,34 @@ const onDragEnd = (result) => {
         draggedLetter = answerSlotsCopy[source.index];
     }
 
-    // Harf sürüklenemiyorsa (boş slottan vs.) işlemi bitir
     if (!draggedLetter) return;
 
-    // 4. Sürüklenen harfi eski yerinden kaldır
+    // Sürüklenen harfi eski yerinden kaldır
     if (source.droppableId === 'source-area') {
         sourceLettersCopy.splice(source.index, 1);
     } else {
         answerSlotsCopy[source.index] = null;
     }
 
-    // 5. Bırakılan yerdeki harfi (varsa) al ve sürüklenen harfi o yuvaya yerleştir
+    // Bırakılan yerdeki harfi (varsa) al ve sürüklenen harfi o yuvaya yerleştir
     if (destination.droppableId === 'answer-area') {
         const letterAtDestination = answerSlotsCopy[destination.index];
         answerSlotsCopy[destination.index] = draggedLetter;
         
-        // Eğer bırakılan yerde başka bir harf varsa (SWAP durumu)
         if (letterAtDestination) {
-            // O harfi, sürüklenenin geldiği yere gönder
             if (source.droppableId === 'source-area') {
-                sourceLettersCopy.push(letterAtDestination); // Kaynağa geri gönder
-            } else { // answer-area
-                answerSlotsCopy[source.index] = letterAtDestination; // Diğer slota gönder
+                sourceLettersCopy.push(letterAtDestination);
+            } else {
+                answerSlotsCopy[source.index] = letterAtDestination;
             }
         }
-    } else { // destination.droppableId === 'source-area' (Kaynağa geri bırakma)
+    } else {
         sourceLettersCopy.push(draggedLetter);
     }
-
-    // 6. Son olarak state'leri güncelle
+    
     setAnswerSlots(answerSlotsCopy);
     setSourceLetters(sourceLettersCopy);
 };
-
 
 
     const handleHiddenWordHint = () => {
@@ -1417,35 +1422,53 @@ const onDragEnd = (result) => {
         <Droppable droppableId="answer-area" direction="horizontal">
             {(provided) => (
                 <div {...provided.droppableProps} ref={provided.innerRef} className="flex justify-center gap-1 p-2 bg-indigo-100 rounded-lg">
-                    {answerSlots.map((letter, index) => {
-                        const isLocked = hintLockedSlots.includes(index);
-                        return (
-                            <Draggable 
-                                key={letter ? letter.id : `slot-${index}`} 
-                                draggableId={letter ? letter.id : `slot-${index}`} 
-                                index={index} 
-                                isDragDisabled={isLocked || !letter}
-                            >
-                                {(provided, snapshot) => (
-                                    <div
-                                        ref={provided.innerRef}
-                                        {...provided.draggableProps}
-                                        {...provided.dragHandleProps}
-                                        className={`
-                                            flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded font-bold text-xl text-gray-800
-                                            transition-shadow duration-200 ease-in-out select-none
-                                            ${!letter ? 'bg-indigo-50 border-2 border-dashed border-gray-400' : 'bg-white shadow-md'}
-                                            ${isLocked ? 'bg-amber-200 cursor-not-allowed' : ''}
-                                            ${snapshot.isDragging ? 'scale-110 -rotate-3 shadow-2xl bg-amber-200' : ''}
-                                        `}
-                                    >
-                                        {letter ? letter.char : ''}
-                                    </div>
-                                )}
-                            </Draggable>
-                        );
-                    })}
-                    {provided.placeholder}
+
+
+
+                   {/* ... Droppable (answer-area) içinde ... */}
+{answerSlots.map((letter, index) => {
+    const isLocked = hintLockedSlots.includes(index);
+    return (
+        <Draggable 
+    key={letter ? letter.id : `slot-${index}`} 
+    draggableId={letter ? letter.id : `slot-${index}`} 
+    index={index} 
+    isDragDisabled={isLocked || !letter}
+>
+    {(provided, snapshot) => (
+        <div
+            ref={provided.innerRef}
+            {...provided.draggableProps}
+            className={`
+                group flex items-center gap-1 p-1 w-10 h-10 sm:w-12 sm:h-12 rounded font-bold text-xl text-gray-800
+                transition-shadow duration-200 ease-in-out select-none
+                ${!letter ? 'bg-indigo-50 border-2 border-dashed border-gray-400' : 'bg-white shadow-md'}
+                ${isLocked ? 'bg-amber-200 cursor-not-allowed' : ''}
+                ${snapshot.isDragging ? 'scale-110 -rotate-3 shadow-2xl bg-amber-200' : ''}
+            `}
+        >
+            {/* TUTAMAÇ SOLA ALINDI VE İKON DEĞİŞTİ */}
+            {!isLocked && letter && (
+                <div 
+                    {...provided.dragHandleProps}
+                    className="w-5 h-full flex items-center justify-center text-gray-400 cursor-grab active:cursor-grabbing
+                               opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                    title="Taşımak için sürükle"
+                >
+                    ⠿
+                </div>
+            )}
+            
+            {/* Kilitli harfler için boşluk, hizalamayı korur */}
+            {isLocked && <div className="w-5 h-full"></div>}
+
+            <span className="flex-grow text-center">{letter ? letter.char : ''}</span>
+        </div>
+    )}
+</Draggable>
+    );
+})}
+                   {provided.placeholder}
                 </div>
             )}
         </Droppable>
@@ -1457,24 +1480,38 @@ const onDragEnd = (result) => {
     <Droppable droppableId="source-area" direction="horizontal">
         {(provided) => (
             <div {...provided.droppableProps} ref={provided.innerRef} className="flex flex-wrap justify-center items-center gap-2 p-2 bg-gray-200 rounded-lg min-h-[50px] w-full max-w-sm">
-                {sourceLetters.map((letter, index) => (
-                    <Draggable key={letter.id} draggableId={letter.id} index={index}>
-                        {(provided, snapshot) => (
-                            <div 
-                                ref={provided.innerRef} 
-                                {...provided.draggableProps} 
-                                {...provided.dragHandleProps} 
-                                className={`
-                                    flex items-center justify-center w-10 h-10 rounded-md font-bold text-gray-800 shadow-md 
-                                    transition-all bg-white select-none
-                                    ${snapshot.isDragging ? 'bg-yellow-300 scale-110' : ''}
-                                `}
-                            >
-                                {letter.char}
-                            </div>
-                        )}
-                    </Draggable>
-                ))}
+                {/* ... Droppable (source-area) içinde ... */}
+{sourceLetters.map((letter, index) => {
+    return (
+       <Draggable key={letter.id} draggableId={letter.id} index={index}>
+    {(provided, snapshot) => (
+        <div 
+            ref={provided.innerRef} 
+            {...provided.draggableProps} 
+            className={`
+                group flex items-center gap-1 p-1 w-10 h-10 rounded-md font-bold text-gray-800 
+                shadow-md transition-all bg-white select-none
+                ${snapshot.isDragging ? 'bg-yellow-300 scale-110' : ''}
+            `}
+        >
+            {/* TUTAMAÇ SOLA ALINDI VE İKON DEĞİŞTİ */}
+            <div 
+                {...provided.dragHandleProps} 
+                className="w-5 h-full flex items-center justify-center text-gray-400 cursor-grab active:cursor-grabbing
+                           opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                title="Taşımak için sürükle"
+            >
+                ⠿
+            </div>
+            <span className="flex-grow text-center">{letter.char}</span>
+        </div>
+    )}
+</Draggable>
+    );
+})}
+
+
+
                 {provided.placeholder}
             </div>
         )}

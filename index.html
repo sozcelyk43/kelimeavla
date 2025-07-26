@@ -320,10 +320,10 @@ function createBoard(level, language, mode) {
             let targetHiddenWordLength;
 
             if (mode === 'super-easy') {
-                targetTotalWordCount = 4 + Math.floor(level / 8); 
-                targetHiddenWordLength = 4 + Math.floor(level / 10); 
+                targetTotalWordCount = Math.min(15, 6 + Math.floor(level / 8));
+    		targetHiddenWordLength = Math.min(8, 4 + Math.floor(level / 10))
             } else {
-    	        targetTotalWordCount = Math.min(33, 21 + Math.floor(level / 3));
+		targetTotalWordCount = Math.min(45, 25 + Math.floor(level / 3));
     		targetHiddenWordLength = Math.min(10, 5 + Math.floor(level / 3));
             }
 
@@ -448,7 +448,16 @@ for (let r = 0; r < rows; r++) {
     }
 }
 
-         
+       for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+        // Eğer bir hücre hala boşsa (boş string, null veya undefined ise)
+        if (!board[r][c]) {
+            // Onu alfabeden rastgele bir harfle doldurmaya zorla.
+            console.warn(`Zorunlu doldurma tetiklendi: Satır ${r}, Sütun ${c}`); // Bu satır, hatayı tespit etmemize yardımcı olur
+            board[r][c] = _.sample(charSets[language]);
+        }
+    }
+}  
 
 
 
@@ -777,48 +786,68 @@ const { DragDropContext, Droppable, Draggable } = window.ReactBeautifulDnd;
         if (path.length !== expectedLength) { return false; } return true;
     };
 
+// BU FONKSİYONUN TAMAMINI KODUNUZDAKİ MEVCUT FONKSİYONLA DEĞİŞTİRİN
 const onDragEnd = (result) => {
-    const { source, destination } = result;
-    if (!destination) return;
-    if (source.droppableId === destination.droppableId && source.index === destination.index) return;
-    if (source.droppableId === 'answer-area' && destination.droppableId === 'source-area') {
-        return; // İşlemi iptal et, harf eski yerine dönsün.
-    }
-    if ((source.droppableId === 'answer-area' && hintLockedSlots.includes(source.index)) ||
-        (destination.droppableId === 'answer-area' && hintLockedSlots.includes(destination.index))) {
-        return;
-    }
-    const sourceLettersCopy = [...sourceLetters];
-    const answerSlotsCopy = [...answerSlots];
-    let draggedLetter;
-    if (source.droppableId === 'source-area') {
-        draggedLetter = sourceLettersCopy[source.index];
-    } else { // 'answer-area'
-        draggedLetter = answerSlotsCopy[source.index];
-    }
-    if (!draggedLetter) return;
-    if (source.droppableId === 'source-area') {
-        sourceLettersCopy.splice(source.index, 1);
-    } else {
-        answerSlotsCopy[source.index] = null;
-    }
-    if (destination.droppableId === 'answer-area') {
-        const letterAtDestination = answerSlotsCopy[destination.index];
-        answerSlotsCopy[destination.index] = draggedLetter;
-        
-        if (letterAtDestination) {
-            if (source.droppableId === 'source-area') {
-                sourceLettersCopy.push(letterAtDestination);
-            } else {
-                answerSlotsCopy[source.index] = letterAtDestination;
-            }
+    // State güncellemesini bir sonraki animasyon karesine erteleyerek
+    // react-beautiful-dnd ile React render döngüsü arasındaki çakışmaları çözüyoruz.
+    window.requestAnimationFrame(() => {
+        const { source, destination } = result;
+
+        if (!destination || (source.droppableId === destination.droppableId && source.index === destination.index)) {
+            return;
         }
-    } else {
-        sourceLettersCopy.push(draggedLetter);
-    }
-    
-    setAnswerSlots(answerSlotsCopy);
-setSourceLetters(_.shuffle(sourceLettersCopy));
+
+        if ((destination.droppableId.startsWith('slot-') && hintLockedSlots.includes(parseInt(destination.droppableId.split('-')[1]))) ||
+            (source.droppableId.startsWith('slot-') && hintLockedSlots.includes(parseInt(source.droppableId.split('-')[1])))) {
+            return;
+        }
+
+        const sourceLettersCopy = [...sourceLetters];
+        const answerSlotsCopy = [...answerSlots];
+
+        // SENARYO 1: Kaynaktan (Kalan Harfler) bir cevap kutusuna
+        if (source.droppableId === 'source-area' && destination.droppableId.startsWith('slot-')) {
+            const destIndex = parseInt(destination.droppableId.split('-')[1]);
+            const [draggedLetter] = sourceLettersCopy.splice(source.index, 1);
+
+            const letterInDest = answerSlotsCopy[destIndex];
+            if (letterInDest) {
+                sourceLettersCopy.push(letterInDest);
+            }
+
+            answerSlotsCopy[destIndex] = draggedLetter;
+            setAnswerSlots(answerSlotsCopy);
+            setSourceLetters(_.shuffle(sourceLettersCopy));
+        }
+        // SENARYO 2: Cevap kutusundan kaynağa (Kalan Harfler) geri
+        else if (source.droppableId.startsWith('slot-') && destination.droppableId === 'source-area') {
+            const sourceIndex = parseInt(source.droppableId.split('-')[1]);
+            const [draggedLetter] = answerSlotsCopy.splice(sourceIndex, 1, null);
+
+            if (draggedLetter) {
+                sourceLettersCopy.splice(destination.index, 0, draggedLetter);
+            }
+            setAnswerSlots(answerSlotsCopy);
+            setSourceLetters(_.shuffle(sourceLettersCopy));
+        }
+        // SENARYO 3: Cevap kutuları arasında taşıma veya takas
+        else if (source.droppableId.startsWith('slot-') && destination.droppableId.startsWith('slot-')) {
+            const sourceIndex = parseInt(source.droppableId.split('-')[1]);
+            const destIndex = parseInt(destination.droppableId.split('-')[1]);
+
+            if (sourceIndex === destIndex) return;
+
+            [answerSlotsCopy[sourceIndex], answerSlotsCopy[destIndex]] = [answerSlotsCopy[destIndex], answerSlotsCopy[sourceIndex]];
+
+            setAnswerSlots(answerSlotsCopy);
+        }
+        // SENARYO 4: Kaynak alan içinde yeniden sıralama
+        else if (source.droppableId === 'source-area' && destination.droppableId === 'source-area') {
+            const [draggedLetter] = sourceLettersCopy.splice(source.index, 1);
+            sourceLettersCopy.splice(destination.index, 0, draggedLetter);
+            setSourceLetters(sourceLettersCopy);
+        }
+    });
 };
 
 const handleHiddenWordHint = () => {
@@ -1207,116 +1236,140 @@ const handleHiddenWordHint = () => {
     
     const triggerConfetti = () => confetti({ particleCount: 150, spread: 90, origin: { y: 0.6 } });
 	
-    const handleHiddenWordSubmit = (guess) => {
-        const isOneShot = config?.isOneShot;
-        if (!allRequiredWordsFound) { 
+
+
+
+
+const handleHiddenWordSubmit = (guess) => {
+    if (!allRequiredWordsFound) {
+        setModalContent({
+            isOpen: true,
+            title: t.error,
+            children: <p>{t.allWordsRequired}</p>
+        });
+        playSound('wrongSound');
+        return;
+    }
+
+    const fullGuess = customToUpperCase(guess.trim());
+
+    if (fullGuess === gameState.hiddenWord) {
+        // --- DOĞRU TAHMİN MANTIĞI ---
+        playSound('correctSound');
+        vibrate('success');
+        triggerConfetti();
+        setTimeout(() => triggerConfetti(), 350);
+
+        if (config?.isOneShot) {
             setModalContent({
                 isOpen: true,
-                title: t.error,
-                children: <p>{t.allWordsRequired}</p>
+                title: "🎲 Rastgele Oyun Bitti 🎲",
+                onClose: goToHome,
+                children: (
+                    <div className="flex flex-col items-center gap-4 p-4 text-center">
+                        <p className="text-lg text-gray-800">Bu bir Rastgele Modu Oyunu idi.<br />İlerlemeniz kaydedilmedi.</p>
+                        <button onClick={goToHome} className="w-full mt-4 px-4 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg transition-all">
+                            {t.returnToHomeButton}
+                        </button>
+                    </div>
+                )
             });
-            playSound('wrongSound'); 
-            return; 
-        }
-          
-        const fullGuess = customToUpperCase(guess.trim());
-        if (fullGuess === gameState.hiddenWord) { 
-            playSound('correctSound'); 
-            vibrate('success');
-            triggerConfetti();
-            if (isOneShot) {
-                 setModalContent({
-                    isOpen: true,
-                    title: "🎲 Rastgele Oyun Bitti 🎲",
-                    onClose: goToHome,
-                    children: (
-                        <div className="flex flex-col items-center gap-4 p-4 text-center">
-                            <p className="text-lg text-gray-800">
-                                Bu bir Rastgele Modu Oyunu idi.<br/>İlerlemeniz kaydedilmedi.
-                            </p>
-                            <button onClick={goToHome} className="w-full mt-4 px-4 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg transition-all">
+        } else {
+            let goldEarned = 0;
+            if (mode === 'easy' || mode === 'super-easy') goldEarned = 1;
+            else if (mode === 'hard') goldEarned = 3;
+            else if (mode === 'timed-easy') goldEarned = 5;
+            else if (mode === 'timed-hard') goldEarned = 8;
+            const newTotalGold = (stats.gold || 0) + goldEarned;
+            onStatsChange({ ...stats, gold: newTotalGold });
+            const playerUsername = localStorage.getItem('wordHuntUsername') || 'Misafir';
+            const currentUser = firebase.auth().currentUser;
+            if (currentUser && playerUsername !== 'Misafir') {
+                db.collection("scores").add({
+                    username: playerUsername,
+                    uid: currentUser.uid,
+                    score: score,
+                    level: level + 1,
+                    mode: mode,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                }).catch(error => console.error("Skor kaydedilirken hata:", error));
+            }
+
+            const currentHighScore = !mode.startsWith('timed') ? (stats.highScores[`${mode}-${level}`] || 0) : 0;
+            const isNewHighScore = !mode.startsWith('timed') && score > currentHighScore;
+
+            setModalContent({
+                isOpen: true,
+                title: '🎉 Harika İş! 🎉',
+                onClose: () => { closeModal(); handleNextLevel(); },
+                children: (
+                    <div className="flex flex-col items-center gap-4 p-4">
+                        <p className="text-lg font-medium text-gray-800 -mt-2 mb-3 text-center">
+                            Bravo! Gizli kelime <b className="text-green-600">{gameState.hiddenWord}</b> idi.
+                        </p>
+                        <div className="bg-amber-100 border-2 border-amber-300 rounded-full px-6 py-2 flex items-center gap-3 shadow-inner">
+                            <span className="text-3xl">💰</span>
+                            <div className="text-left">
+                                <p className="text-sm font-semibold text-amber-800">Kazanılan Altın</p>
+                                <p className="text-2xl font-bold text-amber-900">+{goldEarned}</p>
+                            </div>
+                        </div>
+                        <div className="w-full grid grid-cols-2 gap-4 text-center">
+                            <div className="bg-slate-100 p-3 rounded-lg">
+                                <p className="text-sm font-semibold text-gray-600 uppercase">SKORUN</p>
+                                <p className="text-4xl font-bold text-green-600">{score}</p>
+                                {isNewHighScore && (
+                                    <span className="mt-1 inline-block text-xs bg-yellow-200 text-yellow-800 font-bold px-2 py-0.5 rounded-full animate-pulse">
+                                        YENİ REKOR!
+                                    </span>
+                                )}
+                            </div>
+                            <div className="bg-slate-100 p-3 rounded-lg">
+                                <p className="text-sm font-semibold text-gray-600 uppercase">YÜKSEK SKOR</p>
+                                <p className="text-4xl font-bold text-indigo-600">{mode.startsWith('timed') ? '-' : Math.max(score, currentHighScore)}</p>
+                            </div>
+                        </div>
+                        <div className="w-full flex flex-col sm:flex-row gap-3 mt-4">
+                            <button onClick={goToHome} className="w-full px-4 py-3 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold rounded-lg transition-all duration-300 shadow-sm">
                                 {t.returnToHomeButton}
                             </button>
-                        </div>
-                    )
-                });
-            } else {
-                let goldEarned = 0;
-                if (mode === 'easy' || mode === 'super-easy') goldEarned = 1;
-                else if (mode === 'hard') goldEarned = 3;
-                else if (mode === 'timed-easy') goldEarned = 5;
-                else if (mode === 'timed-hard') goldEarned = 8;
-                const newTotalGold = (stats.gold || 0) + goldEarned;
-                onStatsChange({ ...stats, gold: newTotalGold });
-                const playerUsername = localStorage.getItem('wordHuntUsername') || 'Misafir'; 
-                const currentUser = firebase.auth().currentUser;
-                if (currentUser && playerUsername !== 'Misafir') {
-                    db.collection("scores").add({
-                        username: playerUsername,
-                        uid: currentUser.uid,
-                        score: score,
-                        level: level + 1,
-                        mode: mode,
-                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                    }).catch(error => console.error("Skor kaydedilirken hata:", error));
-                }
-
-                const currentHighScore = !mode.startsWith('timed') ? (stats.highScores[`${mode}-${level}`] || 0) : 0;
-                const isNewHighScore = !mode.startsWith('timed') && score > currentHighScore;
-
-                setModalContent({ 
-                    isOpen: true,
-                    title: '🎉 Harika İş! 🎉',
-                    onClose: () => { closeModal(); handleNextLevel(); },
-                    children: (
-                        <div className="flex flex-col items-center gap-4 p-4">
-                          <p className="text-lg font-medium text-gray-800 -mt-2 mb-3 text-center">
-                            Bravo! Gizli kelime <b className="text-green-600">{gameState.hiddenWord}</b> idi.
-                          </p>
-                          <div className="bg-amber-100 border-2 border-amber-300 rounded-full px-6 py-2 flex items-center gap-3 shadow-inner">
-                              <span className="text-3xl">💰</span>
-                              <div className="text-left">
-                                  <p className="text-sm font-semibold text-amber-800">Kazanılan Altın</p>
-                                  <p className="text-2xl font-bold text-amber-900">+{goldEarned}</p>
-                              </div>
-                          </div>
-                          <div className="w-full grid grid-cols-2 gap-4 text-center">
-                              <div className="bg-slate-100 p-3 rounded-lg">
-                                  <p className="text-sm font-semibold text-gray-600 uppercase">SKORUN</p>
-                                  <p className="text-4xl font-bold text-green-600">{score}</p>
-                                  {isNewHighScore && (
-                                      <span className="mt-1 inline-block text-xs bg-yellow-200 text-yellow-800 font-bold px-2 py-0.5 rounded-full animate-pulse">
-                                        YENİ REKOR!
-                                      </span>
-                                  )}
-                              </div>
-                              <div className="bg-slate-100 p-3 rounded-lg">
-                                  <p className="text-sm font-semibold text-gray-600 uppercase">YÜKSEK SKOR</p>
-                                  <p className="text-4xl font-bold text-indigo-600">{mode.startsWith('timed') ? '-' : Math.max(score, currentHighScore)}</p>
-                              </div>
-                          </div>
-                          <div className="w-full flex flex-col sm:flex-row gap-3 mt-4">
-                              <button onClick={goToHome} className="w-full px-4 py-3 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold rounded-lg transition-all duration-300 shadow-sm">
-                                {t.returnToHomeButton}
-                              </button>
-                              <button onClick={() => { closeModal(); handleNextLevel(); }} className="w-full px-4 py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg transition-all duration-300 shadow-lg">
+                            <button onClick={() => { closeModal(); handleNextLevel(); }} className="w-full px-4 py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg transition-all duration-300 shadow-lg">
                                 {t.nextLevelButton}
-                              </button>
-                          </div>
-                      </div>
-                    )
-                });
-            }
-        } else {
-            playSound('wrongSound'); 
-            vibrate('error');
-            const answerArea = document.getElementById('answer-area-container');
-            if (answerArea) {
-                answerArea.classList.add('shake-animation');
-                setTimeout(() => answerArea.classList.remove('shake-animation'), 300);
-            }
+                            </button>
+                        </div>
+                    </div>
+                )
+            });
         }
-    };
+    } else {
+        // --- YANLIŞ TAHMİN MANTIĞI (İPUCU HARFİNİ KORUYARAK SIFIRLAMA) ---
+        playSound('wrongSound');
+        vibrate('error');
+        const answerArea = document.getElementById('answer-area-container');
+        if (answerArea) {
+            answerArea.classList.add('shake-animation');
+            setTimeout(() => answerArea.classList.remove('shake-animation'), 300);
+        }
+
+        const lettersToReturn = [];
+        const newAnswerSlots = Array(gameState.hiddenWord.length).fill(null);
+
+        answerSlots.forEach((letter, index) => {
+            if (letter) {
+                if (hintLockedSlots.includes(index)) {
+                    newAnswerSlots[index] = letter;
+                } else {
+                    lettersToReturn.push(letter);
+                }
+            }
+        });
+
+        setSourceLetters(prevSource => _.shuffle([...prevSource, ...lettersToReturn]));
+        setAnswerSlots(newAnswerSlots);
+    }
+};
+
+
       
     if (isLoading) { return ( <div className="flex items-center justify-center h-full text-lg font-semibold text-indigo-700">{t.loadingLevel(level + 1)}</div> ); }
 
@@ -1389,66 +1442,66 @@ const handleHiddenWordHint = () => {
 <DragDropContext onDragEnd={onDragEnd}>
     <p className="font-bold text-lg text-indigo-700">Gizli Kelimeyi Oluştur</p>
     
-    {/* Cevap Alanı */}
-    <div id="answer-area-container" className="my-2">
-        <Droppable droppableId="answer-area" direction="horizontal">
-            {(provided) => (
-            <div {...provided.droppableProps} ref={provided.innerRef} className="flex justify-center flex-wrap gap-1 p-2 bg-indigo-100 rounded-lg">
 
+{/* İsteğiniz üzerine eklenen, Kalan Harfler gibi gri arka plan */}
+<div id="answer-area-container" className="my-2">
+    <div className="p-2 bg-gray-200 rounded-lg min-h-[50px] w-full max-w-sm flex justify-center items-center gap-1">
+        {(() => {
+            // Bu sayaç, cevap alanındaki harflere doğru ve ardışık index vermek için kullanılıyor.
+            let answerDraggableCounter = 0;
 
+            return answerSlots.map((letter, index) => {
+                const isLocked = hintLockedSlots.includes(index);
+                
+                // Eğer bu slotta bir harf varsa, ona atanacak olan benzersiz index'i hesapla.
+                // Index, kaynak harflerin sayısından sonra devam eder.
+                let draggableIndex = -1;
+                if (letter) {
+                    draggableIndex = sourceLetters.length + answerDraggableCounter;
+                    answerDraggableCounter++;
+                }
 
-
-                   {/* ... Droppable (answer-area) içinde ... */}
-{answerSlots.map((letter, index) => {
-    const isLocked = hintLockedSlots.includes(index);
-    return (
-        <Draggable 
-    key={letter ? letter.id : `slot-${index}`} 
-    draggableId={letter ? letter.id : `slot-${index}`} 
-    index={index} 
-    isDragDisabled={isLocked || !letter}
->
-    {(provided, snapshot) => (
-        // 1. Ana kutuya 'relative' pozisyonu veriyoruz.
-        <div
-            ref={provided.innerRef}
-            {...provided.draggableProps}
-            className={`
-                relative group w-10 h-10 sm:w-12 sm:h-12 rounded
-                transition-shadow duration-200 ease-in-out select-none
-                ${!letter ? 'bg-indigo-50 border-2 border-dashed border-gray-400' : 'bg-white shadow-md'}
-                ${isLocked ? 'bg-amber-200 cursor-not-allowed' : ''}
-                ${snapshot.isDragging ? 'scale-110 -rotate-3 shadow-2xl bg-amber-200' : ''}
-            `}
-        >
-            {/* 2. Görünmez Tutamaç: Tüm kutuyu kaplayan, anında sürüklemeyi başlatan katman */}
-            {!isLocked && letter && (
-                <div 
-                    {...provided.dragHandleProps}
-                    className="absolute top-0 left-0 w-full h-full cursor-grab active:cursor-grabbing z-10"
-                    title="Taşımak için sürükle"
-                >
-                    {/* Bu div'in içi boş kalacak, çünkü kendisi görünmez */}
-                </div>
-            )}
-
-            {/* 3. Harfin kendisi: Görsel olarak görünür ama sürüklemeyi başlatmaz */}
-            <div className="w-full h-full flex items-center justify-center font-bold text-xl text-gray-800">
-                <span>{letter ? letter.char : ''}</span>
-            </div>
-        </div>
-    )}
-</Draggable>
-
-
-);
-})}
-                   {provided.placeholder}
-                </div>
-            )}
-        </Droppable>
+                return (
+                    <Droppable key={index} droppableId={`slot-${index}`} isDropDisabled={isLocked}>
+                        {(provided, snapshot) => (
+                            <div
+                                ref={provided.innerRef}
+                                {...provided.droppableProps}
+                                className={`relative group w-10 h-10 sm:w-12 sm:h-12 rounded transition-all duration-200
+                                    ${isLocked ? 'bg-amber-200 cursor-not-allowed' : ''}
+                                    ${!letter ? 'border-2 border-dashed border-gray-400 bg-indigo-50' : 'border-0'}
+                                    ${snapshot.isDraggingOver ? 'scale-110 bg-blue-200 ring-2 ring-blue-500' : ''}
+                                `}
+                            >
+                                {letter && (
+                                    <Draggable
+                                        key={letter.id} // React için stabil bir key ekledik.
+                                        draggableId={letter.id}
+                                        index={draggableIndex} // HESAPLANAN BENZERSİZ INDEX KULLANILIYOR
+                                        isDragDisabled={isLocked}
+                                    >
+                                        {(provided, snapshot) => (
+                                            <div
+                                                ref={provided.innerRef}
+                                                {...provided.draggableProps}
+                                                {...provided.dragHandleProps}
+                                                className={`w-full h-full flex items-center justify-center font-bold text-xl text-gray-800 bg-white shadow-md rounded
+                                                    ${snapshot.isDragging ? 'scale-110 -rotate-3 shadow-2xl' : ''}`}
+                                            >
+                                                <span>{letter.char}</span>
+                                            </div>
+                                        )}
+                                    </Draggable>
+                                )}
+                                <div style={{ display: 'none' }}>{provided.placeholder}</div>
+                            </div>
+                        )}
+                    </Droppable>
+                );
+            });
+        })()}
     </div>
-
+</div>
     <p className="text-sm text-gray-600 mt-2 mb-1">Kalan Harfler</p>
     
     {/* Kalan Harfler Alanı */}

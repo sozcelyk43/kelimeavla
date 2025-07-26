@@ -740,6 +740,7 @@ function HomePage({ startGame, language, setLanguage, stats, setModalContent, sa
 }
 
 function WordHunt({ goToHome, language, mode, stats, onStatsChange, initialSavedState, config }) {
+const [activeTouchId, setActiveTouchId] = React.useState(null);
 
     const t = translations[language] || translations['en'];
 
@@ -788,67 +789,67 @@ const { DragDropContext, Droppable, Draggable } = window.ReactBeautifulDnd;
 
 // BU FONKSİYONUN TAMAMINI KODUNUZDAKİ MEVCUT FONKSİYONLA DEĞİŞTİRİN
 const onDragEnd = (result) => {
-    // State güncellemesini bir sonraki animasyon karesine erteleyerek
-    // react-beautiful-dnd ile React render döngüsü arasındaki çakışmaları çözüyoruz.
-    window.requestAnimationFrame(() => {
-        const { source, destination } = result;
+    const { source, destination } = result;
 
-        if (!destination || (source.droppableId === destination.droppableId && source.index === destination.index)) {
-            return;
+    // Eğer bir hedef yoksa veya aynı yere bırakıldıysa hiçbir şey yapma
+    if (!destination || (source.droppableId === destination.droppableId && source.index === destination.index)) {
+        return;
+    }
+    
+    // Kilitli bir slota işlem yapmayı engelle
+    if ((destination.droppableId.startsWith('slot-') && hintLockedSlots.includes(parseInt(destination.droppableId.split('-')[1]))) ||
+        (source.droppableId.startsWith('slot-') && hintLockedSlots.includes(parseInt(source.droppableId.split('-')[1])))) {
+        return;
+    }
+
+    const sourceLettersCopy = [...sourceLetters];
+    const answerSlotsCopy = [...answerSlots];
+
+    // SENARYO 1: Kaynaktan (Kalan Harfler) bir cevap kutusuna
+    if (source.droppableId === 'source-area' && destination.droppableId.startsWith('slot-')) {
+        const destIndex = parseInt(destination.droppableId.split('-')[1]);
+        const [draggedLetter] = sourceLettersCopy.splice(source.index, 1);
+        
+        const letterInDest = answerSlotsCopy[destIndex];
+        if (letterInDest) {
+            sourceLettersCopy.push(letterInDest);
         }
-
-        if ((destination.droppableId.startsWith('slot-') && hintLockedSlots.includes(parseInt(destination.droppableId.split('-')[1]))) ||
-            (source.droppableId.startsWith('slot-') && hintLockedSlots.includes(parseInt(source.droppableId.split('-')[1])))) {
-            return;
-        }
-
-        const sourceLettersCopy = [...sourceLetters];
-        const answerSlotsCopy = [...answerSlots];
-
-        // SENARYO 1: Kaynaktan (Kalan Harfler) bir cevap kutusuna
-        if (source.droppableId === 'source-area' && destination.droppableId.startsWith('slot-')) {
-            const destIndex = parseInt(destination.droppableId.split('-')[1]);
-            const [draggedLetter] = sourceLettersCopy.splice(source.index, 1);
-
-            const letterInDest = answerSlotsCopy[destIndex];
-            if (letterInDest) {
-                sourceLettersCopy.push(letterInDest);
-            }
-
-            answerSlotsCopy[destIndex] = draggedLetter;
-            setAnswerSlots(answerSlotsCopy);
-            setSourceLetters(_.shuffle(sourceLettersCopy));
-        }
-        // SENARYO 2: Cevap kutusundan kaynağa (Kalan Harfler) geri
-        else if (source.droppableId.startsWith('slot-') && destination.droppableId === 'source-area') {
-            const sourceIndex = parseInt(source.droppableId.split('-')[1]);
-            const [draggedLetter] = answerSlotsCopy.splice(sourceIndex, 1, null);
-
-            if (draggedLetter) {
-                sourceLettersCopy.splice(destination.index, 0, draggedLetter);
-            }
-            setAnswerSlots(answerSlotsCopy);
-            setSourceLetters(_.shuffle(sourceLettersCopy));
-        }
-        // SENARYO 3: Cevap kutuları arasında taşıma veya takas
-        else if (source.droppableId.startsWith('slot-') && destination.droppableId.startsWith('slot-')) {
-            const sourceIndex = parseInt(source.droppableId.split('-')[1]);
-            const destIndex = parseInt(destination.droppableId.split('-')[1]);
-
-            if (sourceIndex === destIndex) return;
-
-            [answerSlotsCopy[sourceIndex], answerSlotsCopy[destIndex]] = [answerSlotsCopy[destIndex], answerSlotsCopy[sourceIndex]];
-
-            setAnswerSlots(answerSlotsCopy);
-        }
-        // SENARYO 4: Kaynak alan içinde yeniden sıralama
-        else if (source.droppableId === 'source-area' && destination.droppableId === 'source-area') {
-            const [draggedLetter] = sourceLettersCopy.splice(source.index, 1);
+        
+        answerSlotsCopy[destIndex] = draggedLetter;
+        setAnswerSlots(answerSlotsCopy);
+        setSourceLetters(_.shuffle(sourceLettersCopy));
+    }
+    // SENARYO 2: Cevap kutusundan kaynağa (Kalan Harfler) geri
+    else if (source.droppableId.startsWith('slot-') && destination.droppableId === 'source-area') {
+        const sourceIndex = parseInt(source.droppableId.split('-')[1]);
+        const [draggedLetter] = answerSlotsCopy.splice(sourceIndex, 1, null);
+        
+        if (draggedLetter) {
             sourceLettersCopy.splice(destination.index, 0, draggedLetter);
-            setSourceLetters(sourceLettersCopy);
         }
-    });
+        setAnswerSlots(answerSlotsCopy);
+        setSourceLetters(_.shuffle(sourceLettersCopy));
+    }
+    // SENARYO 3: Cevap kutuları arasında taşıma veya takas
+    else if (source.droppableId.startsWith('slot-') && destination.droppableId.startsWith('slot-')) {
+        const sourceIndex = parseInt(source.droppableId.split('-')[1]);
+        const destIndex = parseInt(destination.droppableId.split('-')[1]);
+        
+        if (sourceIndex === destIndex) return;
+
+        [answerSlotsCopy[sourceIndex], answerSlotsCopy[destIndex]] = [answerSlotsCopy[destIndex], answerSlotsCopy[sourceIndex]];
+
+        setAnswerSlots(answerSlotsCopy);
+    }
+    // SENARYO 4: Kaynak alan içinde yeniden sıralama
+    else if (source.droppableId === 'source-area' && destination.droppableId === 'source-area') {
+        const [draggedLetter] = sourceLettersCopy.splice(source.index, 1);
+        sourceLettersCopy.splice(destination.index, 0, draggedLetter);
+        setSourceLetters(sourceLettersCopy);
+    }
 };
+
+
 
 const handleHiddenWordHint = () => {
     if (stats.gold < 1 || !gameState) return;
@@ -1241,6 +1242,16 @@ const handleHiddenWordHint = () => {
 
 
 const handleHiddenWordSubmit = (guess) => {
+    // Bu yardımcı fonksiyon, bir diziyi yerinde karıştırır (Fisher-Yates Algoritması)
+    // ve her zaman rastgele bir sonuç garanti eder.
+    const shuffleArray = (array) => {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    };
+
     if (!allRequiredWordsFound) {
         setModalContent({
             isOpen: true,
@@ -1342,7 +1353,7 @@ const handleHiddenWordSubmit = (guess) => {
             });
         }
     } else {
-        // --- YANLIŞ TAHMİN MANTIĞI (İPUCU HARFİNİ KORUYARAK SIFIRLAMA) ---
+        // --- YANLIŞ TAHMİN MANTIĞI ---
         playSound('wrongSound');
         vibrate('error');
         const answerArea = document.getElementById('answer-area-container');
@@ -1364,7 +1375,7 @@ const handleHiddenWordSubmit = (guess) => {
             }
         });
 
-        setSourceLetters(prevSource => _.shuffle([...prevSource, ...lettersToReturn]));
+        setSourceLetters(prevSource => shuffleArray([...prevSource, ...lettersToReturn]));
         setAnswerSlots(newAnswerSlots);
     }
 };
@@ -1503,48 +1514,45 @@ const handleHiddenWordSubmit = (guess) => {
     </div>
 </div>
     <p className="text-sm text-gray-600 mt-2 mb-1">Kalan Harfler</p>
-    
-    {/* Kalan Harfler Alanı */}
-    <Droppable droppableId="source-area" direction="horizontal">
-        {(provided) => (
-            <div {...provided.droppableProps} ref={provided.innerRef} className="flex flex-wrap justify-center items-center gap-2 p-2 bg-gray-200 rounded-lg min-h-[50px] w-full max-w-sm">
-                {/* ... Droppable (source-area) içinde ... */}
-{sourceLetters.map((letter, index) => {
-    return (
-<Draggable key={letter.id} draggableId={letter.id} index={index}>
-    {(provided, snapshot) => (
-        // 1. Ana kutuya 'relative' pozisyonu veriyoruz.
-        <div 
-            ref={provided.innerRef} 
-            {...provided.draggableProps} 
-            className={`
-                relative group w-10 h-10 rounded-md
-                shadow-md transition-all bg-white select-none
-                ${snapshot.isDragging ? 'bg-yellow-300 scale-110' : ''}
-            `}
-        >
-            {/* 2. Görünmez Tutamaç: Tüm kutuyu kaplayan, anında sürüklemeyi başlatan katman */}
-            <div 
-                {...provided.dragHandleProps} 
-                className="absolute top-0 left-0 w-full h-full cursor-grab active:cursor-grabbing z-10"
-                title="Taşımak için sürükle"
-            >
-                {/* Bu div'in içi boş kalacak, çünkü kendisi görünmez */}
-            </div>
 
-            {/* 3. Harfin kendisi: Görsel olarak görünür ama sürüklemeyi başlatmaz */}
-            <div className="w-full h-full flex items-center justify-center font-bold text-xl text-gray-800">
-                <span>{letter.char}</span>
-            </div>
+
+<Droppable droppableId="source-area" direction="horizontal">
+    {(provided) => (
+        <div {...provided.droppableProps} ref={provided.innerRef} className="flex flex-wrap justify-center items-center gap-2 p-2 bg-gray-200 rounded-lg min-h-[50px] w-full max-w-sm">
+            {sourceLetters.map((letter, index) => {
+                return (
+                    <Draggable key={letter.id} draggableId={letter.id} index={index}>
+                        {(provided, snapshot) => (
+                            <div
+                                ref={provided.innerRef}
+                                {...provided.draggableProps}
+                                {...provided.dragHandleProps}
+                                onTouchStart={() => {
+                                    setActiveTouchId(letter.id);
+                                    vibrate(25); // Titreşimi biraz daha hissedilir yapalım
+                                }}
+                                onTouchEnd={() => setActiveTouchId(null)}
+                                // --- GÜÇLENDİRİLMİŞ GÖRSEL EFEKT ---
+                                className={`relative group w-10 h-10 rounded-md shadow-md transition-all duration-150 bg-white select-none
+                                    ${snapshot.isDragging ? 'scale-110 shadow-xl z-30' : ''}
+                                    ${activeTouchId === letter.id && !snapshot.isDragging ? 'scale-125 shadow-2xl z-20' : ''}
+                                `}
+                            >
+                                <div className="absolute top-0 left-0 w-full h-full cursor-grab active:cursor-grabbing" title="Taşımak için sürükle"></div>
+                                <div className="w-full h-full flex items-center justify-center font-bold text-xl text-gray-800">
+                                    <span>{letter.char}</span>
+                                </div>
+                            </div>
+                        )}
+                    </Draggable>
+                );
+            })}
+            {provided.placeholder}
         </div>
     )}
-</Draggable>
-);
-})}
-{provided.placeholder}
-</div>
-)}
 </Droppable>
+
+
 </DragDropContext>                                
 
 <button onClick={() => { const guess = answerSlots.map(l => l ? l.char : '').join(''); handleHiddenWordSubmit(guess); }} disabled={answerSlots.some(l => l === null)} className="mt-4 w-full max-w-sm mx-auto bg-green-500 text-white rounded-lg py-3 font-bold hover:bg-green-600 transition-transform active:scale-95 disabled:bg-gray-400 disabled:cursor-not-allowed">

@@ -12,13 +12,13 @@
 	<script src="libs/firebase-app.js"></script>
 	<script src="libs/firebase-firestore.js"></script>
 	<script src="libs/firebase-auth.js"></script>
-    <script src="libs/firebase-remote-config.js"></script>
+	<script src="libs/firebase-remote-config.js"></script>
 	<script src="libs/babel.min.js"></script>
 	<script src="wordstr.js?v=1.0"></script>
 	<script src="words_tr_2letters.js?v=1.0"></script>
 	<script src="wordsen.js?v=1.0"></script>
 
-	<style>
+<style>
 	body {overscroll-behavior-y: none;-webkit-user-select: none;user-select: none;height: 100vh;font-family: 'Inter', sans-serif;background-color: #f3f4f6;    }
 	body.no-scroll {overflow: hidden;touch-action: none;}
     body.no-scroll #root {overflow: hidden;}
@@ -40,19 +40,19 @@
     100% { transform: scale(1); background-color: #6ee7b7; box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }	}
     .animate-bonus-glow {animation: bonus-double-glow-animation 1.2s ease-out;}
 
-    @keyframes bonus-double-glow-animation {    0% {        transform: scale(1);    }
-    25% {        transform: scale(1.15);        background-color: #fde047;        box-shadow: 0 0 15px #facc15;    }
-    50% {        transform: scale(1);    }
-    75% {        transform: scale(1.15);        background-color: #fde047;         box-shadow: 0 0 15px #facc15;    }
-    100% {       transform: scale(1);    }    }	
+    @keyframes bonus-double-glow-animation {0% {transform: scale(1);}
+    25% {transform: scale(1.15);background-color: #fde047;box-shadow: 0 0 15px #facc15;}
+    50% {transform: scale(1);}
+    75% {transform: scale(1.15);background-color: #fde047;box-shadow: 0 0 15px #facc15;}
+    100% {transform: scale(1);}}	
 
 
-    #loader.hidden {        opacity: 0;        visibility: hidden;        transition: opacity 0.5s ease-out, visibility 0.5s ease-out;    }
-    #loader-progress {        animation: loading-progress 1.5s ease-in-out forwards;    }
-    @keyframes loading-progress {        0% { width: 0%; }        100% { width: 100%; }    }
-	.animate-timer-pulse {	animation: pulse-timer 0.5s ease-out;}
+    #loader.hidden {opacity: 0;visibility: hidden;transition: opacity 0.5s ease-out, visibility 0.5s ease-out;}
+    #loader-progress {animation: loading-progress 1.5s ease-in-out forwards;}
+    @keyframes loading-progress {0% { width: 0%; }100% { width: 100%;}}
+    .animate-timer-pulse {animation: pulse-timer 0.5s ease-out;}
 
-    @keyframes pulse-timer {      0% { transform: scale(1); }
+    @keyframes pulse-timer {0% { transform: scale(1); }
       40% { transform: scale(1.15); color: #ef4444; }
       100% { transform: scale(1); }}
 
@@ -68,20 +68,14 @@
     50% { transform: translateX(5px); }
     75% { transform: translateX(-5px); }
     100% { transform: translateX(0); }}
-@keyframes gradient-animation {
+    @keyframes gradient-animation {
     0% { background-position: 0% 50%; }
     50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-}
-.animate-loading-bar-slide {
-    width: 40%;
-    animation: loading-bar-slide 1.5s ease-in-out infinite;
-}
-@keyframes loading-bar-slide {
-    0% { transform: translateX(-150%); }
-    100% { transform: translateX(300%); }
-}
-    @keyframes pulse-hint {  0%, 100% { background-color: #fef08a; transform: scale(1); }50% { background-color: #fde047; 	transform: scale(1.05); box-shadow: 0 0 8px #facc15; } }
+    100% { background-position: 0% 50%; }}
+
+    .animate-loading-bar-slide {width: 40%;animation: loading-bar-slide 1.5s ease-in-out infinite;}
+    @keyframes loading-bar-slide {0% { transform: translateX(-150%); }100% { transform: translateX(300%); }}
+    @keyframes pulse-hint {  0%, 100% { background-color: #fef08a; transform: scale(1); }50% { background-color: #fde047;transform: scale(1.05); box-shadow: 0 0 8px #facc15; } }
 </style>
 
 </head>
@@ -185,8 +179,6 @@
         </div>
     );
 }
-
-
 
 function ConfirmationModal({ isOpen, onClose, onConfirm, title, bodyText, language }) {
     if (!isOpen) return null;
@@ -339,13 +331,6 @@ function RoomLobbyPage({ username, gameId, db, onBack, startGame, setPage, setTo
     );
 }
 
-
-
-
-
-
-
-
 function initializeGame() {
         if (window.firebase && window._ && window.React && window.ReactDOM) {
             runApp();
@@ -424,9 +409,11 @@ function initializeGame() {
         { id: 'avatar16', url: 'avatars/avatar16.png' }
 
     ];
-    function runApp() {
-        const loader = document.getElementById('loader');
 
+
+
+function runApp() {
+        const loader = document.getElementById('loader');
         const firebaseConfig = {
           apiKey: "AIzaSyC9qRRHO-m3e_2Kfs14wxxjsovhrE3idXs",
           authDomain: "kelime-avla.firebaseapp.com",
@@ -603,44 +590,49 @@ function ProfileModal({ isOpen, onClose, username, avatarId, cardColor, gold, un
     return (
         <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4" onClick={onClose}>
             <div
-                className="relative bg-gradient-to-br from-slate-50 to-gray-100 p-6 rounded-2xl shadow-2xl w-full max-w-md text-center flex flex-col max-h-[90vh]"
+                className="bg-gradient-to-br from-slate-50 to-gray-100 p-5 rounded-2xl shadow-2xl w-full max-w-md flex flex-col max-h-[90vh]"
                 onClick={e => e.stopPropagation()}
             >
-                <div className="absolute top-4 right-4 bg-amber-100 text-amber-800 text-lg font-bold px-4 py-2 rounded-full shadow-md flex items-center gap-2">
+                {/* 1. Başlık */}
+                <h3 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600 text-center mb-2 flex-shrink-0">
+                    {t.profileTitle}
+                </h3>
+
+                {/* 2. Altın Sayısı (Arka plan rengi belirginleştirildi) */}
+                <div className="mx-auto bg-amber-500 text-white text-base font-bold px-4 py-1 rounded-full shadow-lg flex items-center gap-2 mb-5 flex-shrink-0">
                     <span>💰</span>
                     <span>{gold}</span>
                 </div>
 
-                <h3 className="text-3xl font-black mb-4 text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600 flex-shrink-0">{t.profileTitle}</h3>
-
-                <div className="mb-6 flex-shrink-0">
-                    <label className="block text-sm font-bold text-slate-700 mb-2">{t.changeUsernameLabel}</label>
-                    <div className="flex gap-2">
-                        <input
-                            type="text"
-                            value={newUsername}
-                            onChange={(e) => setNewUsername(e.target.value)}
-                            className="flex-1 border-2 border-slate-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                            maxLength={15}
-                            placeholder={t.newUsernamePlaceholder}
-                        />
-                        <button
-                            onClick={() => onUsernameUpdate(newUsername)}
-                            className="px-4 py-2 bg-indigo-600 text-white font-bold rounded-lg hover:bg-indigo-700 transition-colors shadow-md"
-                        >
-                            {t.saveButton}
-                        </button>
-                    </div>
+                {/* 3. Kullanıcı Adı Değiştirme (Alt Alta) */}
+                <div className="mb-5 flex-shrink-0">
+                    <label className="block text-sm font-bold text-slate-700 mb-2 text-left">{t.changeUsernameLabel}</label>
+                    <input
+                        type="text"
+                        value={newUsername}
+                        onChange={(e) => setNewUsername(e.target.value)}
+                        className="w-full border-2 border-slate-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                        maxLength={15}
+                        placeholder={t.newUsernamePlaceholder}
+                    />
+                    <button
+                        onClick={() => onUsernameUpdate(newUsername)}
+                        className="w-full mt-2 px-4 py-2 bg-indigo-600 text-white font-bold rounded-lg hover:bg-indigo-700 transition-colors shadow-md"
+                    >
+                        {t.saveButton}
+                    </button>
                 </div>
 
-                <div className="flex-1 min-h-0 overflow-y-auto scrollbar-thin pr-2 -mr-4">
-                    <div className="mb-6 border-t pt-4">
+                {/* Kaydırılabilir Alan */}
+                <div className="flex-1 min-h-0 overflow-y-auto scrollbar-thin border-t pt-4">
+
+                    {/* 4. Kart Rengi Seçimi */}
+                    <div className="mb-5">
                         <label className="block text-sm font-bold text-slate-700 mb-3">{t.selectCardColorLabel}</label>
                         <div className="flex flex-wrap justify-center gap-3">
                             {playerCardColors.map(color => {
                                 const isUnlocked = (unlockedColors || []).includes(color.id);
                                 const cost = 2;
-
                                 return (
                                     <div key={color.id} className="flex flex-col items-center gap-1">
                                         <div
@@ -661,13 +653,13 @@ function ProfileModal({ isOpen, onClose, username, avatarId, cardColor, gold, un
                         </div>
                     </div>
 
+                    {/* 5. Avatar Değiştirme */}
                     <div className="border-t pt-4">
-                        <label className="block text-sm font-bold text-slate-700 mb-4">{t.changeAvatarLabel}</label>
-                        <div className="grid grid-cols-4 sm:grid-cols-5 gap-4">
+                        <label className="block text-sm font-bold text-slate-700 mb-3">{t.changeAvatarLabel}</label>
+                        <div className="grid grid-cols-4 sm:grid-cols-5 gap-3">
                             {availableAvatars.map(avatar => {
                                 const isUnlocked = (unlockedAvatars || []).includes(avatar.id);
                                 const cost = 5;
-
                                 return (
                                     <div key={avatar.id} onClick={() => isUnlocked ? onAvatarSelect(avatar.id) : onPurchaseItem('avatar', avatar.id, cost)} className="cursor-pointer group flex flex-col items-center gap-1">
                                         <div className="relative" title={isUnlocked ? '' : t.unlockForGold(cost)}>
@@ -688,18 +680,20 @@ function ProfileModal({ isOpen, onClose, username, avatarId, cardColor, gold, un
                             })}
                         </div>
                     </div>
+
                 </div>
 
-                <button onClick={onClose} className="mt-6 bg-slate-200 text-slate-800 font-bold py-2 px-8 rounded-lg hover:bg-slate-300 transition-all shadow-sm flex-shrink-0">
+                {/* Kapat Butonu (Kırmızı tonlarına çevrildi) */}
+                <button 
+                    onClick={onClose} 
+                    className="mt-4 bg-rose-500 text-white font-bold py-2 px-8 rounded-lg hover:bg-rose-600 transition-all shadow-sm flex-shrink-0"
+                >
                     {t.closeButton}
                 </button>
             </div>
         </div>
     );
-}
-
-
-function FriendRequestModal({ isOpen, requestDetails, onAccept, onDecline }) {
+}function FriendRequestModal({ isOpen, requestDetails, onAccept, onDecline }) {
         if (!isOpen || !requestDetails) return null;
 
         return (
@@ -717,6 +711,8 @@ function FriendRequestModal({ isOpen, requestDetails, onAccept, onDecline }) {
             </div>
         );
     }
+
+
 
 function RoomCreateModal({ isOpen, onClose, onCreate }) {
     if (!isOpen) return null;
@@ -797,9 +793,6 @@ function AccordionSection({ title, isOpen, onToggle, children, badgeCount, icon,
 
 
 function DuelLobbyPage({ username, onBack, db, setToastMessage, joinGameRoom, createGameRoom, sendDirectInvite }) {
-
-
-
     const [openSection, setOpenSection] = React.useState('lobi');
     const [gameRooms, setGameRooms] = React.useState([]);
     const [onlineUsers, setOnlineUsers] = React.useState([]);
@@ -995,11 +988,6 @@ function DuelLobbyPage({ username, onBack, db, setToastMessage, joinGameRoom, cr
     );
 }
 
-
-    
-
-    
-
     const servers = {
           iceServers: [
             {
@@ -1036,8 +1024,6 @@ function DuelLobbyPage({ username, onBack, db, setToastMessage, joinGameRoom, cr
     class ErrorBoundary extends React.Component { state = { hasError: false }; static getDerivedStateFromError(error) { return { hasError: true }; } componentDidCatch(error, errorInfo) { console.error("ErrorBoundary yakaladı:", error, errorInfo); } render() { if (this.state.hasError) { return <div className="p-4 text-red-600">Beklenmedik bir hata oluştu. Lütfen sayfayı yenileyin.</div>; } return this.props.children; } }
 
     const vibrate = (pattern) => { if ('vibrate' in navigator) { if (pattern === 'success') navigator.vibrate(50); else if (pattern === 'error') navigator.vibrate([100, 50, 100]); else if (pattern === 'achievement') navigator.vibrate([100, 50, 100, 50, 100]); else if (typeof pattern === 'number') navigator.vibrate(pattern); } };
-
-
 
 const wordFoundColors = [
     { bg: 'bg-rose-200', text: 'text-rose-800' },
@@ -1110,7 +1096,6 @@ const wordFoundColors = [
 
    const translations = {
         tr: {
-            // Ana Sayfa & Genel
             title: "Kelime Avı",
             homePageSubtitle: "Kelime dehası olmaya hazır mısın?",
             leaderboardButton: "Liderlik Tablosu",
@@ -1126,16 +1111,13 @@ const wordFoundColors = [
             wordTrackingTitle: "Kelime Takibi",
             wordTrackingDescription: "Harfleri birleştirerek yılan gibi kelimeler oluştur",
             loading: "Yükleniyor...",
-            // Mod İsimleri
             çok: "ÇOK", aşırı: "AŞIRI", kolay: "KOLAY", normal: "NORMAL", zor: "ZOR", süreli: "SÜRELİ",
             superEasyMode: "ÇOK KOLAY", easyMode: "KOLAY", hardMode: "ZOR", timedEasyMode: "SÜRELİ KOLAY", timedHardMode: "SÜRELİ ZOR", randomMode: "RASTGELE",
-            // Oyun İçi
             level: "Seviye", score: "Puan", gold: "Altın", time: "Süre", noTimeLimit: "Süresiz",
             hiddenWord: "Gizli Sözcük", checkButton: "Kontrol Et", homeButton: "Anasayfa", nextLevelButton: "Sonraki Seviye →",
             congrats: "Tebrikler!", levelCompleted: "Seviye Tamamlandı!",
             timeUp: "Süre Bitti!", finalScore: (score) => `Skorunuz: ${score}`, earnedGold: "Kazanılan Altın",
             totalScore: "Toplam Puan", returnToHome: "Anasayfa'ya Dön", hint: "İpucu", reveal: "Aç",
-            // Modallar & Uyarılar
             areYouSureTitle: "Emin misin?",
             quitGameBody: "Ana menüye dönmek istediğine emin misin? Mevcut ilerlemen kaydedildi.",
             appQuitBody: "Uygulamadan çıkmak istediğinize emin misiniz?",
@@ -1144,9 +1126,9 @@ const wordFoundColors = [
             savedGameFoundBody: (level) => `Bu modda <span class="font-bold">Seviye ${level}</span>'de kayıtlı bir oyununuz mevcut. Ne yapmak istersiniz?`,
             continueButton: "Evet, Devam Et",
             newGameButton: "Hayır, Yeni Oyun Başlat",
-randomGameTitle: "🐟 Rastgele Oyun 🐟",
+	randomGameTitle: "🐟 Rastgele Oyun 🐟",
             randomGameBody: (mode, level) => `Sizin için <span class="font-bold">${mode}</span> modunda, <span class="font-bold">Seviye ${level}</span> hazırlandı. Bu oyun kaydedilmez.`,
-startButton: "Başla!",
+	startButton: "Başla!",
             closeButton: "Kapat",
             welcome: "Oyuna Hoş Geldin!",
             usernamePrompt: "Liderlik tablosu için benzersiz bir kullanıcı adı belirle.",
@@ -1187,7 +1169,6 @@ startButton: "Başla!",
             invitedToGame: (user) => `${user} seni özel bir oyuna davet ediyor!`,
             removeFriend: "Arkadaşlıktan Çıkar",
             removeFriendConfirm: (user) => `<b>${user}</b> kişisini arkadaşlıktan çıkarmak istediğinize emin misiniz?`,
-            // Toast Mesajları
             linkCopied: "Link panoya kopyalandı!",
             copyFail: "Hata: Link kopyalanamadı.",
             androidOnly: "Bu özellik sadece uygulamada kullanılabilir.",
@@ -1207,9 +1188,16 @@ startButton: "Başla!",
             inviteSent: "Davet gönderildi!",
             inviteFail: "Hata: Davet gönderilemedi.",
             inviteDeclined: "Davet reddedildi.",
+	loadingMessages: [
+                "Seviye planlanıyor...",
+                "Kelimeler için yollar çiziliyor...",
+                "Tahta hazırlanıyor...",
+                "Son kontroller yapılıyor...",
+                "Neredeyse hazır!"
+            ]
+
         },
         en: {
-            // Homepage & General
             title: "Word Hunt", homePageSubtitle: "Ready to become a word genius?",
             leaderboardButton: "Leaderboard", achievementsButton: "Achievements",
             footerText: "© 2025 Ozcelik Inc.", languageSwitch: "🇹🇷 Türkçe",
@@ -1218,17 +1206,14 @@ startButton: "Başla!",
             wordHuntTitle: "Word Hunt Classic", wordHuntDescription: "Find the words hidden among the letters",
             wordTrackingTitle: "Word Tracking", wordTrackingDescription: "Create snake-like words by connecting letters",
             loading: "Loading...",
-            // Mode Names
             çok: "SUPER", aşırı: "SUPER", kolay: "EASY", normal: "NORMAL", zor: "HARD", süreli: "TIMED",
             superEasyMode: "SUPER EASY", easyMode: "EASY", hardMode: "HARD",
             timedEasyMode: "TIMED EASY", timedHardMode: "TIMED HARD", randomMode: "RANDOM",
-            // In-Game
             level: "Level", score: "Score", gold: "Gold", time: "Time", noTimeLimit: "No Limit",
             hiddenWord: "Hidden Word", checkButton: "Check", homeButton: "Homepage", nextLevelButton: "Next Level →",
             congrats: "Congratulations!", levelCompleted: "Level Complete!",
             timeUp: "Time's Up!", finalScore: (score) => `Your Score: ${score}`, earnedGold: "Gold Earned",
             totalScore: "Total Score", returnToHome: "Return to Homepage", hint: "Hint", reveal: "Reveal",
-            // Modals & Alerts
             areYouSureTitle: "Are you sure?",
             quitGameBody: "Are you sure you want to return to the main menu? Your current progress has been saved.",
             appQuitBody: "Are you sure you want to exit the application?",
@@ -1236,9 +1221,9 @@ startButton: "Başla!",
             savedGameFoundTitle: "Saved Game Found",
             savedGameFoundBody: (level) => `You have a saved game in this mode at <span class="font-bold">Level ${level}</span>. What would you like to do?`,
             continueButton: "Yes, Continue", newGameButton: "No, Start New Game",
-randomGameTitle: "🎁 Random Game 🎁",
+	randomGameTitle: "🎁 Random Game 🎁",
             randomGameBody: (mode, level) => `A game in <span class="font-bold">${mode}</span> mode, <span class="font-bold">Level ${level}</span> has been prepared for you. This game will not be saved.`,
-startButton: "Start!",
+	startButton: "Start!",
             closeButton: "Close",
             welcome: "Welcome to the Game!",
             usernamePrompt: "Set a unique username for the leaderboard.",
@@ -1279,7 +1264,6 @@ startButton: "Start!",
             invitedToGame: (user) => `${user} is inviting you to a private game!`,
             removeFriend: "Remove Friend",
             removeFriendConfirm: (user) => `Are you sure you want to remove <b>${user}</b> from your friends?`,
-            // Toast Messages
             linkCopied: "Link copied to clipboard!",
             copyFail: "Error: Could not copy link.",
             androidOnly: "This feature is only available in the app.",
@@ -1299,6 +1283,7 @@ startButton: "Start!",
             inviteSent: "Invite sent!",
             inviteFail: "Error: Could not send invite.",
             inviteDeclined: "Invite declined.",
+
         }
     };
 
@@ -1332,21 +1317,6 @@ const GAME_STATS_KEY = 'wordHuntGameStats';
     };
 
     const saveGameStats = (stats) => { try { localStorage.setItem(GAME_STATS_KEY, JSON.stringify(stats)); } catch (e) { console.error("İstatistikler kaydedilemedi:", e); } };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 function createBoard(level, language, config) {    
     if (config && config.modeType === 'takip') {
@@ -1454,13 +1424,6 @@ return { board, words: _.sortBy(uniquePlacedWords, 'word'), hiddenWord, scattere
     console.error("[createBoard] UYARI: 100 denemeye rağmen istenen kurallarda bir tahta oluşturulamadı.");
     return null;
 }
-
-
-
-
-
-
-
 
 
 function createTakipBoard(level, language, config) {
@@ -1591,24 +1554,6 @@ return { board, words: _.sortBy(uniquePlacedWords, 'word'), hiddenWord, scattere
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 function Modal({ isOpen, title, children, onClose }) { if (!isOpen) return null; return ( <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4" onClick={onClose}> <div className="bg-white p-6 rounded-xl shadow-2xl max-w-md w-full text-center relative" onClick={e => e.stopPropagation()}> <h3 className="text-2xl font-semibold mb-4 text-gray-800">{title}</h3> <div className="text-gray-700">{children}</div> <button onClick={onClose} className="absolute top-2 right-2 text-gray-500 hover:text-gray-800 text-2xl">&times;</button> </div> </div> ); }
 
 const Cell = React.memo(function Cell({letter, isSelected, isFoundRequiredPart, isHiddenLetterCell, allRequiredWordsFound, isJustFound, isBonusGlow, theme, numCols, foundWordColorInfo, rowIndex, colIndex }) {
@@ -1665,7 +1610,8 @@ const Cell = React.memo(function Cell({letter, isSelected, isFoundRequiredPart, 
 });
 
 
-    function LeaderboardDisplay({ scores, currentUser, language }) {
+    
+function LeaderboardDisplay({ scores, currentUser, language }) {
             const t = translations[language] || translations['en'];
             if (!scores || scores.length === 0) {
                 return <p className="text-gray-600 dark:text-gray-400 pt-10">Bu mod için henüz skor bulunmuyor.</p>;
@@ -1707,7 +1653,8 @@ const Cell = React.memo(function Cell({letter, isSelected, isFoundRequiredPart, 
             );
         }
 
-    function LeaderboardModal({ isOpen, onClose, currentUser, language }) { const t = translations[language] || translations['en']; const [activeTab, setActiveTab] = React.useState('super-easy'); const [scores, setScores] = React.useState({ 'super-easy': [], easy: [], hard: [], 'timed-easy': [], 'timed-hard': [] }); const [loading, setLoading] = React.useState(true);
+    
+function LeaderboardModal({ isOpen, onClose, currentUser, language }) { const t = translations[language] || translations['en']; const [activeTab, setActiveTab] = React.useState('super-easy'); const [scores, setScores] = React.useState({ 'super-easy': [], easy: [], hard: [], 'timed-easy': [], 'timed-hard': [] }); const [loading, setLoading] = React.useState(true);
 
         const tabs = [
 
@@ -1868,15 +1815,32 @@ function HomePage({
 						</div>
                     </div>
                     <footer className="p-4 text-center text-sm text-slate-500 flex-shrink-0">
-                        <div className="mb-2">
+                        {/* --- YENİ TASARIMLI DİL DEĞİŞTİRME BUTONLARI --- */}
+                        <div className="inline-flex items-center justify-center bg-slate-200 rounded-lg p-1 shadow-inner">
+                             {/* Türkçe Dil Butonu */}
                             <button 
-                                onClick={() => setLanguage(language === 'tr' ? 'en' : 'tr')}
-                                className="px-4 py-2 bg-white border border-slate-300 rounded-full shadow-sm text-slate-700 font-semibold hover:bg-slate-100 transition-colors"
+                                onClick={() => setLanguage('tr')}
+                                title="Türkçe"
+                                className={`px-4 py-2 rounded-md transition-all duration-300 font-semibold flex items-center gap-2 ${language === 'tr' ? 'bg-white text-indigo-600 shadow-sm' : 'bg-transparent text-slate-500'}`}
                             >
-                                {t.languageSwitch}
+                                <img src="tr_flag.svg" alt="Türkçe" className="w-6 h-6 rounded-sm" />
+                                <span>TR</span>
+                            </button>
+
+                            {/* İngilizce Dil Butonu */}
+                            <button 
+                                onClick={() => setLanguage('en')}
+                                title="English"
+                                className={`px-4 py-2 rounded-md transition-all duration-300 font-semibold flex items-center gap-2 ${language === 'en' ? 'bg-white text-indigo-600 shadow-sm' : 'bg-transparent text-slate-500'}`}
+                            >
+                                <img src="gb_flag.svg" alt="English" className="w-6 h-6 rounded-sm" />
+                                <span>EN</span>
                             </button>
                         </div>
-                        {t.footerText}
+                        
+                        <div className="mt-4 text-xs text-slate-400">
+                            {t.footerText}
+                        </div>
                     </footer>
                 </div>
             </div>
@@ -1935,6 +1899,31 @@ React.useImperativeHandle(ref, () => ({
     const [isSwiping, setIsSwiping] = React.useState(false);
     const foundWordsRef = React.useRef(foundWords);
     const computerStateRef = React.useRef(computerState);
+    const [loadingProgress, setLoadingProgress] = React.useState(0);
+    const [loadingMessageIndex, setLoadingMessageIndex] = React.useState(0);
+    React.useEffect(() => {
+        if (!isGenerating) return;
+
+        const messages = t.loadingMessages;
+        const messageTimer = setInterval(() => {
+            setLoadingMessageIndex(prevIndex => (prevIndex + 1) % messages.length);
+        }, 1800); // Her 1.8 saniyede bir mesaj değişir
+
+        const progressTimer = setInterval(() => {
+            setLoadingProgress(prev => {
+                if (prev >= 95) { // Otomatik olarak %100'e ulaşmasını engelle
+                    clearInterval(progressTimer);
+                    return prev;
+                }
+                return prev + 2 + Math.random() * 5;
+            });
+        }, 200);
+
+        return () => {
+            clearInterval(messageTimer);
+            clearInterval(progressTimer);
+        };
+    }, [isGenerating, t.loadingMessages]);
     const lastHiddenTimestamp = React.useRef(null);
     const [bonusGlowCells, setBonusGlowCells] = React.useState([]);
     const [foundBonusWords, setFoundBonusWords] = React.useState([]);
@@ -1943,6 +1932,10 @@ React.useImperativeHandle(ref, () => ({
 
 
  const getCellFromEvent = (clientX, clientY) => {
+       if (!isFinite(clientX) || !isFinite(clientY)) {
+        return null;
+    }
+
     const targetElement = document.elementFromPoint(clientX, clientY);
     if (targetElement) {
         const rowStr = targetElement.getAttribute('data-row');
@@ -1969,45 +1962,48 @@ const handleInteractionStart = React.useCallback((clientX, clientY) => {
     } else {
     }
 }, [board, isCellFound, isRealtimeDuel, allRequiredWordsFound, isVsComputer]);
+
+
+
 const handleInteractionMove = React.useCallback((clientX, clientY) => {
-    if (!isSwiping) {
-        return;
-    }
+    if (!isSwiping) return;
 
     const currentCell = getCellFromEvent(clientX, clientY);
-    if (!currentCell) {
-        return;
-    }
+    if (!currentCell) return;
     
     setSelectedCells(prevSelectedCells => {
         if (prevSelectedCells.length === 0) return prevSelectedCells;
         
         const lastCell = prevSelectedCells[prevSelectedCells.length - 1];
         if(lastCell.row === currentCell.row && lastCell.col === currentCell.col) return prevSelectedCells;
+
         const isTrackingMode = config.modeType === 'takip';
         
+        let newSelectedCells = [...prevSelectedCells];
+
         if (isTrackingMode) {
-            let newSelectedCells = [...prevSelectedCells];
+            if (!lastCell || !currentCell) {
+                return prevSelectedCells;
+            }
+
             if (newSelectedCells.length > 1) {
                 const secondToLastCell = newSelectedCells[newSelectedCells.length - 2];
                 if (secondToLastCell.row === currentCell.row && secondToLastCell.col === currentCell.col) {
                     return newSelectedCells.slice(0, -1);
                 }
             }
-            const isAdjacent = (Math.abs(currentCell.row - lastCell.row) === 1 && currentCell.col === lastCell.col) ||
-                               (Math.abs(currentCell.col - lastCell.col) === 1 && currentCell.row === lastCell.row);
-            if (isAdjacent && !isCellFound(currentCell.row, currentCell.col)) {
+            const isAdjacent = (Math.abs(currentCell.row - lastCell.row) <= 1 && Math.abs(currentCell.col - lastCell.col) <= 1);
+            if (isAdjacent && !newSelectedCells.some(c => c.row === currentCell.row && c.col === currentCell.col) && !isCellFound(currentCell.row, currentCell.col)) {
                 return [...newSelectedCells, currentCell];
             }
-            return newSelectedCells;
-        } else { 
-            const startCell = prevSelectedCells[0];
+            return prevSelectedCells;
+
+        } else { // Kelime Avı
+            const startCell = newSelectedCells[0];
             const dx = Math.sign(currentCell.col - startCell.col);
             const dy = Math.sign(currentCell.row - startCell.row);
-            const isDiagonal = (dx !== 0 && dy !== 0 && Math.abs(currentCell.col - startCell.col) === Math.abs(currentCell.row - startCell.row));
-            const isStraight = (dx === 0 || dy === 0);
-            
-            if (!(isDiagonal || isStraight)) {
+
+            if (!((dx !== 0 && dy !== 0 && Math.abs(currentCell.col - startCell.col) === Math.abs(currentCell.row - startCell.row)) || (dx === 0 || dy === 0))) {
                  return prevSelectedCells;
             }
             
@@ -2015,17 +2011,13 @@ const handleInteractionMove = React.useCallback((clientX, clientY) => {
             const path = [startCell];
             for (let i = 1; i <= distance; i++) {
                 const nextCell = { row: startCell.row + i * dy, col: startCell.col + i * dx };
-                const cellFoundStatus = isCellFound(nextCell.row, nextCell.col);
-                if (cellFoundStatus) {
-                    break;
-                }
+                if (isCellFound(nextCell.row, nextCell.col)) break;
                 path.push(nextCell);
             }
             return path;
         }
     });
 }, [isSwiping, board, config.modeType, isCellFound]);
-
 
 
 
@@ -2069,11 +2061,17 @@ const handleInteractionMove = React.useCallback((clientX, clientY) => {
 
     React.useEffect(() => {
         if (isRealtimeDuel || isVsComputer) {
+            setIsGenerating(false);
             setIsLoading(false);
             return;
         };
+        
         setIsGenerating(true);
         setError('');
+        // Yeni seviye için yükleme animasyonunu sıfırla
+        setLoadingProgress(0);
+        setLoadingMessageIndex(0);
+
         setTimeout(() => {
             const newBoardData = createBoard(level, language, config);
             if (newBoardData) {
@@ -2094,13 +2092,14 @@ const handleInteractionMove = React.useCallback((clientX, clientY) => {
                 setAnswerSlots([]);
                 setSourceLetters([]);
                 setHintLockedSlots([]);
-                setLevelStartTime(Date.now());
             } else {
                 setError(t.levelLoadError);
             }
+            // Yükleme tamamlandı, ilerleme çubuğunu %100 yap ve ekranı değiştir
+            setLoadingProgress(100);
             setIsGenerating(false);
             setIsLoading(false);
-        }, 100);
+        }, 100); // 100ms bekleme, animasyonun başlaması için zaman tanır
     }, [level, config.name, language, isRealtimeDuel, isVsComputer, initialSavedState]);
     
     React.useEffect(() => {
@@ -2324,14 +2323,7 @@ const handleInteractionMove = React.useCallback((clientX, clientY) => {
         }
         setSelectedCells([]);
     };
-
-
-
-
-
-
-
-    
+  
     const playSound = React.useCallback((soundId) => {
         const sound = document.getElementById(soundId);
         if (sound) {
@@ -2460,13 +2452,11 @@ const handleInteractionMove = React.useCallback((clientX, clientY) => {
     };
 
     const handleGoHomeClick = () => {
-        // Tek seferlik rastgele oyunsa, uyarı göstermeden doğrudan ana menüye dön.
         if (config?.isOneShot) {
             goToHome();
             return;
         }
 
-        // Diğer tüm durumlar için çıkış onayı modalını göster.
         setModalContent({
             isOpen: true,
             title: '',
@@ -2574,18 +2564,9 @@ const handleInteractionMove = React.useCallback((clientX, clientY) => {
     }, [foundWords, gameState, isRealtimeDuel]);
 
     React.useEffect(() => {
-        // Bu effect, oyunun durumunu (seviye, skor, bulunan kelimeler, kalan süre)
-        // her değiştiğinde localStorage'a kaydeder.
-        // Bu sayede oyuncu oyundan çıksa bile kaldığı yerden devam edebilir.
-        
-        // Çok oyunculu, vs-computer veya tek seferlik rastgele oyunları kaydetme.
         if (isRealtimeDuel || isVsComputer || config?.isOneShot) return;
-
-        // Oyun henüz yüklenmediyse veya bir hata varsa kaydetme.
         if (isLoading || isGenerating || !gameState) return;
-
         const saveKey = config.modeType === 'takip' ? `takip-${config.name}` : config.name;
-        
         const gameStateToSave = {
             level,
             score,
@@ -2707,10 +2688,9 @@ const handleInteractionMove = React.useCallback((clientX, clientY) => {
     }, [realtimeGameData, username]);
 
 	if (isLoading || isGenerating) {
-        // HATA DÜZELTİLDİ: Metin, artık var olan çeviri anahtarlarıyla oluşturuluyor.
+        const message = t.loadingMessages[loadingMessageIndex];
         const levelText = t.level;
         const levelNumber = level + 1;
-        const loadingStatusText = t.loading + "...";
         
 		return (
             <div className="h-full w-full flex flex-col items-center justify-center text-white p-4" style={{
@@ -2718,21 +2698,22 @@ const handleInteractionMove = React.useCallback((clientX, clientY) => {
                 backgroundSize: '400% 400%',
                 animation: 'gradient-animation 10s ease infinite'
             }}>
-                {/* Zıplayan oyun logosu */}
-                <img src="logo.png" alt="Oyun Logosu" className="w-36 h-36 mb-8 drop-shadow-lg animate-bounce" />
+                <img src="logo.png" alt="Oyun Logosu" className="w-36 h-36 mb-6 drop-shadow-lg animate-bounce" />
                 
-                {/* Farklı renkteki metinler */}
-                <div className="text-center">
-                    <p className="text-5xl font-black tracking-tighter" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.5)' }}>
+                <div className="text-center mb-6" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.5)' }}>
+                    <p className="text-5xl font-black tracking-tighter">
                         <span className="text-cyan-300">{levelText}</span>
-                        <span className="text-white mx-3">{levelNumber}</span>
-                        <span className="text-amber-300">{loadingStatusText}</span>
+                        <span className="text-white ml-3">{levelNumber}</span>
                     </p>
                 </div>
 
-                {/* Hareketli yükleme çubuğu */}
-                <div className="w-64 max-w-full mt-10 bg-white/20 rounded-full h-3 overflow-hidden shadow-inner">
-                    <div className="bg-white h-3 rounded-full animate-loading-bar-slide"></div>
+                <p className="text-xl text-white/80 animate-pulse min-h-[28px]">{message || t.loading}</p>
+
+                <div className="w-64 max-w-full mt-6 bg-white/20 rounded-full h-3.5 overflow-hidden shadow-inner border border-white/30">
+                    <div
+                        className="bg-gradient-to-r from-green-300 via-cyan-300 to-green-300 h-full rounded-full transition-all duration-300 ease-linear"
+                        style={{ width: `${Math.min(loadingProgress, 100)}%` }}
+                    ></div>
                 </div>
             </div>
         );
@@ -2767,7 +2748,8 @@ const handleInteractionMove = React.useCallback((clientX, clientY) => {
 						onMouseMove={(e) => throttledMouseMove(e.clientX, e.clientY)}
 						onMouseUp={handleInteractionEnd} onMouseLeave={handleInteractionEnd}
 						onTouchStart={(e) => handleInteractionStart(e.touches[0].clientX, e.touches[0].clientY)}
-						onTouchEnd={handleInteractionEnd} onTouchCancel={handleInteractionEnd} >
+						onTouchEnd={handleInteractionEnd} onTouchCancel={handleInteractionEnd}
+                        onContextMenu={(e) => e.preventDefault()} >
 						
 						{board.map((row, r) => row.map((letter, c) => {
 							const isSelected = selectedCells.some(cell => cell.row === r && cell.col === c);
@@ -2816,12 +2798,17 @@ const handleInteractionMove = React.useCallback((clientX, clientY) => {
         const allWordsInLevel = gameState.words; const allFoundWordsCombined = new Set([...foundWords, ...computerState.foundWords]);
         const calculateFontSize = (numCols) => { if (!numCols) return { fontSize: '18px' }; const maxGridWidth = 768; const targetRatio = 0.8; const minFontSize = 10; const preferredVw = (100 / numCols) * targetRatio; const maxFontSize = (maxGridWidth / numCols) * targetRatio; return { fontSize: `clamp(${minFontSize}px, ${preferredVw.toFixed(2)}vw, ${maxFontSize.toFixed(2)}px)` }; };
         const fontSizeStyle = calculateFontSize(board?.[0]?.length);
-        return ( <div className="h-full w-full flex flex-col items-center py-2 sm:py-4 bg-indigo-50"> <div className="container w-full h-full flex flex-col gap-2 text-center text-gray-800 p-1"> <Modal isOpen={modalContent.isOpen} title={modalContent.title} onClose={modalContent.onClose || closeModal}>{modalContent.body}</Modal> <div className="flex-shrink-0 w-full max-w-2xl mx-auto"> <div className="flex justify-between items-center bg-white p-1.5 rounded-lg shadow-sm"> <div className="flex items-center gap-2 w-2/5 justify-start"><span className="font-semibold text-sm truncate text-indigo-700">Siz</span><span className="text-lg font-bold text-green-600">{score}</span></div> <span className="text-sm font-bold text-gray-400">VS</span> <div className="flex items-center gap-2 w-2/5 justify-end"><span className="font-semibold text-sm truncate text-gray-600">Bilgisayar ({config.difficulty})</span><span className="text-lg font-bold text-red-600">{computerState.score}</span></div> </div> </div> <div className="flex-shrink-0 w-full max-w-2xl mx-auto"> <div ref={gridRef} className="grid gap-0.5 p-1 rounded-lg bg-indigo-100 w-full aspect-square shadow-inner" style={{ gridTemplateColumns: `repeat(${board[0].length}, minmax(0, 1fr))` }} 
+        return ( <div className="h-full w-full flex flex-col items-center py-2 sm:py-4 bg-indigo-50"> <div className="container w-full h-full flex flex-col gap-2 text-center text-gray-800 p-1"> <Modal isOpen={modalContent.isOpen} title={modalContent.title} onClose={modalContent.onClose || closeModal}>{modalContent.body}</Modal> <div className="flex-shrink-0 w-full max-w-2xl mx-auto"> <div className="flex justify-between items-center bg-white p-1.5 rounded-lg shadow-sm"> <div className="flex items-center gap-2 w-2/5 justify-start"><span className="font-semibold text-sm truncate text-indigo-700">Siz</span><span className="text-lg font-bold text-green-600">{score}</span></div> <span className="text-sm font-bold text-gray-400">VS</span> <div className="flex items-center gap-2 w-2/5 justify-end"><span className="font-semibold text-sm truncate text-gray-600">Bilgisayar ({config.difficulty})</span><span className="text-lg font-bold text-red-600">{computerState.score}</span></div> </div> </div> <div className="flex-shrink-0 w-full max-w-2xl mx-auto"> 
+
+
+<div ref={gridRef} className="grid gap-0.5 p-1 rounded-lg bg-indigo-100 w-full aspect-square shadow-inner" style={{ gridTemplateColumns: `repeat(${board[0].length}, minmax(0, 1fr))` }} 
             onMouseDown={(e) => handleInteractionStart(e.clientX, e.clientY)} 
             onMouseMove={(e) => throttledMouseMove(e.clientX, e.clientY)}
             onMouseUp={handleInteractionEnd} onMouseLeave={handleInteractionEnd} 
             onTouchStart={(e) => handleInteractionStart(e.touches[0].clientX, e.touches[0].clientY)} 
-            onTouchEnd={handleInteractionEnd} onTouchCancel={handleInteractionEnd} >
+            onTouchEnd={handleInteractionEnd} onTouchCancel={handleInteractionEnd}
+            onContextMenu={(e) => e.preventDefault()} >
+
             {board.map((row, r) => row.map((letter, c) => { const isSelected = selectedCells.some(cell => cell.row === r && cell.col === c); const foundBy = isCellFound(r, c); let cellClass = 'bg-white text-gray-800 hover:bg-gray-200'; if (isSelected) { cellClass = 'bg-yellow-300 text-black transform scale-110 shadow-lg'; } else if (foundBy === 'player') { cellClass = 'bg-green-300 text-green-800'; } else if (foundBy === 'computer') { cellClass = 'bg-red-300 text-red-800'; } return ( <div key={`${r}-${c}`} data-row={r} data-col={c} className={`flex items-center justify-center aspect-square text-center font-bold rounded-sm transition-all duration-150 select-none ${cellClass}`} style={fontSizeStyle}> {letter} </div> ); }))} </div> </div> <div className="flex-1 min-h-0 w-full max-w-2xl mx-auto"> <div className="bg-white rounded-lg p-1 shadow h-full overflow-y-auto scrollbar-thin"> <div className="flex flex-wrap justify-center content-start gap-x-1.5 gap-y-1 p-1"> {allWordsInLevel.map(({ word }) => { const isFound = allFoundWordsCombined.has(word); const isHidden = config.difficulty === 'hard' && !isFound; return (<span key={word} className={`font-medium transition-all duration-300 rounded-md px-2 py-1 text-xs ${ isFound ? 'bg-gray-300 text-gray-500 line-through opacity-50' : isHidden ? 'bg-gray-400 text-transparent pointer-events-none' : 'bg-indigo-100 text-gray-800' }`}>{isHidden ? '???' : word}</span>); })} </div> </div> </div> <div className="flex-shrink-0 w-full max-w-2xl mx-auto"> <button onClick={showExitConfirmation} className="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow-md transition-all text-sm">Ana Menüye Dön</button> </div> </div> </div> );
     }
 
@@ -2868,7 +2855,9 @@ const handleInteractionMove = React.useCallback((clientX, clientY) => {
                             onMouseMove={(e) => throttledMouseMove(e.clientX, e.clientY)} 
                             onMouseUp={handleInteractionEnd} onMouseLeave={handleInteractionEnd} 
                             onTouchStart={(e) => handleInteractionStart(e.touches[0].clientX, e.touches[0].clientY)} 
-                            onTouchEnd={handleInteractionEnd} onTouchCancel={handleInteractionEnd} >
+                            onTouchEnd={handleInteractionEnd} onTouchCancel={handleInteractionEnd}
+                            onContextMenu={(e) => e.preventDefault()}
+                        >
                         {(() => {
                             const numCols = board[0] ? board[0].length : 1;
 							return board.map((row, rowIndex) => row.map((letter, colIndex) => { 
@@ -3409,15 +3398,7 @@ const startGame = async (roomId) => {
 };
 
 
-
-
-
-
-
-
-
-        
-       const sendDirectInvite = (targetPlayer, boardSize, difficulty) => {
+const sendDirectInvite = (targetPlayer, boardSize, difficulty) => {
             if (!username || !targetPlayer) return;
 
             setToastMessage(`${targetPlayer.username} kullanıcısına davet gönderiliyor...`);
@@ -3549,13 +3530,10 @@ React.useEffect(() => {
             const t = translations[language] || translations['en'];
             
             if (page === 'game') {
-                // Oyun ekranındayken, WordHunt komponentindeki çıkış onayı fonksiyonunu çağırıyoruz.
-                // Bu fonksiyonu WordHunt'a bir ref aracılığıyla ileteceğiz.
                 if (wordHuntRef.current && typeof wordHuntRef.current.showExitConfirmation === 'function') {
                     wordHuntRef.current.showExitConfirmation();
                 }
             } else if (page === 'home') {
-                // Ana sayfadaysak, uygulamadan çıkış onayını göster.
                 setModalContent({
                     isOpen: true,
                     title: t.areYouSureTitle,
@@ -3571,7 +3549,6 @@ React.useEffect(() => {
                     )
                 });
             } else {
-                // Diğer tüm sayfalardan geri tuşuna basıldığında ana sayfaya dön.
                 goToHome();
             }
         }, [page, goToHome, language]);

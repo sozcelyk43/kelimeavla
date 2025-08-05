@@ -68,7 +68,19 @@
     50% { transform: translateX(5px); }
     75% { transform: translateX(-5px); }
     100% { transform: translateX(0); }}
-
+@keyframes gradient-animation {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+.animate-loading-bar-slide {
+    width: 40%;
+    animation: loading-bar-slide 1.5s ease-in-out infinite;
+}
+@keyframes loading-bar-slide {
+    0% { transform: translateX(-150%); }
+    100% { transform: translateX(300%); }
+}
     @keyframes pulse-hint {  0%, 100% { background-color: #fef08a; transform: scale(1); }50% { background-color: #fde047; 	transform: scale(1.05); box-shadow: 0 0 8px #facc15; } }
 </style>
 
@@ -104,21 +116,22 @@
       }
     };
 
-   function DuelInviteModal({ isOpen, onClose, player, onInvite }) {
+  function DuelInviteModal({ isOpen, onClose, player, onInvite, language }) {
     if (!isOpen || !player) return null;
-
+    
+    const t = translations[language] || translations['en'];
     const [boardSize, setBoardSize] = React.useState('medium');
     const [difficulty, setDifficulty] = React.useState('easy');
 
     const difficultyOptions = [
-        { key: 'easy', label: 'Kolay', icon: '🧸', desc: 'Kelimeler görünür', color: 'from-green-400 to-emerald-500' },
-        { key: 'hard', label: 'Zor', icon: '🔥', desc: 'Kelimeler gizli', color: 'from-red-500 to-rose-600' }
+        { key: 'easy', label: t.kolay, icon: '🧸', desc: t.easyDesc, color: 'from-green-400 to-emerald-500' },
+        { key: 'hard', label: t.zor, icon: '🔥', desc: t.hardDesc, color: 'from-red-500 to-rose-600' }
     ];
 
     const sizeOptions = [
-        { key: 'small', label: 'Küçük Alan', icon: '🤏' },
-        { key: 'medium', label: 'Orta Alan', icon: '👌' },
-        { key: 'large', label: 'Geniş Alan', icon: '👐' }
+        { key: 'small', label: t.smallArea, icon: '🤏' },
+        { key: 'medium', label: t.mediumArea, icon: '👌' },
+        { key: 'large', label: t.largeArea, icon: '👐' }
     ];
 
     const handleSendInvite = () => {
@@ -130,11 +143,11 @@
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={onClose}>
             <div className="bg-slate-50 p-6 rounded-2xl shadow-2xl w-full max-w-sm" onClick={e => e.stopPropagation()}>
                 <h3 className="text-2xl font-bold mb-6 text-gray-800 text-center">
-                    <span className="font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-indigo-600">{player.username}</span> için oyun kur
+                    <span className="font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-indigo-600">{t.setupGameFor(player.username)}</span>
                 </h3>
                 <div className="space-y-6">
                     <div>
-                        <h4 className="font-bold text-lg text-slate-700 mb-3">Zorluk Seviyesi</h4>
+                        <h4 className="font-bold text-lg text-slate-700 mb-3">{t.difficulty}</h4>
                         <div className="grid grid-cols-2 gap-3">
                             {difficultyOptions.map(opt => (
                                 <button
@@ -150,7 +163,7 @@
                         </div>
                     </div>
                     <div>
-                        <h4 className="font-bold text-lg text-slate-700 mb-3">Oyun Alanı Boyutu</h4>
+                        <h4 className="font-bold text-lg text-slate-700 mb-3">{t.boardSize}</h4>
                         <div className="grid grid-cols-3 gap-3">
                             {sizeOptions.map(opt => (
                                  <button
@@ -166,7 +179,7 @@
                     </div>
                 </div>
                 <button onClick={handleSendInvite} className="w-full mt-8 bg-green-500 text-white font-bold py-3 rounded-lg hover:bg-green-600 transition-all text-lg shadow-lg">
-                    Meydan Oku
+                    {t.challenge}
                 </button>
             </div>
         </div>
@@ -175,43 +188,43 @@
 
 
 
-function ConfirmationModal({ isOpen, onClose, onConfirm, title, bodyText }) {
+function ConfirmationModal({ isOpen, onClose, onConfirm, title, bodyText, language }) {
     if (!isOpen) return null;
+    const t = translations[language] || translations['en'];
     return (
         <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
             <div className="bg-white p-6 rounded-xl shadow-2xl w-full max-w-sm text-center">
                 <h3 className="text-xl font-bold mb-4 text-gray-800">{title}</h3>
                 <p className="text-gray-600 mb-6" dangerouslySetInnerHTML={{ __html: bodyText }}></p>
                 <div className="flex justify-center gap-4">
-                    <button onClick={onClose} className="px-6 py-2 bg-gray-500 text-white font-bold rounded-lg hover:bg-gray-600">İptal</button>
-                    <button onClick={onConfirm} className="px-6 py-2 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700">Onayla</button>
+                    <button onClick={onClose} className="px-6 py-2 bg-gray-500 text-white font-bold rounded-lg hover:bg-gray-600">{t.stayButton}</button>
+                    <button onClick={onConfirm} className="px-6 py-2 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700">{t.quitButton}</button>
                 </div>
             </div>
         </div>
     );
 }
 
-
-function DirectInviteModal({ isOpen, invitationDetails, onAccept, onDecline }) {
+function DirectInviteModal({ isOpen, invitationDetails, onAccept, onDecline, language }) {
     if (!isOpen || !invitationDetails) return null;
-
+    const t = translations[language] || translations['en'];
     return (
         <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4">
             <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-2xl w-full max-w-sm text-center transform transition-all animate-pulse-once">
-                <h3 className="text-3xl font-bold mb-2 text-gray-800">⚔️ Meydan Okuma ⚔️</h3>
+                <h3 className="text-3xl font-bold mb-2 text-gray-800">⚔️ {t.duelChallenge} ⚔️</h3>
                 <p className="text-gray-600 text-lg mb-6">
-                    <span className="font-bold text-indigo-600">{invitationDetails.invitedBy}</span> seni özel bir oyuna davet ediyor!
+                    <span className="font-bold text-indigo-600">{invitationDetails.invitedBy}</span> {t.invitedToGame(invitationDetails.invitedBy)}
                 </p>
                 <div className="flex justify-center gap-4 mt-4">
                     <button
                         onClick={onDecline}
                         className="px-8 py-3 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 transition-all transform hover:scale-105 shadow-lg">
-                        Reddet
+                        {t.decline}
                     </button>
                     <button
                         onClick={onAccept}
                         className="px-8 py-3 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 transition-all transform hover:scale-105 shadow-lg">
-                        Kabul Et
+                        {t.accept}
                     </button>
                 </div>
             </div>
@@ -220,15 +233,8 @@ function DirectInviteModal({ isOpen, invitationDetails, onAccept, onDecline }) {
 }
 
 
-
-
-
-
-
-
-
-// MEVCUT RoomLobbyPage FONKSİYONUNU TAMAMEN SİLİP, BUNU YAPIŞTIRIN:
-function RoomLobbyPage({ username, gameId, db, onBack, startGame, setPage, setToastMessage, setModeConfig }) {
+function RoomLobbyPage({ username, gameId, db, onBack, startGame, setPage, setToastMessage, setModeConfig, language }) {
+    const t = translations[language] || translations['en'];
     const [roomData, setRoomData] = React.useState(null);
 
     React.useEffect(() => {
@@ -243,11 +249,7 @@ function RoomLobbyPage({ username, gameId, db, onBack, startGame, setPage, setTo
                 const data = doc.data();
                 setRoomData(data);
                 
-                // DÜZELTME:
-                // Sadece oyunun başladığını değil, tahta verisinin de hazır ve dolu olduğunu kontrol et.
-                // Bu, "oyun kuruluyor" ekranında takılma sorununu çözer.
                 if (data.status === 'in-progress' && data.boardData && data.boardData.board && Object.keys(data.boardData.board).length > 0) {
-                    // 1. Önce oyun modunu doğru şekilde ayarla.
                     const newConfig = {
                         name: 'multiplayer',
                         boardSize: data.gameSettings.boardSize,
@@ -255,7 +257,6 @@ function RoomLobbyPage({ username, gameId, db, onBack, startGame, setPage, setTo
                         modeType: 'avi' 
                     };
                     setModeConfig(newConfig);
-                    // 2. Sonra oyun ekranına geçiş yap.
                     setPage('game');
                 }
             } else {
@@ -273,13 +274,11 @@ function RoomLobbyPage({ username, gameId, db, onBack, startGame, setPage, setTo
         
         try {
             if (Object.keys(roomData.players).length <= 1) {
-                // Odada kimse kalmadıysa odayı sil
                 await roomRef.delete();
             } else {
                 const updates = {
                     [`players.${username}`]: firebase.firestore.FieldValue.delete()
                 };
-                // Eğer ayrılan kişi kurucuysa, yeni bir kurucu ata
                 if (roomData.host === username) {
                     updates.host = Object.keys(roomData.players).find(p => p !== username) || null;
                 }
@@ -287,14 +286,13 @@ function RoomLobbyPage({ username, gameId, db, onBack, startGame, setPage, setTo
             }
         } catch (error) {
             console.error("Odadan ayrılırken hata:", error);
-            // Hata olsa bile kullanıcıyı ana menüye gönder
         } finally {
             onBack();
         }
     };
 
     if (!roomData) {
-        return <div className="flex items-center justify-center h-screen bg-gray-800 text-white text-lg">Oda bilgileri yükleniyor...</div>;
+        return <div className="flex items-center justify-center h-screen bg-gray-800 text-white text-lg">{t.loading}...</div>;
     }
 
     const isHost = roomData.host === username;
@@ -305,8 +303,8 @@ function RoomLobbyPage({ username, gameId, db, onBack, startGame, setPage, setTo
     return (
         <div className="h-screen w-full bg-gradient-to-br from-gray-800 to-slate-900 text-white flex flex-col items-center justify-center p-4">
             <div className="text-center mb-8">
-                <h1 className="text-4xl font-black mb-2 tracking-tight">{roomData.host}'un Odası</h1>
-                <p className="text-indigo-300 animate-pulse">{isHost ? 'Oyuncuların katılmasını bekliyorsun...' : 'Oyunun başlaması bekleniyor...'}</p>
+                <h1 className="text-4xl font-black mb-2 tracking-tight">{t.hostsRoom(roomData.host)}</h1>
+                <p className="text-indigo-300 animate-pulse">{isHost ? t.waitingForPlayers : t.waitingForHost}</p>
             </div>
 
             <div className="w-full max-w-lg grid grid-cols-2 gap-4 mb-8">
@@ -316,7 +314,7 @@ function RoomLobbyPage({ username, gameId, db, onBack, startGame, setPage, setTo
                         <div key={name} className="bg-white/10 p-3 rounded-lg flex flex-col items-center gap-2 text-center shadow-lg">
                            <div className="relative">
                              <img src={pData.avatarId ? `avatars/${pData.avatarId}.png` : 'avatars/default.png'} className="w-16 h-16 rounded-full object-cover border-2 border-slate-500" />
-                             {roomData.host === name && <span className="absolute -top-1 -right-1 text-2xl" title="Oda Kurucusu">👑</span>}
+                             {roomData.host === name && <span className="absolute -top-1 -right-1 text-2xl" title={t.host}>👑</span>}
                            </div>
                            <p className="font-bold text-sm">{name}</p>
                         </div>
@@ -330,12 +328,12 @@ function RoomLobbyPage({ username, gameId, db, onBack, startGame, setPage, setTo
                     disabled={!canStart}
                     className="bg-green-600 text-white font-bold py-4 px-10 rounded-lg shadow-lg text-xl hover:bg-green-700 disabled:bg-gray-500 disabled:cursor-not-allowed transform hover:scale-105 transition-all"
                 >
-                    {canStart ? 'Oyunu Başlat' : 'Oyuncu Bekleniyor'}
+                    {canStart ? t.startGameButton : t.waitingForPlayer}
                 </button>
             )}
 
             <button onClick={leaveRoom} className="absolute top-6 right-6 bg-red-500/50 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-500/80 transition-colors">
-                Odadan Ayrıl
+                {t.leaveRoomButton}
             </button>
         </div>
     );
@@ -459,9 +457,9 @@ function initializeGame() {
         return (
             <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4" onClick={onClose}>
                 <div
-                    className="bg-gradient-to-br from-slate-50 to-gray-100 p-6 rounded-2xl shadow-2xl w-full max-w-md text-center flex flex-col max-h-[85vh] border border-gray-200"
-                    onClick={e => e.stopPropagation()}
-                >
+    className="relative bg-gradient-to-br from-slate-50 to-gray-100 p-6 rounded-2xl shadow-2xl w-full max-w-md text-center flex flex-col max-h-[90vh]"
+    onClick={e => e.stopPropagation()}
+>
                     <h3 className="text-3xl font-black mb-6 text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600 flex-shrink-0">
                         Avatarını Seç
                     </h3>
@@ -596,21 +594,27 @@ const PlayerCard = ({ player, onOpenInviteModal, onSendRequest, onRemoveFriend }
     );
 };
 
-function ProfileModal({ isOpen, onClose, username, avatarId, cardColor, gold, unlockedAvatars, unlockedColors, onAvatarSelect, onUsernameUpdate, onColorSelect, onPurchaseItem }) {
+function ProfileModal({ isOpen, onClose, username, avatarId, cardColor, gold, unlockedAvatars, unlockedColors, onAvatarSelect, onUsernameUpdate, onColorSelect, onPurchaseItem, language }) {
     if (!isOpen) return null;
-
+    
+    const t = translations[language] || translations['en'];
     const [newUsername, setNewUsername] = React.useState(username);
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4" onClick={onClose}>
             <div
-                className="bg-gradient-to-br from-slate-50 to-gray-100 p-6 rounded-2xl shadow-2xl w-full max-w-md text-center flex flex-col max-h-[90vh]"
+                className="relative bg-gradient-to-br from-slate-50 to-gray-100 p-6 rounded-2xl shadow-2xl w-full max-w-md text-center flex flex-col max-h-[90vh]"
                 onClick={e => e.stopPropagation()}
             >
-                <h3 className="text-3xl font-black mb-4 text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600 flex-shrink-0">Profilin</h3>
+                <div className="absolute top-4 right-4 bg-amber-100 text-amber-800 text-lg font-bold px-4 py-2 rounded-full shadow-md flex items-center gap-2">
+                    <span>💰</span>
+                    <span>{gold}</span>
+                </div>
+
+                <h3 className="text-3xl font-black mb-4 text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600 flex-shrink-0">{t.profileTitle}</h3>
 
                 <div className="mb-6 flex-shrink-0">
-                    <label className="block text-sm font-bold text-slate-700 mb-2">Kullanıcı Adını Değiştir</label>
+                    <label className="block text-sm font-bold text-slate-700 mb-2">{t.changeUsernameLabel}</label>
                     <div className="flex gap-2">
                         <input
                             type="text"
@@ -618,20 +622,20 @@ function ProfileModal({ isOpen, onClose, username, avatarId, cardColor, gold, un
                             onChange={(e) => setNewUsername(e.target.value)}
                             className="flex-1 border-2 border-slate-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
                             maxLength={15}
-                            placeholder="Yeni kullanıcı adın..."
+                            placeholder={t.newUsernamePlaceholder}
                         />
                         <button
                             onClick={() => onUsernameUpdate(newUsername)}
                             className="px-4 py-2 bg-indigo-600 text-white font-bold rounded-lg hover:bg-indigo-700 transition-colors shadow-md"
                         >
-                            Kaydet
+                            {t.saveButton}
                         </button>
                     </div>
                 </div>
 
                 <div className="flex-1 min-h-0 overflow-y-auto scrollbar-thin pr-2 -mr-4">
                     <div className="mb-6 border-t pt-4">
-                        <label className="block text-sm font-bold text-slate-700 mb-3">Kart Rengini Seç</label>
+                        <label className="block text-sm font-bold text-slate-700 mb-3">{t.selectCardColorLabel}</label>
                         <div className="flex flex-wrap justify-center gap-3">
                             {playerCardColors.map(color => {
                                 const isUnlocked = (unlockedColors || []).includes(color.id);
@@ -641,10 +645,9 @@ function ProfileModal({ isOpen, onClose, username, avatarId, cardColor, gold, un
                                     <div key={color.id} className="flex flex-col items-center gap-1">
                                         <div
                                             onClick={() => isUnlocked ? onColorSelect(color.id) : onPurchaseItem('color', color.id, cost)}
-                                            title={isUnlocked ? color.name : `Kilidi açmak için ${cost} altın`}
+                                            title={isUnlocked ? color.name : t.unlockForGold(cost)}
                                             className={`relative w-10 h-10 rounded-full cursor-pointer ${color.class} border-4 transition-all hover:scale-110 shadow-md ${cardColor === color.id ? 'border-green-500 scale-110 ring-2 ring-offset-2 ring-green-500' : 'border-transparent'}`}
                                         >
-                                            {/* DEĞİŞİKLİK: Koyu katman kaldırıldı, sadece kilit ikonu kaldı */}
                                             {!isUnlocked && (
                                                 <div className="absolute inset-0 rounded-full flex items-center justify-center bg-black/20">
                                                     <span className="text-2xl text-white drop-shadow-md">🔒</span>
@@ -659,7 +662,7 @@ function ProfileModal({ isOpen, onClose, username, avatarId, cardColor, gold, un
                     </div>
 
                     <div className="border-t pt-4">
-                        <label className="block text-sm font-bold text-slate-700 mb-4">Avatarını Değiştir</label>
+                        <label className="block text-sm font-bold text-slate-700 mb-4">{t.changeAvatarLabel}</label>
                         <div className="grid grid-cols-4 sm:grid-cols-5 gap-4">
                             {availableAvatars.map(avatar => {
                                 const isUnlocked = (unlockedAvatars || []).includes(avatar.id);
@@ -667,13 +670,12 @@ function ProfileModal({ isOpen, onClose, username, avatarId, cardColor, gold, un
 
                                 return (
                                     <div key={avatar.id} onClick={() => isUnlocked ? onAvatarSelect(avatar.id) : onPurchaseItem('avatar', avatar.id, cost)} className="cursor-pointer group flex flex-col items-center gap-1">
-                                        <div className="relative" title={isUnlocked ? '' : `Kilidi açmak için ${cost} altın`}>
+                                        <div className="relative" title={isUnlocked ? '' : t.unlockForGold(cost)}>
                                             <img
                                                 src={avatar.url}
                                                 alt={avatar.id}
                                                 className={`w-16 h-16 rounded-full object-cover bg-gray-200 border-4 transition-all duration-200 shadow-md ${avatarId === avatar.id ? 'border-green-500 scale-110' : 'border-transparent'} group-hover:border-indigo-500 group-hover:scale-110`}
                                             />
-                                            {/* DEĞİŞİKLİK: Koyu katman kaldırıldı, sadece kilit ikonu kaldı */}
                                             {!isUnlocked && (
                                                 <div className="absolute inset-0 rounded-full flex items-center justify-center bg-black/20">
                                                     <span className="text-3xl text-white drop-shadow-md">🔒</span>
@@ -689,7 +691,7 @@ function ProfileModal({ isOpen, onClose, username, avatarId, cardColor, gold, un
                 </div>
 
                 <button onClick={onClose} className="mt-6 bg-slate-200 text-slate-800 font-bold py-2 px-8 rounded-lg hover:bg-slate-300 transition-all shadow-sm flex-shrink-0">
-                    Kapat
+                    {t.closeButton}
                 </button>
             </div>
         </div>
@@ -1106,11 +1108,15 @@ const wordFoundColors = [
         );
     }
 
-    const translations = {
+   const translations = {
         tr: {
+            // Ana Sayfa & Genel
             title: "Kelime Avı",
-            easyMode: "KOLAY (NORMAL)",
-            leaderboard: "Liderlik",
+            homePageSubtitle: "Kelime dehası olmaya hazır mısın?",
+            leaderboardButton: "Liderlik Tablosu",
+            achievementsButton: "Başarılar",
+            footerText: "© 2025 Ozcelik Inc.",
+            languageSwitch: "🇬🇧 English",
             lobbyTitle: "Çok Oyunculu",
             lobbyDescription: "Arkadaşlarınla veya diğer oyuncularla yarış",
             vsAiTitle: "Yapay Zekaya Karşı",
@@ -1119,54 +1125,182 @@ const wordFoundColors = [
             wordHuntDescription: "Harflerin arasına gizlenmiş kelimeleri bul",
             wordTrackingTitle: "Kelime Takibi",
             wordTrackingDescription: "Harfleri birleştirerek yılan gibi kelimeler oluştur",
-çok: "ÇOK",
-            aşırı: "AŞIRI",
-            kolay: "KOLAY",
-            normal: "NORMAL",
-            zor: "ZOR",
-            süreli: "SÜRELİ",
-            hardMode: "ZOR (NORMAL)",
-            timedEasyMode: "SÜRELİ KOLAY",
-            timedHardMode: "SÜRELİ ZOR",
-            superEasyMode: "ÇOK KOLAY",
-            randomMode: "RASTGELE",
-            continueGame: (level) => `Devam Et (Seviye ${level})`,
-            level: "Seviye",
-            words: "Kelimeler",
-            hiddenWord: "Gizli Sözcük",
-            hiddenWordPlaceholder: "Gizli sözcüğü girin",
-            checkButton: "Kontrol Et",
-            homeButton: "Anasayfa",
-            footer: `© ${new Date().getFullYear()} Ozcelik Inc. Tüm hakları saklıdır.`,
-            congrats: "Tebrikler!",
-            error: "Hata!",
-            successMessage: (word) => `Harika! Gizli sözcüğü buldunuz: ${word}`,
-            allWordsRequired: "Önce tüm kelimeleri bulmalısınız!",
-            wrongGuess: "Yanlış tahmin! Tekrar deneyin.",
-            gameCompleted: "Tebrikler! Oyunu başarıyla tamamladınız!",
-            timeUp: "Süre Bitti!",
-            finalScore: (score) => `Skorunuz: ${score}`,
-            continueButton: "Devam Et",
-            tryAgainButton: "Tekrar Dene",
-            language: "Dil",
-            turkish: "Türkçe",
-            english: "English",
-            achievements: "Başarılar",
-            highScore: "Yüksek Skor",
-            score: "Puan",
-            gold: "Altın",
-            randomGameTitle: "🐟 Rastgele 🐟",
-            randomGameBody: (mode, level) => `Sizin için <span class="font-bold">${mode}</span> modunda, <span class="font-bold">Seviye ${level}</span> hazırlandı. Bu oyun kaydedilmez.`,
-            startButton: "Başla!",
+            loading: "Yükleniyor...",
+            // Mod İsimleri
+            çok: "ÇOK", aşırı: "AŞIRI", kolay: "KOLAY", normal: "NORMAL", zor: "ZOR", süreli: "SÜRELİ",
+            superEasyMode: "ÇOK KOLAY", easyMode: "KOLAY", hardMode: "ZOR", timedEasyMode: "SÜRELİ KOLAY", timedHardMode: "SÜRELİ ZOR", randomMode: "RASTGELE",
+            // Oyun İçi
+            level: "Seviye", score: "Puan", gold: "Altın", time: "Süre", noTimeLimit: "Süresiz",
+            hiddenWord: "Gizli Sözcük", checkButton: "Kontrol Et", homeButton: "Anasayfa", nextLevelButton: "Sonraki Seviye →",
+            congrats: "Tebrikler!", levelCompleted: "Seviye Tamamlandı!",
+            timeUp: "Süre Bitti!", finalScore: (score) => `Skorunuz: ${score}`, earnedGold: "Kazanılan Altın",
+            totalScore: "Toplam Puan", returnToHome: "Anasayfa'ya Dön", hint: "İpucu", reveal: "Aç",
+            // Modallar & Uyarılar
+            areYouSureTitle: "Emin misin?",
+            quitGameBody: "Ana menüye dönmek istediğine emin misin? Mevcut ilerlemen kaydedildi.",
+            appQuitBody: "Uygulamadan çıkmak istediğinize emin misiniz?",
+            stayButton: "Hayır", quitButton: "Evet",
             savedGameFoundTitle: "Kayıtlı Oyun Bulundu",
             savedGameFoundBody: (level) => `Bu modda <span class="font-bold">Seviye ${level}</span>'de kayıtlı bir oyununuz mevcut. Ne yapmak istersiniz?`,
-            noStartNewButton: "Hayır, Yeni Oyun Başlat",
-            yesContinueButton: "Evet, Devam Et",
-            returnToHomeButton: "Anasayfa",
-            nextLevelButton: "Devam→",
-            loadingLevel: (level) => `Seviye ${level} Yükleniyor...`,
-            levelLoadError: "Üzgünüz, bu seviye yüklenirken bir sorun oluştu."
-        }, en: { leaderboard: "Leaderboard", aşırı: "SUPER", kolay: "EASY", normal: "NORMAL", zor: "HARD", süreli: "TIMED", title: "Word Hunt", easyMode: "EASY (NORMAL)", hardMode: "HARD (NORMAL)", timedEasyMode: "TIMED EASY", timedHardMode: "TIMED HARD", superEasyMode: "SUPER EASY", randomMode: "RANDOM", continueGame: (level) => `Continue (Level ${level})`, level: "Level", words: "Words", hiddenWord: "Hidden Word", hiddenWordPlaceholder: "Enter the hidden word", checkButton: "Check", homeButton: "Homepage", footer: `© ${new Date().getFullYear()} Ozcelik Inc. All rights reserved.`, congrats: "Congratulations!", error: "Error!", successMessage: (word) => `Awesome! You found the hidden word: ${word}`, allWordsRequired: "You must find all the words first!", wrongGuess: "Wrong guess! Try again.", gameCompleted: "Congratulations! You have successfully completed the game!", timeUp: "Time's Up!", finalScore: (score) => `Your Score: ${score}`, continueButton: "Continue", tryAgainButton: "Try Again", language: "Language", turkish: "Türkçe", english: "English", achievements: "Achievements", highScore: "High Score", score: "Score", gold: "Gold", randomGameTitle: "🎁 Random Game 🎁", randomGameBody: (mode, level) => `A game in <span class="font-bold">${mode}</span> mode, <span class="font-bold">Level ${level}</span> has been prepared for you. This game will not be saved.`, startButton: "Start!", savedGameFoundTitle: "Saved Game Found", savedGameFoundBody: (level) => `You have a saved game in this mode at <span class="font-bold">Level ${level}</span>. What would you like to do?`, noStartNewButton: "No, Start New Game", yesContinueButton: "Yes, Continue", returnToHomeButton: "Return to Homepage", nextLevelButton: "Next Level →", loadingLevel: (level) => `Loading Level ${level}...`, levelLoadError: "Sorry, a problem occurred while loading this level." } };
+            continueButton: "Evet, Devam Et",
+            newGameButton: "Hayır, Yeni Oyun Başlat",
+randomGameTitle: "🐟 Rastgele Oyun 🐟",
+            randomGameBody: (mode, level) => `Sizin için <span class="font-bold">${mode}</span> modunda, <span class="font-bold">Seviye ${level}</span> hazırlandı. Bu oyun kaydedilmez.`,
+startButton: "Başla!",
+            closeButton: "Kapat",
+            welcome: "Oyuna Hoş Geldin!",
+            usernamePrompt: "Liderlik tablosu için benzersiz bir kullanıcı adı belirle.",
+            usernamePlaceholder: "Kullanıcı adınız...",
+            checking: "Kontrol ediliyor...",
+            saveAndStart: "Kaydet ve Başla",
+            usernameTaken: "Bu kullanıcı adı zaten alınmış. Lütfen başka bir tane deneyin.",
+            profileTitle: "Profilin",
+            changeUsernameLabel: "Kullanıcı Adını Değiştir",
+            saveButton: "Kaydet",
+            newUsernamePlaceholder: "Yeni kullanıcı adın...",
+            selectCardColorLabel: "Kart Rengini Seç",
+            changeAvatarLabel: "Avatarını Değiştir",
+            unlockForGold: (cost) => `Kilidi açmak için ${cost} altın`,
+            gameLobby: "Oyun Lobisi", backButton: "Geri", createRoom: "+ Yeni Oda Kur",
+            onlineNow: "Şu Anda Online", friends: "Arkadaşlar", allUsers: "Tüm Kullanıcılar",
+            waitingForPlayers: "Oyuncuların katılmasını bekliyorsun...", waitingForHost: "Oyunun başlaması bekleniyor...",
+            startGameButton: "Oyunu Başlat", waitingForPlayer: "Oyuncu Bekleniyor", leaveRoomButton: "Odadan Ayrıl",
+            hostsRoom: (host) => `${host}'un Odası`,
+            noRooms: "Aktif oyun odası bulunmuyor.",
+            noUsers: "Burada kimse yok.",
+            join: "Katıl",
+            full: "Dolu",
+            challenge: "Meydan Oku",
+            setupGameFor: (player) => `${player} için oyun kur`,
+            difficulty: "Zorluk Seviyesi",
+            easyDesc: "Kelimeler görünür",
+            hardDesc: "Kelimeler gizli",
+            boardSize: "Oyun Alanı Boyutu",
+            smallArea: "Küçük Alan",
+            mediumArea: "Orta Alan",
+            largeArea: "Geniş Alan",
+            friendRequest: "Arkadaşlık İsteği",
+            wantsToBeFriend: (user) => `${user} seni arkadaş olarak eklemek istiyor.`,
+            accept: "Kabul Et",
+            decline: "Reddet",
+            duelChallenge: "Meydan Okuma",
+            invitedToGame: (user) => `${user} seni özel bir oyuna davet ediyor!`,
+            removeFriend: "Arkadaşlıktan Çıkar",
+            removeFriendConfirm: (user) => `<b>${user}</b> kişisini arkadaşlıktan çıkarmak istediğinize emin misiniz?`,
+            // Toast Mesajları
+            linkCopied: "Link panoya kopyalandı!",
+            copyFail: "Hata: Link kopyalanamadı.",
+            androidOnly: "Bu özellik sadece uygulamada kullanılabilir.",
+            insufficientGold: "Yetersiz altın!",
+            purchaseSuccess: "Başarıyla satın alındı!",
+            purchaseFail: "Bir hata oluştu.",
+            avatarUpdated: "Avatarın başarıyla güncellendi!",
+            avatarUpdateFail: "Hata: Avatar güncellenemedi.",
+            colorUpdated: "Kart rengin güncellendi!",
+            usernameUpdated: "Kullanıcı adın başarıyla güncellendi!",
+            usernameUpdateFail: "Hata: Kullanıcı adı güncellenemedi.",
+            friendRequestSent: (user) => `${user} kişisine arkadaşlık isteği gönderildi!`,
+            friendRequestFail: "Hata: İstek gönderilemedi.",
+            friendRemoved: (user) => `${user} arkadaşlıktan çıkarıldı.`,
+            friendRequestAccepted: (user) => `${user} ile arkadaş oldunuz!`,
+            requestAcceptFail: "İstek kabul edilemedi:",
+            inviteSent: "Davet gönderildi!",
+            inviteFail: "Hata: Davet gönderilemedi.",
+            inviteDeclined: "Davet reddedildi.",
+        },
+        en: {
+            // Homepage & General
+            title: "Word Hunt", homePageSubtitle: "Ready to become a word genius?",
+            leaderboardButton: "Leaderboard", achievementsButton: "Achievements",
+            footerText: "© 2025 Ozcelik Inc.", languageSwitch: "🇹🇷 Türkçe",
+            lobbyTitle: "Multiplayer", lobbyDescription: "Compete with friends or other players",
+            vsAiTitle: "Versus AI", vsAiDescription: "Test your word finding skills against the computer",
+            wordHuntTitle: "Word Hunt Classic", wordHuntDescription: "Find the words hidden among the letters",
+            wordTrackingTitle: "Word Tracking", wordTrackingDescription: "Create snake-like words by connecting letters",
+            loading: "Loading...",
+            // Mode Names
+            çok: "SUPER", aşırı: "SUPER", kolay: "EASY", normal: "NORMAL", zor: "HARD", süreli: "TIMED",
+            superEasyMode: "SUPER EASY", easyMode: "EASY", hardMode: "HARD",
+            timedEasyMode: "TIMED EASY", timedHardMode: "TIMED HARD", randomMode: "RANDOM",
+            // In-Game
+            level: "Level", score: "Score", gold: "Gold", time: "Time", noTimeLimit: "No Limit",
+            hiddenWord: "Hidden Word", checkButton: "Check", homeButton: "Homepage", nextLevelButton: "Next Level →",
+            congrats: "Congratulations!", levelCompleted: "Level Complete!",
+            timeUp: "Time's Up!", finalScore: (score) => `Your Score: ${score}`, earnedGold: "Gold Earned",
+            totalScore: "Total Score", returnToHome: "Return to Homepage", hint: "Hint", reveal: "Reveal",
+            // Modals & Alerts
+            areYouSureTitle: "Are you sure?",
+            quitGameBody: "Are you sure you want to return to the main menu? Your current progress has been saved.",
+            appQuitBody: "Are you sure you want to exit the application?",
+            stayButton: "No", quitButton: "Yes",
+            savedGameFoundTitle: "Saved Game Found",
+            savedGameFoundBody: (level) => `You have a saved game in this mode at <span class="font-bold">Level ${level}</span>. What would you like to do?`,
+            continueButton: "Yes, Continue", newGameButton: "No, Start New Game",
+randomGameTitle: "🎁 Random Game 🎁",
+            randomGameBody: (mode, level) => `A game in <span class="font-bold">${mode}</span> mode, <span class="font-bold">Level ${level}</span> has been prepared for you. This game will not be saved.`,
+startButton: "Start!",
+            closeButton: "Close",
+            welcome: "Welcome to the Game!",
+            usernamePrompt: "Set a unique username for the leaderboard.",
+            usernamePlaceholder: "Your username...",
+            checking: "Checking...",
+            saveAndStart: "Save and Start",
+            usernameTaken: "This username is already taken. Please try another one.",
+            profileTitle: "Your Profile",
+            changeUsernameLabel: "Change Username",
+            saveButton: "Save",
+            newUsernamePlaceholder: "Your new username...",
+            selectCardColorLabel: "Select Card Color",
+            changeAvatarLabel: "Change Your Avatar",
+            unlockForGold: (cost) => `Unlock for ${cost} gold`,
+            gameLobby: "Game Lobby", backButton: "Back", createRoom: "+ Create New Room",
+            onlineNow: "Online Now", friends: "Friends", allUsers: "All Users",
+            waitingForPlayers: "Waiting for players to join...", waitingForHost: "Waiting for the host to start...",
+            startGameButton: "Start Game", waitingForPlayer: "Waiting for Player", leaveRoomButton: "Leave Room",
+            hostsRoom: (host) => `${host}'s Room`,
+            noRooms: "There are no active game rooms.",
+            noUsers: "Nobody is here.",
+            join: "Join",
+            full: "Full",
+            challenge: "Challenge",
+            setupGameFor: (player) => `Setup game for ${player}`,
+            difficulty: "Difficulty",
+            easyDesc: "Words are visible",
+            hardDesc: "Words are hidden",
+            boardSize: "Board Size",
+            smallArea: "Small Area",
+            mediumArea: "Medium Area",
+            largeArea: "Large Area",
+            friendRequest: "Friend Request",
+            wantsToBeFriend: (user) => `${user} wants to be your friend.`,
+            accept: "Accept",
+            decline: "Decline",
+            duelChallenge: "Duel Challenge",
+            invitedToGame: (user) => `${user} is inviting you to a private game!`,
+            removeFriend: "Remove Friend",
+            removeFriendConfirm: (user) => `Are you sure you want to remove <b>${user}</b> from your friends?`,
+            // Toast Messages
+            linkCopied: "Link copied to clipboard!",
+            copyFail: "Error: Could not copy link.",
+            androidOnly: "This feature is only available in the app.",
+            insufficientGold: "Insufficient gold!",
+            purchaseSuccess: "Purchase successful!",
+            purchaseFail: "An error occurred.",
+            avatarUpdated: "Avatar updated successfully!",
+            avatarUpdateFail: "Error: Could not update avatar.",
+            colorUpdated: "Card color updated!",
+            usernameUpdated: "Your username has been updated successfully!",
+            usernameUpdateFail: "Error: Could not update username.",
+            friendRequestSent: (user) => `Friend request sent to ${user}!`,
+            friendRequestFail: "Error: Could not send request.",
+            friendRemoved: (user) => `${user} has been removed from friends.`,
+            friendRequestAccepted: (user) => `You are now friends with ${user}!`,
+            requestAcceptFail: "Could not accept request:",
+            inviteSent: "Invite sent!",
+            inviteFail: "Error: Could not send invite.",
+            inviteDeclined: "Invite declined.",
+        }
+    };
 
     const charSets = { tr: 'ABCÇDEFGĞHIİJKLMNOÖPRSŞTUÜVYZ'.split(''), en: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('') };
     const wordLists = { tr: typeof wordListTr !== 'undefined' ? wordListTr : [], en: typeof wordListEn !== 'undefined' ? wordListEn : [] };
@@ -1214,9 +1348,7 @@ const GAME_STATS_KEY = 'wordHuntGameStats';
 
 
 
-function createBoard(level, language, config) {
-    console.log(`[createBoard Başladı] Seviye: ${level}, Mod: ${config?.name}, Tip: ${config?.modeType}, Boyut: ${config?.boardSize}`);
-    
+function createBoard(level, language, config) {    
     if (config && config.modeType === 'takip') {
         return createTakipBoard(level, language, config);
     } 
@@ -1273,7 +1405,6 @@ function createBoard(level, language, config) {
                 placedWordsInfo.push({ word, positions, direction: dir.name });
             };
             
-            // YENİ VE DÜZELTİLMİŞ KISIM: %50 Çapraz Kuralını Uygula
             const shuffledWords = _.shuffle(wordsToPlacePool);
             const midPoint = Math.ceil(shuffledWords.length / 2);
             const diagonalWords = shuffledWords.slice(0, midPoint);
@@ -1282,7 +1413,6 @@ function createBoard(level, language, config) {
             const placeWordSet = (wordSet, directionSet) => {
                 for (const word of wordSet) {
                     const availablePositions = [];
-                    // Her kelime için tahtadaki tüm olası yerleri ve yönleri bul
                     for (let r = 0; r < rows; r++) {
                         for (let c = 0; c < cols; c++) {
                             for (const dir of directionSet) {
@@ -1292,7 +1422,6 @@ function createBoard(level, language, config) {
                             }
                         }
                     }
-                    // Eğer yerleştirilebilecek bir yer varsa, rastgele birini seç ve yerleştir
                     if (availablePositions.length > 0) {
                         const { r, c, dir } = _.sample(availablePositions);
                         placeWord(word, r, c, dir);
@@ -1300,24 +1429,22 @@ function createBoard(level, language, config) {
                 }
             };
             
-            // Önce sadece çapraz yerleşebilecek kelimeleri yerleştir
             placeWordSet(diagonalWords, directions.diagonal);
-            // Sonra sadece düz (yatay/dikey) yerleşebilecek kelimeleri yerleştir
             placeWordSet(nonDiagonalWords, nonDiagonalDirections);
             
             const fillRatio = placedCellCount / (rows * cols);
-            if (fillRatio < 0.85 && attempt < 99) {
-                if(attempt % 10 === 0) console.log(`Deneme #${attempt}: Doluluk oranı düşük (${(fillRatio * 100).toFixed(1)}%), yeniden deneniyor.`);
+            if (fillRatio < 0.90 && attempt < 99) {
+                if(attempt % 10 === 0) 
                 continue;
             }
             
-            console.log(`[createBoard] BAŞARILI! Deneme #${attempt}, Doluluk: ${(fillRatio * 100).toFixed(1)}%, Kelime Sayısı: ${placedWordsInfo.length}`);
-
             for (let r = 0; r < rows; r++) { for (let c = 0; c < cols; c++) { if (board[r][c] === null) board[r][c] = _.sample(charSets[language]); } }
-            
             let hiddenWord = _.sample(mainWordPool.filter(w => w.length >= 5 && w.length <= 9 && !placedWordsInfo.some(p => p.word === w))) || "TÜRKİYE";
             
-            return { board, words: _.sortBy(placedWordsInfo, 'word'), hiddenWord, scatteredHiddenLetterPositions: [] };
+const uniquePlacedWords = _.uniqBy(placedWordsInfo, 'word');
+
+return { board, words: _.sortBy(uniquePlacedWords, 'word'), hiddenWord, scatteredHiddenLetterPositions: [] };
+
         }
     } catch (e) {
         console.error(`[createBoard] KRİTİK HATA:`, e);
@@ -1415,7 +1542,7 @@ function createTakipBoard(level, language, config) {
         }
         
         const filledRatio = occupiedCoords.size / (rows * cols);
-        if (filledRatio < 0.85 && attempt < 45) { // Alanın en az %85'i dolmadıysa, tekrar dene
+        if (filledRatio < 0.90 && attempt < 45) { 
             continue;
         }
 
@@ -1449,7 +1576,15 @@ function createTakipBoard(level, language, config) {
             }
         }
         
-        return { board, words: _.sortBy(placedWordsInfo, 'word'), hiddenWord, scatteredHiddenLetterPositions };
+       const uniquePlacedWords = _.uniqBy(placedWordsInfo, 'word');
+
+
+if (uniquePlacedWords.length === 0) {
+    console.error("createTakipBoard: 50 denemeye rağmen hiçbir kelime yerleştirilemedi.");
+    return null;
+}
+
+return { board, words: _.sortBy(uniquePlacedWords, 'word'), hiddenWord, scatteredHiddenLetterPositions: [] };
     }
     console.error("Kelime Takibi tahtası oluşturulamadı.");
     return null; 
@@ -1476,7 +1611,7 @@ function createTakipBoard(level, language, config) {
 
 function Modal({ isOpen, title, children, onClose }) { if (!isOpen) return null; return ( <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4" onClick={onClose}> <div className="bg-white p-6 rounded-xl shadow-2xl max-w-md w-full text-center relative" onClick={e => e.stopPropagation()}> <h3 className="text-2xl font-semibold mb-4 text-gray-800">{title}</h3> <div className="text-gray-700">{children}</div> <button onClick={onClose} className="absolute top-2 right-2 text-gray-500 hover:text-gray-800 text-2xl">&times;</button> </div> </div> ); }
 
-const Cell = React.memo(function Cell({letter, isSelected, isFoundRequiredPart, isHiddenLetterCell, allRequiredWordsFound, isJustFound, isBonusGlow, theme, numCols, foundWordColorInfo }) {
+const Cell = React.memo(function Cell({letter, isSelected, isFoundRequiredPart, isHiddenLetterCell, allRequiredWordsFound, isJustFound, isBonusGlow, theme, numCols, foundWordColorInfo, rowIndex, colIndex }) {
     let cellClass = 'bg-white';
     let textClass = 'text-gray-800';
 
@@ -1497,12 +1632,11 @@ const Cell = React.memo(function Cell({letter, isSelected, isFoundRequiredPart, 
             cellClass = theme.selectedCell + ' transform scale-110 shadow-lg';
             textClass = 'text-black font-bold';
         } else if (isFoundRequiredPart) {
-            // YENİ RENK MANTIĞI
             if (foundWordColorInfo) {
                 cellClass = foundWordColorInfo.bg;
                 textClass = foundWordColorInfo.text;
             } else {
-                cellClass = theme.foundCell; // Fallback
+                cellClass = theme.foundCell;
                 textClass = 'text-gray-600 opacity-75';
             }
         }
@@ -1510,20 +1644,18 @@ const Cell = React.memo(function Cell({letter, isSelected, isFoundRequiredPart, 
 
     const calculateFontSize = () => {
         if (!numCols) return { fontSize: '18px' };
-        const maxGridWidth = 768;
-        const targetRatio = 0.6;
-        const minFontSize = 10;
+        const maxGridWidth = 768; const targetRatio = 0.6; const minFontSize = 10;
         const preferredVw = (100 / numCols) * targetRatio;
         const maxFontSize = (maxGridWidth / numCols) * targetRatio;
-        return {
-            fontSize: `clamp(${minFontSize}px, ${preferredVw.toFixed(2)}vw, ${maxFontSize.toFixed(2)}px)`
-        };
+        return { fontSize: `clamp(${minFontSize}px, ${preferredVw.toFixed(2)}vw, ${maxFontSize.toFixed(2)}px)` };
     };
 
     const fontSizeStyle = calculateFontSize();
 
     return (
         <div
+            data-row={rowIndex}
+            data-col={colIndex}
             className={`flex items-center justify-center text-center font-semibold border border-gray-200/50 rounded aspect-square ${cellClass} ${textClass} transition-all duration-150 select-none`}
             style={fontSizeStyle}
         >
@@ -1531,6 +1663,7 @@ const Cell = React.memo(function Cell({letter, isSelected, isFoundRequiredPart, 
         </div>
     );
 });
+
 
     function LeaderboardDisplay({ scores, currentUser, language }) {
             const t = translations[language] || translations['en'];
@@ -1597,6 +1730,7 @@ function HomePage({
         setLanguage,
         stats,
         setModalContent,
+        setLeaderboardModalOpen,
         username,
         isInitializing,
         openLobbyPage,
@@ -1610,6 +1744,15 @@ function HomePage({
 
         const handleSectionClick = (section) => {
             setExpandedSection(prevSection => (prevSection === section ? null : section));
+        };
+        
+        const handleAchievementsClick = () => {
+            setModalContent({
+                isOpen: true,
+                title: t.achievementsButton,
+                onClose: () => setModalContent({ isOpen: false }),
+                body: <AchievementsList stats={stats} language={language} />
+            });
         };
 
         const MainSectionCard = ({ sectionKey, title, icon, onClick, bgColor, children, description }) => {
@@ -1655,29 +1798,48 @@ function HomePage({
                     <header className="my-2 flex-shrink-0 flex items-center justify-between">
                          <div className="text-left">
                             <h1 className="text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600 drop-shadow-sm">{t.title}</h1>
-                            <p className="text-slate-500 text-sm mt-1">Kelime dehası olmaya hazır mısın?</p>
+                            <p className="text-slate-500 text-sm mt-1">{t.homePageSubtitle}</p>
                         </div>
                         {username && (
-                            <div 
-                                onClick={openProfileModal}
-                                className={`p-3 rounded-2xl shadow-sm border border-white/20 transition-all cursor-pointer hover:shadow-lg hover:scale-105 ${selectedCardColor.class}`}
-                            >
-                                <div className="flex flex-col items-center gap-1.5 pointer-events-none">
-                                    <div className="relative">
-                                        <img
-                                            src={avatarId ? `avatars/${avatarId}.png` : 'avatars/default.png'}
-                                            className="w-12 h-12 rounded-full object-cover bg-gray-200 border-2 border-white shadow-md"
-                                        />
-                                        <div
-                                            className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-400 rounded-full border-2 border-white"
-                                            title={'Çevrimiçi'}
-                                        ></div>
+                            <div className="flex items-center gap-2">
+                                <div 
+                                    onClick={openProfileModal}
+                                    className={`p-3 rounded-2xl shadow-sm border border-white/20 transition-all cursor-pointer hover:shadow-lg hover:scale-105 ${selectedCardColor.class}`}
+                                >
+                                    <div className="flex flex-col items-center gap-1.5 pointer-events-none">
+                                        <div className="relative">
+                                            <img
+                                                src={avatarId ? `avatars/${avatarId}.png` : 'avatars/default.png'}
+                                                className="w-12 h-12 rounded-full object-cover bg-gray-200 border-2 border-white shadow-md"
+                                            />
+                                            <div
+                                                className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-400 rounded-full border-2 border-white"
+                                                title={'Çevrimiçi'}
+                                            ></div>
+                                        </div>
+                                        <p className="font-bold text-sm text-white drop-shadow">{username}</p>
                                     </div>
-                                    <p className="font-bold text-sm text-white drop-shadow">{username}</p>
                                 </div>
                             </div>
                         )}
                     </header>
+
+                    <div className="flex-shrink-0 grid grid-cols-2 gap-3 my-4">
+                        <button 
+                            onClick={() => setLeaderboardModalOpen(true)} 
+                            className="w-full p-3 bg-gradient-to-br from-amber-400 to-orange-500 text-white font-bold rounded-xl shadow-lg flex items-center justify-center gap-2 transition-transform hover:scale-105"
+                        >
+                            <span className="text-2xl">🏆</span>
+                            <span>{t.leaderboardButton}</span>
+                        </button>
+                        <button 
+                            onClick={handleAchievementsClick} 
+                            className="w-full p-3 bg-gradient-to-br from-lime-500 to-emerald-600 text-white font-bold rounded-xl shadow-lg flex items-center justify-center gap-2 transition-transform hover:scale-105"
+                        >
+                            <span className="text-2xl">🏅</span>
+                            <span>{t.achievementsButton}</span>
+                        </button>
+                    </div>
 
                     <div className="flex-1 overflow-y-auto scrollbar-thin py-4">
                         <div className="w-full max-w-md mx-auto space-y-4">
@@ -1691,21 +1853,31 @@ function HomePage({
 									<SubModeCard title={t.hardMode} icon="🌋" onClick={() => startGame('hard')} bgColor="bg-sky-800/50 hover:bg-sky-700/60" />
 									<SubModeCard title={t.timedEasyMode} icon="⏱️" onClick={() => startGame('timed-easy')} bgColor="bg-sky-800/50 hover:bg-sky-700/60" />
 									<SubModeCard title={t.timedHardMode} icon="🔥" onClick={() => startGame('timed-hard')} bgColor="bg-sky-800/50 hover:bg-sky-700/60" />
-									<SubModeCard title={t.randomMode} icon="🎲" onClick={() => startGame('random')} bgColor="bg-sky-800/50 hover:bg-sky-700/60" />
+									<SubModeCard title={t.randomMode} icon="🐟" onClick={() => startGame('random')} bgColor="bg-sky-800/50 hover:bg-sky-700/60" />
 								</div>
 							</MainSectionCard>
 
-							{/* DEĞİŞİKLİK: Kelime Takibi bölümünden "Zor" ve "Süreli Zor" modları kaldırıldı. */}
 							<MainSectionCard sectionKey="kelime_takibi" title={t.wordTrackingTitle} icon="🎯" description={t.wordTrackingDescription} onClick={() => handleSectionClick('kelime_takibi')} bgColor="bg-gradient-to-br from-amber-500 to-orange-600">
-							   <div className="grid grid-cols-2 sm:grid-cols-2 gap-3"> {/* Grid sm:grid-cols-2 olarak değiştirildi */}
+							   <div className="grid grid-cols-2 sm:grid-cols-2 gap-3">
 									<SubModeCard title={t.superEasyMode} icon="🐛" onClick={() => startGame('takip-super-easy')} bgColor="bg-amber-800/50 hover:bg-amber-700/60" />
 									<SubModeCard title={t.easyMode} icon="🐍" onClick={() => startGame('takip-easy')} bgColor="bg-amber-800/50 hover:bg-amber-700/60" />
 									<SubModeCard title={t.timedEasyMode} icon="⏳" onClick={() => startGame('takip-timed-easy')} bgColor="bg-amber-800/50 hover:bg-amber-700/60" />
-									<SubModeCard title={t.randomMode} icon="❓" onClick={() => startGame('takip-random')} bgColor="bg-amber-800/50 hover:bg-amber-700/60" />
+									<SubModeCard title={t.randomMode} icon="🐠" onClick={() => startGame('takip-random')} bgColor="bg-amber-800/50 hover:bg-amber-700/60" />
 								</div>
 							</MainSectionCard>
 						</div>
                     </div>
+                    <footer className="p-4 text-center text-sm text-slate-500 flex-shrink-0">
+                        <div className="mb-2">
+                            <button 
+                                onClick={() => setLanguage(language === 'tr' ? 'en' : 'tr')}
+                                className="px-4 py-2 bg-white border border-slate-300 rounded-full shadow-sm text-slate-700 font-semibold hover:bg-slate-100 transition-colors"
+                            >
+                                {t.languageSwitch}
+                            </button>
+                        </div>
+                        {t.footerText}
+                    </footer>
                 </div>
             </div>
         );
@@ -1716,10 +1888,15 @@ function HomePage({
 
 
 
-
-
-function WordHunt({ config, gameId, username, goToHome, language, stats, onStatsChange, initialSavedState, setToastMessage, toastMessage }) {
+const WordHunt = React.forwardRef(({ config, gameId, username, goToHome, language, stats, onStatsChange, initialSavedState, setToastMessage, toastMessage }, ref) => {
     const t = translations[language] || translations['en'];
+
+
+React.useImperativeHandle(ref, () => ({
+        showExitConfirmation() {
+            handleGoHomeClick();
+        }
+    }));
     let infoBarClass = 'from-violet-100 to-indigo-100'; 
     if (config.name === 'super-easy') {
         infoBarClass = 'from-green-100 to-emerald-200 text-green-900';
@@ -1762,7 +1939,114 @@ function WordHunt({ config, gameId, username, goToHome, language, stats, onStats
     const [bonusGlowCells, setBonusGlowCells] = React.useState([]);
     const [foundBonusWords, setFoundBonusWords] = React.useState([]);
     const theme = (config.name === 'hard' || config.name === 'timed-hard') ? { bg: 'bg-red-50', foundCell: 'bg-red-200', hiddenWordCell: 'bg-blue-400 text-white font-bold', wordBg: 'bg-red-100', gridBg: 'bg-red-100', button: 'bg-red-600 hover:bg-red-700', inputBorder: 'border-red-300 focus:border-red-500', selectedCell: 'bg-yellow-400', obscuredCell: 'bg-gray-400 text-transparent opacity-50' } : { bg: 'bg-indigo-50', foundCell: 'bg-green-200', hiddenWordCell: 'bg-blue-400 text-white font-bold', wordBg: 'bg-indigo-100', gridBg: 'bg-indigo-100', button: 'bg-indigo-600 hover:bg-indigo-700', inputBorder: 'border-indigo-300 focus:border-indigo-500', selectedCell: 'bg-yellow-300', obscuredCell: 'bg-gray-400 text-transparent opacity-50' };
-    const lastProcessedCell = React.useRef(null);
+
+
+
+ const getCellFromEvent = (clientX, clientY) => {
+    const targetElement = document.elementFromPoint(clientX, clientY);
+    if (targetElement) {
+        const rowStr = targetElement.getAttribute('data-row');
+        const colStr = targetElement.getAttribute('data-col');
+        if (rowStr && colStr) {
+            return { row: parseInt(rowStr, 10), col: parseInt(colStr, 10) };
+        }
+    }
+    return null;
+};
+
+const handleInteractionStart = React.useCallback((clientX, clientY) => {
+    const canPlay = isRealtimeDuel || isVsComputer ? true : !allRequiredWordsFound;
+    if (!canPlay || !board) {
+        return;
+    }
+    
+    const cell = getCellFromEvent(clientX, clientY);
+    const cellFoundStatus = cell ? isCellFound(cell.row, cell.col) : 'yok';
+
+    if (cell && !cellFoundStatus) {
+        setIsSwiping(true);
+        setSelectedCells([cell]);
+    } else {
+    }
+}, [board, isCellFound, isRealtimeDuel, allRequiredWordsFound, isVsComputer]);
+const handleInteractionMove = React.useCallback((clientX, clientY) => {
+    if (!isSwiping) {
+        return;
+    }
+
+    const currentCell = getCellFromEvent(clientX, clientY);
+    if (!currentCell) {
+        return;
+    }
+    
+    setSelectedCells(prevSelectedCells => {
+        if (prevSelectedCells.length === 0) return prevSelectedCells;
+        
+        const lastCell = prevSelectedCells[prevSelectedCells.length - 1];
+        if(lastCell.row === currentCell.row && lastCell.col === currentCell.col) return prevSelectedCells;
+        const isTrackingMode = config.modeType === 'takip';
+        
+        if (isTrackingMode) {
+            let newSelectedCells = [...prevSelectedCells];
+            if (newSelectedCells.length > 1) {
+                const secondToLastCell = newSelectedCells[newSelectedCells.length - 2];
+                if (secondToLastCell.row === currentCell.row && secondToLastCell.col === currentCell.col) {
+                    return newSelectedCells.slice(0, -1);
+                }
+            }
+            const isAdjacent = (Math.abs(currentCell.row - lastCell.row) === 1 && currentCell.col === lastCell.col) ||
+                               (Math.abs(currentCell.col - lastCell.col) === 1 && currentCell.row === lastCell.row);
+            if (isAdjacent && !isCellFound(currentCell.row, currentCell.col)) {
+                return [...newSelectedCells, currentCell];
+            }
+            return newSelectedCells;
+        } else { 
+            const startCell = prevSelectedCells[0];
+            const dx = Math.sign(currentCell.col - startCell.col);
+            const dy = Math.sign(currentCell.row - startCell.row);
+            const isDiagonal = (dx !== 0 && dy !== 0 && Math.abs(currentCell.col - startCell.col) === Math.abs(currentCell.row - startCell.row));
+            const isStraight = (dx === 0 || dy === 0);
+            
+            if (!(isDiagonal || isStraight)) {
+                 return prevSelectedCells;
+            }
+            
+            const distance = Math.max(Math.abs(currentCell.row - startCell.row), Math.abs(currentCell.col - startCell.col));
+            const path = [startCell];
+            for (let i = 1; i <= distance; i++) {
+                const nextCell = { row: startCell.row + i * dy, col: startCell.col + i * dx };
+                const cellFoundStatus = isCellFound(nextCell.row, nextCell.col);
+                if (cellFoundStatus) {
+                    break;
+                }
+                path.push(nextCell);
+            }
+            return path;
+        }
+    });
+}, [isSwiping, board, config.modeType, isCellFound]);
+
+
+
+
+    const throttledMouseMove = React.useMemo(() => _.throttle((e) => handleInteractionMove(e.clientX, e.clientY), 50), [handleInteractionMove]);
+
+    React.useEffect(() => {
+        const gridElement = gridRef.current;
+        const handleTouchMoveWrapper = (e) => {
+            e.preventDefault();
+            handleInteractionMove(e.touches[0].clientX, e.touches[0].clientY);
+        };
+
+        if (gridElement) {
+            gridElement.addEventListener('touchmove', handleTouchMoveWrapper, { passive: false });
+            return () => {
+                gridElement.removeEventListener('touchmove', handleTouchMoveWrapper);
+            };
+        }
+    }, [handleInteractionMove]);
+
+
     const cellOwnerMap = React.useMemo(() => {
         const map = {};
         if (!isRealtimeDuel || !realtimeGameData?.players || !realtimeGameData?.boardData?.words) return map;
@@ -1863,98 +2147,8 @@ function WordHunt({ config, gameId, username, goToHome, language, stats, onStats
         }, 100);
     }, [isVsComputer, config.name, language]);
 
-    const handleInteractionMove = React.useCallback((clientX, clientY) => {
-    const isTrackingMode = config.modeType === 'takip';
-
-    setSelectedCells(prevSelectedCells => {
-        const currentCell = getCellFromCoordinates(clientX, clientY);
-
-        if (!currentCell || (lastProcessedCell.current && lastProcessedCell.current.row === currentCell.row && lastProcessedCell.current.col === currentCell.col)) {
-            return prevSelectedCells;
-        }
-        lastProcessedCell.current = currentCell;
-        if (!isSwiping || !board || prevSelectedCells.length === 0) {
-            return prevSelectedCells;
-        }
-
-        const currentCell = getCellFromCoordinates(clientX, clientY);
-        if (!currentCell) {
-            return prevSelectedCells;
-        }
-        
-        if (isTrackingMode) {
-            if (prevSelectedCells.length > 1) {
-                const secondToLastCell = prevSelectedCells[prevSelectedCells.length - 2];
-                if (secondToLastCell.row === currentCell.row && secondToLastCell.col === currentCell.col) {
-                    return prevSelectedCells.slice(0, -1);
-                }
-            }
-
-            const lastCell = prevSelectedCells[prevSelectedCells.length - 1];
-            const isAlreadySelected = prevSelectedCells.some(cell => cell.row === currentCell.row && cell.col === currentCell.col);
-            
-            // Sadece yatay ve dikey komşulara izin veren orijinal kural
-            const isAdjacent = (Math.abs(currentCell.row - lastCell.row) === 1 && currentCell.col === lastCell.col) ||
-                               (Math.abs(currentCell.col - lastCell.col) === 1 && currentCell.row === lastCell.row);
-
-            if (!isAlreadySelected && isAdjacent && !isCellFound(currentCell.row, currentCell.col)) {
-                return [...prevSelectedCells, currentCell];
-            }
-        } else { // Kelime Avı modu için (değişiklik yok)
-            const startCell = prevSelectedCells[0];
-            const dx = Math.sign(currentCell.col - startCell.col);
-            const dy = Math.sign(currentCell.row - startCell.row);
-
-            if (dx === 0 && dy === 0 && prevSelectedCells.length > 1) return prevSelectedCells;
-            if (!((dx !== 0 && dy !== 0 && Math.abs(currentCell.col - startCell.col) === Math.abs(currentCell.row - startCell.row)) || (dx === 0 || dy === 0))) {
-                 return prevSelectedCells;
-            }
-
-            const distance = Math.max(Math.abs(currentCell.row - startCell.row), Math.abs(currentCell.col - startCell.col));
-            const newSelection = [];
-            for (let i = 0; i <= distance; i++) {
-                const nextRow = startCell.row + i * dy;
-                const nextCol = startCell.col + i * dx;
-                if (nextRow >= 0 && nextRow < board.length && nextCol >= 0 && nextCol < board[0].length) {
-                    const cellToAdd = { row: nextRow, col: nextCol };
-                    if (!isCellFound(cellToAdd.row, cellToAdd.col)) {
-                        newSelection.push(cellToAdd);
-                    } else { 
-                        if (newSelection.length === 0) newSelection.push(startCell);
-                        return newSelection;
-                    }
-                } else { 
-                    return newSelection;
-                }
-            }
-            return newSelection;
-        }
-
-        return prevSelectedCells;
-    });
-}, [isSwiping, board, config.modeType, getCellFromCoordinates, isCellFound]);
     
-    React.useEffect(() => {
-    const gridElement = gridRef.current;
 
-    const throttledMove = _.throttle((e) => {
-        handleInteractionMove(e.touches[0].clientX, e.touches[0].clientY);
-    }, 16); // 60fps için ~16ms gecikme
-
-    const handleTouchMoveWrapper = (e) => {
-        e.preventDefault();
-        throttledMove(e);
-    };
-
-    if (gridElement) {
-        gridElement.addEventListener('touchmove', handleTouchMoveWrapper, { passive: false });
-
-        return () => {
-            gridElement.removeEventListener('touchmove', handleTouchMoveWrapper);
-            throttledMove.cancel(); // Component kaldırıldığında throttle'ı iptal et
-        };
-    }
-}, [board, isSwiping, handleInteractionMove]);
 
     React.useEffect(() => {
         if (!isRealtimeDuel || !realtimeGameData || !realtimeGameData.boardData || realtimeGameData.status !== 'in-progress') {
@@ -2035,18 +2229,14 @@ function WordHunt({ config, gameId, username, goToHome, language, stats, onStats
         });
     }, [isRealtimeDuel, isVsComputer, goToHome, handleForfeit, realtimeGameData]);
 
-    const getCellFromCoordinates = React.useCallback((clientX, clientY) => {
-        const grid = gridRef.current; if (!grid || !board || !board[0]) return null; const rect = grid.getBoundingClientRect(); const cols = board[0].length; const rows = board.length; const cellWidth = rect.width / cols; const cellHeight = rect.height / rows; const x = clientX - rect.left; const y = clientY - rect.top; const col = Math.floor(x / cellWidth); const row = Math.floor(y / cellHeight); if (row < 0 || row >= rows || col < 0 || col >= cols) return null; return { row, col }; 
-    }, [board]);
+    
     
     const isCellFound = React.useCallback((r, c) => {
     if (isRealtimeDuel) {
         if (!realtimeGameData || !realtimeGameData.boardData || !realtimeGameData.players) return false;
         for (const player of Object.values(realtimeGameData.players)) {
-            // DÜZELTME: Buradaki 'p.foundWords' ifadesi 'player.foundWords' olarak değiştirildi.
             const foundWordInfo = realtimeGameData.boardData.words.filter(w => (player.foundWords || []).includes(w.word));
             for (const word of foundWordInfo) {
-                // Not: Buradaki 'p' harfi pozisyonu (position) ifade ettiği için doğrudur ve değiştirilmemelidir.
                 if (word.positions.some(p => p.row === r && p.col === c)) return true;
             }
         }
@@ -2058,11 +2248,9 @@ function WordHunt({ config, gameId, username, goToHome, language, stats, onStats
     }
 }, [isRealtimeDuel, realtimeGameData, gameState, foundWords, isVsComputer, computerState]);
     
-    const handleInteractionStart = React.useCallback((clientX, clientY) => {
-        const canPlay = isRealtimeDuel || isVsComputer ? true : !allRequiredWordsFound; if (!canPlay || !board) return; const cell = getCellFromCoordinates(clientX, clientY); if (cell && !isCellFound(cell.row, cell.col)) { setIsSwiping(true); setSelectedCells([cell]); } 
-    }, [board, getCellFromCoordinates, isCellFound, isRealtimeDuel, allRequiredWordsFound, isVsComputer]);
+    
 
-    const throttledMouseMove = React.useMemo(() => _.throttle((clientX, clientY) => handleInteractionMove(clientX, clientY), 50), [handleInteractionMove]);
+   
 
     const handleInteractionEnd = () => {
         if (!isSwiping || !board || selectedCells.length <= 1) {
@@ -2272,10 +2460,13 @@ function WordHunt({ config, gameId, username, goToHome, language, stats, onStats
     };
 
     const handleGoHomeClick = () => {
+        // Tek seferlik rastgele oyunsa, uyarı göstermeden doğrudan ana menüye dön.
         if (config?.isOneShot) {
             goToHome();
             return;
         }
+
+        // Diğer tüm durumlar için çıkış onayı modalını göster.
         setModalContent({
             isOpen: true,
             title: '',
@@ -2283,18 +2474,16 @@ function WordHunt({ config, gameId, username, goToHome, language, stats, onStats
             body: (
                 <div className="w-full max-w-sm text-white bg-gradient-to-br from-slate-700 to-gray-800 rounded-2xl shadow-2xl p-6 text-center">
                     <div className="text-6xl mb-4">👋</div>
-                    <h2 className="text-2xl font-bold mb-2">Emin misin?</h2>
-                    <p className="text-white/80 mb-6">
-                        Ana menüye dönmek istediğine emin misin? Mevcut ilerlemen kaydedildi.
-                    </p>
+                    <h2 className="text-2xl font-bold mb-2">{t.areYouSureTitle}</h2>
+                    <p className="text-white/80 mb-6">{t.quitGameBody}</p>
                     <div className="flex justify-center gap-4">
-                        <button onClick={closeModal} className="px-8 py-2 bg-white/20 text-white font-bold rounded-lg hover:bg-white/30">Hayır, Kal</button>
-                        <button onClick={goToHome} className="px-8 py-2 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700">Evet, Çık</button>
+                        <button onClick={closeModal} className="px-8 py-2 bg-white/20 text-white font-bold rounded-lg hover:bg-white/30">{t.stayButton}</button>
+                        <button onClick={goToHome} className="px-8 py-2 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700">{t.quitButton}</button>
                     </div>
                 </div>
             )
         });
-    };        
+    };
 
 	React.useEffect(() => {
         foundWordsRef.current = foundWords;
@@ -2373,25 +2562,52 @@ function WordHunt({ config, gameId, username, goToHome, language, stats, onStats
 	}, [foundWords, computerState.foundWords, score, isVsComputer, isLoading, gameState]);
 
     React.useEffect(() => {
-        if (isRealtimeDuel || !gameState || !Array.isArray(gameState.words)) return;
-        const areAllFound = gameState.words.length > 0 && foundWords.length === gameState.words.length;
-        if(areAllFound){
+        if (isRealtimeDuel || !gameState || !Array.isArray(gameState.words) || gameState.words.length === 0) {
+            return;
+        }
+        const allRequiredWords = gameState.words.map(w => w.word);
+        const areAllFound = allRequiredWords.every(requiredWord => foundWords.includes(requiredWord));
+
+        if (areAllFound) {
             setAllRequiredWordsFound(true);
         }
     }, [foundWords, gameState, isRealtimeDuel]);
 
     React.useEffect(() => {
-		if (isRealtimeDuel || config?.isOneShot || config.name === 'vs-computer') return;
-		if (gameState && !isLoading) {
-		   const gameStateToSave = { level, score, foundWords, timeLeft, gameState, mode: config.name, language: language, difficulty: config.difficulty, boardSize: config.boardSize };
-				try {
-					const currentSaves = JSON.parse(localStorage.getItem(ALL_SAVES_KEY)) || {};
-					currentSaves[config.name] = gameStateToSave;
-					currentSaves.lastPlayed = config.name;
-					localStorage.setItem(ALL_SAVES_KEY, JSON.stringify(currentSaves));
-				} catch (e) { console.error("Oyun kaydedilirken hata:", e); }
-			}
-    }, [gameState, isLoading, level, config, language, score, foundWords, timeLeft, isRealtimeDuel]);
+        // Bu effect, oyunun durumunu (seviye, skor, bulunan kelimeler, kalan süre)
+        // her değiştiğinde localStorage'a kaydeder.
+        // Bu sayede oyuncu oyundan çıksa bile kaldığı yerden devam edebilir.
+        
+        // Çok oyunculu, vs-computer veya tek seferlik rastgele oyunları kaydetme.
+        if (isRealtimeDuel || isVsComputer || config?.isOneShot) return;
+
+        // Oyun henüz yüklenmediyse veya bir hata varsa kaydetme.
+        if (isLoading || isGenerating || !gameState) return;
+
+        const saveKey = config.modeType === 'takip' ? `takip-${config.name}` : config.name;
+        
+        const gameStateToSave = {
+            level,
+            score,
+            foundWords,
+            timeLeft,
+            gameState,
+            mode: config.name,
+            language: language,
+            difficulty: config.difficulty,
+            boardSize: config.boardSize,
+            modeType: config.modeType
+        };
+        
+        try {
+            const currentSaves = JSON.parse(localStorage.getItem(ALL_SAVES_KEY)) || {};
+            currentSaves[saveKey] = gameStateToSave;
+            localStorage.setItem(ALL_SAVES_KEY, JSON.stringify(currentSaves));
+        } catch (e) {
+            console.error("Oyun kaydedilirken hata:", e);
+        }
+
+    }, [level, score, foundWords, timeLeft, gameState, isLoading, isGenerating]); // Bağımlılıkları güncelledik
     
 	React.useEffect(() => {
 		if (allRequiredWordsFound && gameState && gameState.hiddenWord && !isRealtimeDuel) {
@@ -2491,8 +2707,35 @@ function WordHunt({ config, gameId, username, goToHome, language, stats, onStats
     }, [realtimeGameData, username]);
 
 	if (isLoading || isGenerating) {
-		const loadingText = (isVsComputer || isRealtimeDuel) ? "Oyun Kuruluyor..." : t.loadingLevel(level + 1);
-		return <div className="flex items-center justify-center h-full text-lg font-semibold text-indigo-700">{loadingText}</div>;
+        // HATA DÜZELTİLDİ: Metin, artık var olan çeviri anahtarlarıyla oluşturuluyor.
+        const levelText = t.level;
+        const levelNumber = level + 1;
+        const loadingStatusText = t.loading + "...";
+        
+		return (
+            <div className="h-full w-full flex flex-col items-center justify-center text-white p-4" style={{
+                background: 'linear-gradient(135deg, #4f46e5, #7c3aed, #db2777, #f59e0b)',
+                backgroundSize: '400% 400%',
+                animation: 'gradient-animation 10s ease infinite'
+            }}>
+                {/* Zıplayan oyun logosu */}
+                <img src="logo.png" alt="Oyun Logosu" className="w-36 h-36 mb-8 drop-shadow-lg animate-bounce" />
+                
+                {/* Farklı renkteki metinler */}
+                <div className="text-center">
+                    <p className="text-5xl font-black tracking-tighter" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.5)' }}>
+                        <span className="text-cyan-300">{levelText}</span>
+                        <span className="text-white mx-3">{levelNumber}</span>
+                        <span className="text-amber-300">{loadingStatusText}</span>
+                    </p>
+                </div>
+
+                {/* Hareketli yükleme çubuğu */}
+                <div className="w-64 max-w-full mt-10 bg-white/20 rounded-full h-3 overflow-hidden shadow-inner">
+                    <div className="bg-white h-3 rounded-full animate-loading-bar-slide"></div>
+                </div>
+            </div>
+        );
 	}
 
     if (error) { return (<div className="flex flex-col items-center justify-center h-full p-4 text-center"><p className="text-lg font-semibold text-red-600">{error}</p><button onClick={goToHome} className="mt-4 bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600">Ana Sayfaya Dön</button></div>); }
@@ -2538,7 +2781,7 @@ function WordHunt({ config, gameId, username, goToHome, language, stats, onStats
 								const colorInfo = wordFoundColors[playerIndex % wordFoundColors.length];
 								cellClass = `${colorInfo.bg} ${colorInfo.text}`;
 							}
-							return (<div key={`${r}-${c}`} className={`flex items-center justify-center aspect-square text-center font-bold rounded-sm transition-all duration-150 select-none ${cellClass}`}>{letter}</div>);
+							return (<div key={`${r}-${c}`} data-row={r} data-col={c} className={`flex items-center justify-center aspect-square text-center font-bold rounded-sm transition-all duration-150 select-none ${cellClass}`}>{letter}</div>);
 						}))}
 					</div>
 					<div className="flex-1 min-h-0 w-full max-w-2xl mx-auto mt-1 flex flex-col bg-white rounded-lg shadow">
@@ -2579,7 +2822,7 @@ function WordHunt({ config, gameId, username, goToHome, language, stats, onStats
             onMouseUp={handleInteractionEnd} onMouseLeave={handleInteractionEnd} 
             onTouchStart={(e) => handleInteractionStart(e.touches[0].clientX, e.touches[0].clientY)} 
             onTouchEnd={handleInteractionEnd} onTouchCancel={handleInteractionEnd} >
-            {board.map((row, r) => row.map((letter, c) => { const isSelected = selectedCells.some(cell => cell.row === r && cell.col === c); const foundBy = isCellFound(r, c); let cellClass = 'bg-white text-gray-800 hover:bg-gray-200'; if (isSelected) { cellClass = 'bg-yellow-300 text-black transform scale-110 shadow-lg'; } else if (foundBy === 'player') { cellClass = 'bg-green-300 text-green-800'; } else if (foundBy === 'computer') { cellClass = 'bg-red-300 text-red-800'; } return ( <div key={`${r}-${c}`} className={`flex items-center justify-center aspect-square text-center font-bold rounded-sm transition-all duration-150 select-none ${cellClass}`} style={fontSizeStyle}> {letter} </div> ); }))} </div> </div> <div className="flex-1 min-h-0 w-full max-w-2xl mx-auto"> <div className="bg-white rounded-lg p-1 shadow h-full overflow-y-auto scrollbar-thin"> <div className="flex flex-wrap justify-center content-start gap-x-1.5 gap-y-1 p-1"> {allWordsInLevel.map(({ word }) => { const isFound = allFoundWordsCombined.has(word); const isHidden = config.difficulty === 'hard' && !isFound; return (<span key={word} className={`font-medium transition-all duration-300 rounded-md px-2 py-1 text-xs ${ isFound ? 'bg-gray-300 text-gray-500 line-through opacity-50' : isHidden ? 'bg-gray-400 text-transparent pointer-events-none' : 'bg-indigo-100 text-gray-800' }`}>{isHidden ? '???' : word}</span>); })} </div> </div> </div> <div className="flex-shrink-0 w-full max-w-2xl mx-auto"> <button onClick={showExitConfirmation} className="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow-md transition-all text-sm">Ana Menüye Dön</button> </div> </div> </div> );
+            {board.map((row, r) => row.map((letter, c) => { const isSelected = selectedCells.some(cell => cell.row === r && cell.col === c); const foundBy = isCellFound(r, c); let cellClass = 'bg-white text-gray-800 hover:bg-gray-200'; if (isSelected) { cellClass = 'bg-yellow-300 text-black transform scale-110 shadow-lg'; } else if (foundBy === 'player') { cellClass = 'bg-green-300 text-green-800'; } else if (foundBy === 'computer') { cellClass = 'bg-red-300 text-red-800'; } return ( <div key={`${r}-${c}`} data-row={r} data-col={c} className={`flex items-center justify-center aspect-square text-center font-bold rounded-sm transition-all duration-150 select-none ${cellClass}`} style={fontSizeStyle}> {letter} </div> ); }))} </div> </div> <div className="flex-1 min-h-0 w-full max-w-2xl mx-auto"> <div className="bg-white rounded-lg p-1 shadow h-full overflow-y-auto scrollbar-thin"> <div className="flex flex-wrap justify-center content-start gap-x-1.5 gap-y-1 p-1"> {allWordsInLevel.map(({ word }) => { const isFound = allFoundWordsCombined.has(word); const isHidden = config.difficulty === 'hard' && !isFound; return (<span key={word} className={`font-medium transition-all duration-300 rounded-md px-2 py-1 text-xs ${ isFound ? 'bg-gray-300 text-gray-500 line-through opacity-50' : isHidden ? 'bg-gray-400 text-transparent pointer-events-none' : 'bg-indigo-100 text-gray-800' }`}>{isHidden ? '???' : word}</span>); })} </div> </div> </div> <div className="flex-shrink-0 w-full max-w-2xl mx-auto"> <button onClick={showExitConfirmation} className="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow-md transition-all text-sm">Ana Menüye Dön</button> </div> </div> </div> );
     }
 
     const calculateFontSize = (numCols) => {
@@ -2596,12 +2839,15 @@ function WordHunt({ config, gameId, username, goToHome, language, stats, onStats
         <div className="relative h-screen w-full">
             <div className={`h-screen w-full flex flex-col p-2 gap-2 text-center overflow-hidden ${theme.bg}`}>
                 <div className="w-full flex-shrink-0 grid grid-cols-3 gap-2">
-                    <div className="bg-white/80 hover:bg-white border border-slate-200 rounded-xl p-0.5 flex flex-row items-center justify-center gap-1 text-slate-700 shadow-sm" title={t.score}><span className="text-xl">⭐</span><span className="font-bold text-sm text-green-600">{score}</span></div>
-                    <div className="bg-white/80 hover:bg-white border border-slate-200 rounded-xl p-0.5 flex flex-row items-center justify-center gap-1 text-slate-700 shadow-sm" title={t.gold}><span className="text-xl">💰</span><span className="font-bold text-sm text-amber-600">{stats.gold || 0}</span></div>
-                    <div className="bg-white/80 hover:bg-white border border-slate-200 rounded-xl p-0.5 flex flex-row items-center justify-center gap-1 text-slate-700 shadow-sm">
-                        {(config.name?.startsWith('timed') && !allRequiredWordsFound) ? ( <div key={timeLeft} className="animate-timer-pulse flex items-center justify-center gap-1 text-blue-600 tabular-nums" title="Kalan Süre"> <span className="text-xl">⏱️</span> <span className="font-bold text-sm">{Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}</span> </div> ) : ( <div className="flex items-center justify-center gap-1 text-slate-400" title="Bu modda süre yoktur"> <span className="text-xl">⏱️</span> <span className="font-bold text-sm">-:--</span> </div> )}
-                    </div>
-                </div>
+    {/* SÜRE SOLA ALINDI */}
+    <div className="bg-white/80 hover:bg-white border border-slate-200 rounded-xl p-0.5 flex flex-row items-center justify-center gap-1 text-slate-700 shadow-sm">
+        {(config.name?.startsWith('timed') && !allRequiredWordsFound) ? ( <div key={timeLeft} className="animate-timer-pulse flex items-center justify-center gap-1 text-blue-600 tabular-nums" title="Kalan Süre"> <span className="text-xl">⏱️</span> <span className="font-bold text-sm">{Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}</span> </div> ) : ( <div className="flex items-center justify-center gap-1 text-slate-400" title="Bu modda süre yoktur"> <span className="text-xl">⏱️</span> <span className="font-bold text-sm">-:--</span> </div> )}
+    </div>
+    {/* ALTIN ORTADA KALDI */}
+    <div className="bg-white/80 hover:bg-white border border-slate-200 rounded-xl p-0.5 flex flex-row items-center justify-center gap-1 text-slate-700 shadow-sm" title={t.gold}><span className="text-xl">💰</span><span className="font-bold text-sm text-amber-600">{stats.gold || 0}</span></div>
+    {/* PUAN SAĞA ALINDI */}
+    <div className="bg-white/80 hover:bg-white border border-slate-200 rounded-xl p-0.5 flex flex-row items-center justify-center gap-1 text-slate-700 shadow-sm" title={t.score}><span className="text-xl">⭐</span><span className="font-bold text-sm text-green-600">{score}</span></div>
+</div>
                {!allRequiredWordsFound && (
                     <div className="flex-1 min-h-0 p-2 bg-gray-100 rounded-lg overflow-y-auto scrollbar-thin flex">
                         <div className="flex flex-wrap justify-center items-center gap-x-2 gap-y-1 m-auto">
@@ -2631,7 +2877,7 @@ function WordHunt({ config, gameId, username, goToHome, language, stats, onStats
 								const isJustFound = justFoundWordInfo?.positions.some(p => p.row === rowIndex && p.col === colIndex); 
 								const isBonusGlowCell = bonusGlowCells.some(cell => cell.row === rowIndex && cell.col === colIndex); 
 								const colorInfo = foundCellColorMap[`${rowIndex}-${colIndex}`];
-								return <Cell key={`${rowIndex}-${colIndex}`} letter={letter} isSelected={isSelected} isFoundRequiredPart={!!isFoundPart} isJustFound={isJustFound} isBonusGlow={isBonusGlowCell} theme={theme} numCols={numCols} foundWordColorInfo={colorInfo} />;
+								return <Cell key={`${rowIndex}-${colIndex}`} letter={letter} isSelected={isSelected} isFoundRequiredPart={!!isFoundPart} isJustFound={isJustFound} isBonusGlow={isBonusGlowCell} theme={theme} numCols={numCols} foundWordColorInfo={colorInfo} rowIndex={rowIndex} colIndex={colIndex} />;
 							}));
                         })()}
                         </div>
@@ -2668,7 +2914,7 @@ function WordHunt({ config, gameId, username, goToHome, language, stats, onStats
             </div>
         </div>
     );
-}
+});
 
 
 
@@ -2785,8 +3031,49 @@ function DuelModeModal({ isOpen, onClose, duelProgress, startGame, currentUser, 
 
 
 
-function UsernamePrompt({ onSave }) { const [name, setName] = React.useState(''); const [isLoading, setIsLoading] = React.useState(false); const [error, setError] = React.useState(''); const handleSave = async () => { if (!name.trim()) return; setIsLoading(true); setError(''); const success = await onSave(name.trim()); if (!success) { setError('Bu kullanıcı adı zaten alınmış. Lütfen başka bir tane deneyin.'); setIsLoading(false); } }; return ( <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4"> <div className="bg-white p-6 rounded-xl shadow-2xl w-full max-w-sm text-center"> <h3 className="text-2xl font-bold mb-4 text-gray-800">Oyuna Hoş Geldin!</h3> <p className="text-gray-600 mb-5">Liderlik tablosu için benzersiz bir kullanıcı adı belirle.</p> <input type="text" value={name} onChange={(e) => setName(e.target.value)} className="w-full border-2 border-gray-300 p-2 rounded-lg text-lg focus:outline-none focus:ring-2 focus:ring-indigo-400" placeholder="Kullanıcı adınız..." maxLength={15} disabled={isLoading} /> {error && <p className="text-red-500 text-sm mt-2">{error}</p>} <button onClick={handleSave} disabled={!name.trim() || isLoading} className="w-full mt-4 bg-indigo-600 text-white font-bold px-6 py-3 rounded-lg hover:bg-indigo-700 transition-all shadow-lg disabled:bg-gray-400 disabled:cursor-not-allowed" > {isLoading ? 'Kontrol ediliyor...' : 'Kaydet ve Başla'} </button> </div> </div> ); }
-
+function UsernamePrompt({ onSave, language }) {
+    const t = translations[language] || translations['en'];
+    const [name, setName] = React.useState('');
+    const [isLoading, setIsLoading] = React.useState(false);
+    const [error, setError] = React.useState('');
+    
+    const handleSave = async () => {
+        if (!name.trim()) return;
+        setIsLoading(true);
+        setError('');
+        const success = await onSave(name.trim());
+        if (!success) {
+            setError(t.usernameTaken);
+            setIsLoading(false);
+        }
+    };
+    
+    return (
+        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
+            <div className="bg-white p-6 rounded-xl shadow-2xl w-full max-w-sm text-center">
+                <h3 className="text-2xl font-bold mb-4 text-gray-800">{t.welcome}</h3>
+                <p className="text-gray-600 mb-5">{t.usernamePrompt}</p>
+                <input
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="w-full border-2 border-gray-300 p-2 rounded-lg text-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                    placeholder={t.usernamePlaceholder}
+                    maxLength={15}
+                    disabled={isLoading}
+                />
+                {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
+                <button
+                    onClick={handleSave}
+                    disabled={!name.trim() || isLoading}
+                    className="w-full mt-4 bg-indigo-600 text-white font-bold px-6 py-3 rounded-lg hover:bg-indigo-700 transition-all shadow-lg disabled:bg-gray-400 disabled:cursor-not-allowed"
+                >
+                    {isLoading ? t.checking : t.saveAndStart}
+                </button>
+            </div>
+        </div>
+    );
+}
         
 function DuelLeaderboardDisplay({ scores, currentUser }) {
             if (!scores || scores.length === 0) {
@@ -2885,7 +3172,8 @@ function DuelLeaderboardDisplay({ scores, currentUser }) {
         const [directInvite, setDirectInvite] = React.useState(null);
         const [updateInfo, setUpdateInfo] = React.useState({ required: false, url: '' });
         const [gameKey, setGameKey] = React.useState(null);
-
+        const [isLeaderboardModalOpen, setLeaderboardModalOpen] = React.useState(false); 
+	const wordHuntRef = React.useRef(null);
 
         const loadUserData = async (user) => {
         const userRef = db.collection("users").doc(user);
@@ -2989,8 +3277,6 @@ const goToHome = React.useCallback(() => {
             if (page === 'lobby' && username) {
                 db.collection('lobby').doc(username).delete().catch(() => {});
             } else if (page === 'game' && gameId) {
-                // Bu kısım yeni oda sisteminde güncellenebilir, şimdilik böyle kalabilir.
-                // Örneğin: Oyuncunun odadan ayrılması sağlanabilir.
             }
             setPage('home');
             setGameId(null);
@@ -3009,7 +3295,7 @@ const createGameRoom = async (settings) => {
                 createdAt: firebase.firestore.FieldValue.serverTimestamp(),
                 gameSettings: {
                     boardSize: settings.boardSize || 'medium',
-                    difficulty: settings.difficulty || 'easy', // Zorluk eklendi
+                    difficulty: settings.difficulty || 'easy', 
                     maxPlayers: parseInt(settings.maxPlayers) || 3,
                 },
                 players: {
@@ -3077,9 +3363,7 @@ const createGameRoom = async (settings) => {
 
 
 
-// MEVCUT startGame FONKSİYONUNU SİLİP, BUNU YAPIŞTIRIN:
 const startGame = async (roomId) => {
-    console.log("[startGame] Fonksiyonu başlatıldı. Oda ID:", roomId);
     const roomRef = db.collection('game_rooms').doc(roomId);
     
     try {
@@ -3097,7 +3381,6 @@ const startGame = async (roomId) => {
         }
 
         const boardSize = roomData.gameSettings.boardSize;
-        console.log("[startGame] Oyun tahtası oluşturuluyor... Boyut:", boardSize);
         
         const gameConfig = { name: 'multiplayer', boardSize: boardSize, modeType: 'avi' };
         const newBoardData = createBoard(null, language, gameConfig);
@@ -3107,22 +3390,16 @@ const startGame = async (roomId) => {
             setToastMessage("Hata: Oyun tahtası oluşturulamadı. Lütfen tekrar deneyin.");
             return;
         }
-        console.log("[startGame] Tahta başarıyla oluşturuldu. Veritabanına yazılacak.");
 
         const boardAsMap = {};
         newBoardData.board.forEach((row, index) => {
             boardAsMap[index] = row;
         });
 
-        console.log("[startGame] Veritabanı güncellemesi başlıyor...");
         await roomRef.update({
             status: 'in-progress',
             boardData: { ...newBoardData, board: boardAsMap }
         });
-        console.log("[startGame] Veritabanı başarıyla güncellendi! Oyun başlamalı.");
-
-        // YENİ EKLENEN KISIM:
-        // Kurucuyu beklemeden doğrudan oyun ekranına yönlendir.
         setPage('game');
 
     } catch (error) {
@@ -3155,7 +3432,7 @@ const startGame = async (roomId) => {
                 createdAt: firebase.firestore.FieldValue.serverTimestamp(),
                 gameSettings: {
                     boardSize: boardSize || 'medium',
-                    difficulty: difficulty || 'easy', // Zorluk eklendi
+                    difficulty: difficulty || 'easy', 
                     maxPlayers: 2
                 },
                 players: {
@@ -3165,12 +3442,10 @@ const startGame = async (roomId) => {
             };
 
             gameRef.set(newRoomData).then(() => {
-                // Lobi durumunu güncellemeye devam et (uygulama içindekiler için)
                 db.collection('lobby').doc(targetPlayer.username).set({
                     status: 'invited', invitedBy: username, gameId: gameId,
                 }, { merge: true });
 
-                // YENİ EKLENEN KISIM: Cloud Function'ı tetiklemek için "invites" koleksiyonuna yaz
                 db.collection('invites').add({
                     from: username,
                     to: targetPlayer.username,
@@ -3191,34 +3466,24 @@ const handleAcceptDirectInvite = async () => {
             if (!directInvite) return;
             const gameRef = db.collection('game_rooms').doc(directInvite.gameId);
             try {
-                // Önce oyunun mevcut ayarlarını (örn: boardSize) al
                 const roomDoc = await gameRef.get();
                 if (!roomDoc.exists) throw new Error("Oda bulunamadı!");
-                
                 const roomData = roomDoc.data();
                 const boardSize = roomData.gameSettings.boardSize;
-
-                // Oyun tahtasını oluştur
                 const newBoardData = createBoard(null, language, null, boardSize);
                 if (!newBoardData) throw new Error("Oyun tahtası oluşturulamadı.");
 
-                // Firestore'a uygun hale getirmek için board dizisini objeye çevir
                 const boardAsMap = {};
                 newBoardData.board.forEach((row, index) => {
                     boardAsMap[index] = row;
                 });
-
-                // Hem durumu hem de yeni oluşturulan tahtayı veritabanına yaz
                 await gameRef.update({
                     status: 'in-progress',
                     boardData: { ...newBoardData, board: boardAsMap }
                 });
-
-                // Davet edilen oyuncuyu lobi durumundan çıkar
                 await db.collection('lobby').doc(username).update({ status: 'in-game', gameId: directInvite.gameId });
-
                 setGameId(directInvite.gameId);
-                setPage('room_lobby'); // Bu sayfa bizi otomatik olarak 'game' sayfasına yönlendirecek
+                setPage('room_lobby'); 
                 setDirectInvite(null);
 
             } catch (error) {
@@ -3229,11 +3494,8 @@ const handleAcceptDirectInvite = async () => {
 
         const handleDeclineDirectInvite = async () => {
             if (!directInvite) return;
-            // Oyunu (daveti) veritabanından sil
             await db.collection('game_rooms').doc(directInvite.gameId).delete();
-            // Davet eden oyuncunun lobi durumunu temizle
             await db.collection('lobby').doc(directInvite.invitedBy).update({ status: 'idle', gameId: null });
-            // Kendi lobi durumunu temizle
             await db.collection('lobby').doc(username).update({ status: 'idle', gameId: null });
             setDirectInvite(null);
             setToastMessage("Davet reddedildi.");
@@ -3258,7 +3520,7 @@ React.useEffect(() => {
                 }
             });
 
-            return () => unsubscribe(); // Bileşen kaldırıldığında dinleyiciyi kapat
+            return () => unsubscribe(); 
         }, [username, db]);
 
 
@@ -3284,14 +3546,35 @@ React.useEffect(() => {
 
 
         const handleAndroidBack = React.useCallback(() => {
-            if (page === 'game' && typeof window.androidBridge.game_showExitConfirmation === 'function') {
-                window.androidBridge.game_showExitConfirmation();
+            const t = translations[language] || translations['en'];
+            
+            if (page === 'game') {
+                // Oyun ekranındayken, WordHunt komponentindeki çıkış onayı fonksiyonunu çağırıyoruz.
+                // Bu fonksiyonu WordHunt'a bir ref aracılığıyla ileteceğiz.
+                if (wordHuntRef.current && typeof wordHuntRef.current.showExitConfirmation === 'function') {
+                    wordHuntRef.current.showExitConfirmation();
+                }
             } else if (page === 'home') {
-                setShowAppExitModal(true);
+                // Ana sayfadaysak, uygulamadan çıkış onayını göster.
+                setModalContent({
+                    isOpen: true,
+                    title: t.areYouSureTitle,
+                    onClose: () => setModalContent({ isOpen: false }),
+                    body: (
+                        <div className="text-center">
+                            <p className="text-lg text-gray-700 mb-6">{t.appQuitBody}</p>
+                            <div className="flex justify-center gap-4">
+                                <button onClick={() => setModalContent({ isOpen: false })} className="px-8 py-2 bg-gray-500 text-white font-bold rounded-lg hover:bg-gray-600">{t.stayButton}</button>
+                                <button onClick={() => { if (window.Android && window.Android.closeApp) { window.Android.closeApp(); } }} className="px-8 py-2 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700">{t.quitButton}</button>
+                            </div>
+                        </div>
+                    )
+                });
             } else {
+                // Diğer tüm sayfalardan geri tuşuna basıldığında ana sayfaya dön.
                 goToHome();
             }
-        }, [page, goToHome]);
+        }, [page, goToHome, language]);
 
         window.androidBridge.handleIncomingDuel = async (duelId) => {
             if (!duelId) return;
@@ -3300,7 +3583,6 @@ React.useEffect(() => {
             if (duelDoc.exists) {
                 setIncomingInvitation({ id: duelDoc.id, ...duelDoc.data() });
             } else {
-                console.log("Davet bulunamadı veya iptal edilmiş.");
             }
         };
 
@@ -3495,7 +3777,6 @@ const startSinglePlayerGame = (selectedMode) => {
                     title: t.randomGameTitle,
                     body: (<div><p className="text-gray-700 text-lg mb-6" dangerouslySetInnerHTML={{ __html: t.randomGameBody(randomModeName, randomLevel + 1) }} /><button onClick={() => {
                         setGameKey(Date.now());
-                        // modeType'ı config'e ekle
                         setModeConfig({ name: randomModeKey, modeType: modeType, level: randomLevel, isOneShot: true });
                         setPage('game');
                         setModalContent({ isOpen: false });
@@ -3524,7 +3805,6 @@ const startSinglePlayerGame = (selectedMode) => {
                     setAllSaves(currentSaves);
                     
                     setGameKey(Date.now());
-                    // modeType'ı config'e ekle
                     setModeConfig({ name: modeName, modeType: modeType });
                     setModalContent({ isOpen: false });
                     setPage('game');
@@ -3544,20 +3824,20 @@ const startSinglePlayerGame = (selectedMode) => {
                     body: (
                         <div className={`w-full max-w-sm text-white bg-gradient-to-br ${modalBgClass} rounded-2xl shadow-2xl p-6 text-center`}>
                             <div className="text-6xl mb-4">🧭</div>
-                            <h2 className="text-2xl font-bold mb-2">Maceraya Devam Et!</h2>
+                            <h2 className="text-2xl font-bold mb-2">{t.savedGameFoundTitle}</h2>
                             <p className="text-white/80 mb-6" dangerouslySetInnerHTML={{ __html: t.savedGameFoundBody(savedGameForMode.level + 1) }}></p>
                             <div className="flex flex-col gap-3">
                                 <button 
                                     onClick={handleContinue}
                                     className="w-full px-8 py-3 bg-amber-500 text-white font-bold rounded-lg hover:bg-amber-400 transition-all transform hover:scale-105 shadow-lg"
                                 >
-                                    {t.yesContinueButton}
+                                    {t.continueButton}
                                 </button>
                                 <button 
                                     onClick={handleNewGame}
                                     className="w-full px-8 py-2 bg-emerald-600 text-white font-bold rounded-lg hover:bg-emerald-500 transition-all"
                                 >
-                                    {t.noStartNewButton}
+                                    {t.newGameButton}
                                 </button>
                             </div>
                         </div>
@@ -3566,14 +3846,14 @@ const startSinglePlayerGame = (selectedMode) => {
             }
         };
 
-	const launchVsComputerGame = (difficulty, boardSize, aiStrength) => { // <-- aiStrength eklendi
+	const launchVsComputerGame = (difficulty, boardSize, aiStrength) => { 
             setModalContent({ isOpen: false });
             setGameKey(Date.now());
             setModeConfig({ 
                 name: 'vs-computer', 
                 difficulty: difficulty, 
                 boardSize: boardSize,
-                aiStrength: aiStrength // <-- aiStrength eklendi
+                aiStrength: aiStrength 
             });
             setPage('game');
         };
@@ -3584,10 +3864,9 @@ const startSinglePlayerGame = (selectedMode) => {
                 const [size, setSize] = React.useState('medium');
                 const [aiStrength, setAiStrength] = React.useState('orta');
 
-                // İkonlar güncellendi, alt yazılar (desc) kaldırıldı
                 const strengthOptions = [
                     { key: 'zayif', label: 'Zayıf', icon: '🧠' },
-                    { key: 'orta', label: 'Orta', icon: '🤓' }, // Ampul ikonu değişti
+                    { key: 'orta', label: 'Orta', icon: '🤓' }, 
                     { key: 'guclu', label: 'Güçlü', icon: '⚡️' }
                 ];
                 const difficultyOptions = [
@@ -3608,7 +3887,6 @@ const startSinglePlayerGame = (selectedMode) => {
                                     <button
                                         key={opt.key}
                                         onClick={() => setAiStrength(opt.key)}
-                                        // Buton yüksekliği (h-24) azaltılarak daha kompakt hale getirildi
                                         className={`p-3 h-24 rounded-xl font-bold flex flex-col items-center justify-center text-center transition-all transform ${aiStrength === opt.key ? 'bg-gradient-to-br from-amber-400 to-orange-500 text-white ring-4 ring-offset-2 ring-amber-500 scale-105' : 'bg-slate-200 text-slate-800 hover:bg-slate-300'}`}
                                     >
                                         <span className="text-3xl">{opt.icon}</span>
@@ -3626,7 +3904,6 @@ const startSinglePlayerGame = (selectedMode) => {
                                     <button
                                         key={opt.key}
                                         onClick={() => setDifficulty(opt.key)}
-                                        // Buton yüksekliği (h-24) azaltıldı
                                         className={`p-3 h-24 rounded-xl font-bold flex flex-col items-center justify-center text-center transition-all transform ${difficulty === opt.key ? (opt.key === 'easy' ? 'bg-gradient-to-br from-green-400 to-emerald-500' : 'bg-gradient-to-br from-red-500 to-rose-600') + ' text-white ring-4 ring-offset-2 ring-indigo-500 scale-105' : 'bg-slate-200 text-slate-800 hover:bg-slate-300'}`}
                                     >
                                         <span className="text-4xl">{opt.icon}</span>
@@ -3729,13 +4006,14 @@ const statsForWordHunt = React.useMemo(() => {
                             setLanguage={setLanguage}
                             stats={statsForWordHunt}
                             setModalContent={setModalContent}
+                            setLeaderboardModalOpen={setLeaderboardModalOpen} 
                             savedGame={allSaves && allSaves.lastPlayed ? allSaves[allSaves.lastPlayed] : null}
                             username={username}
                             isInitializing={isInitializing}
                             openLobbyPage={openLobbyPage}
                             avatarId={avatarId}
                             openProfileModal={() => setIsProfileModalOpen(true)}
-				cardColor={cardColor} 
+				            cardColor={cardColor} 
                             playerCardColors={playerCardColors}                         />
                     )}
                  {page === 'lobby' && (
@@ -3768,6 +4046,7 @@ const statsForWordHunt = React.useMemo(() => {
 
                     {page === 'game' && (
                         <WordHunt
+                            ref={wordHuntRef} 
                             key={gameKey}
                             config={modeConfig}
                             gameId={gameId}
@@ -3817,6 +4096,7 @@ const statsForWordHunt = React.useMemo(() => {
     onUsernameUpdate={handleUsernameUpdate}
     onColorSelect={handleColorSelect}
     onPurchaseItem={handlePurchaseItem}
+    language={language}
 />
                 <FriendRequestModal
                     isOpen={!!friendRequest}
@@ -3838,6 +4118,13 @@ const statsForWordHunt = React.useMemo(() => {
                         {toastMessage}
                     </div>
                 )}
+                {/* LİDERLİK TABLOSU MODALI EKLENDİ */}
+                <LeaderboardModal 
+                    isOpen={isLeaderboardModalOpen} 
+                    onClose={() => setLeaderboardModalOpen(false)} 
+                    currentUser={username} 
+                    language={language} 
+                />
             </ErrorBoundary>
         );
     }

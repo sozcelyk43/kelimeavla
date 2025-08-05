@@ -1,3 +1,3 @@
 const wordListTr_2letters = [
-'ad', 'ak', 'al', 'an', 'ar', 'as', 'at', 'av', 'ay', 'az', 'bu', 'ek', 'el', 'en', 'er', 'es', 'et', 'ev', 'ez', 'eş', 'he', 'iç', 'il', 'in', 'ip', 'is', 'iş', 'üç', 'ne', 'ok', 'ol', 'on', 'ot', 'oy', 'öc', 'öz', 'su', 'şu'
+'ab', 'ac', 'aç', 'ad', 'af',  'ağ', 'ah', 'ak', 'al',  'an', 'ar', 'as', 'aş', 'at', 'av', 'ay', 'az', 'bu', 'ca', 'do', 'eh', 'ek', 'el', 'em', 'en', 'er', 'es', 'eş', 'et', 'ev', 'ey',  'fe', 'Fe',  'ha', 'he',  'hu', 'ıh', 'iç',  'il', 'im', 'in', 'ip', 'is', 'iş', 'it', 'iz', 'ne',  'od', 'of',  'oh', 'ok', 'ol',  'on','ot', 'oy', 'öç', 'öd', 'öf', 'ön', 'öz', 'su',  'şu', 'ta', 'ti', 'uç', 'uf', 'un', 'ur', 'us', 'ut', 'uz', 'üç', 'ün', 'üs', 've', 'ya',  'ye', 'yo'
 ];

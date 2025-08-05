@@ -1762,7 +1762,7 @@ function WordHunt({ config, gameId, username, goToHome, language, stats, onStats
     const [bonusGlowCells, setBonusGlowCells] = React.useState([]);
     const [foundBonusWords, setFoundBonusWords] = React.useState([]);
     const theme = (config.name === 'hard' || config.name === 'timed-hard') ? { bg: 'bg-red-50', foundCell: 'bg-red-200', hiddenWordCell: 'bg-blue-400 text-white font-bold', wordBg: 'bg-red-100', gridBg: 'bg-red-100', button: 'bg-red-600 hover:bg-red-700', inputBorder: 'border-red-300 focus:border-red-500', selectedCell: 'bg-yellow-400', obscuredCell: 'bg-gray-400 text-transparent opacity-50' } : { bg: 'bg-indigo-50', foundCell: 'bg-green-200', hiddenWordCell: 'bg-blue-400 text-white font-bold', wordBg: 'bg-indigo-100', gridBg: 'bg-indigo-100', button: 'bg-indigo-600 hover:bg-indigo-700', inputBorder: 'border-indigo-300 focus:border-indigo-500', selectedCell: 'bg-yellow-300', obscuredCell: 'bg-gray-400 text-transparent opacity-50' };
-
+    const lastProcessedCell = React.useRef(null);
     const cellOwnerMap = React.useMemo(() => {
         const map = {};
         if (!isRealtimeDuel || !realtimeGameData?.players || !realtimeGameData?.boardData?.words) return map;
@@ -1867,6 +1867,12 @@ function WordHunt({ config, gameId, username, goToHome, language, stats, onStats
     const isTrackingMode = config.modeType === 'takip';
 
     setSelectedCells(prevSelectedCells => {
+        const currentCell = getCellFromCoordinates(clientX, clientY);
+
+        if (!currentCell || (lastProcessedCell.current && lastProcessedCell.current.row === currentCell.row && lastProcessedCell.current.col === currentCell.col)) {
+            return prevSelectedCells;
+        }
+        lastProcessedCell.current = currentCell;
         if (!isSwiping || !board || prevSelectedCells.length === 0) {
             return prevSelectedCells;
         }
@@ -1929,18 +1935,26 @@ function WordHunt({ config, gameId, username, goToHome, language, stats, onStats
 }, [isSwiping, board, config.modeType, getCellFromCoordinates, isCellFound]);
     
     React.useEffect(() => {
-        const gridElement = gridRef.current;
-        const handleTouchMoveWrapper = (e) => {
-            e.preventDefault();
-            handleInteractionMove(e.touches[0].clientX, e.touches[0].clientY);
+    const gridElement = gridRef.current;
+
+    const throttledMove = _.throttle((e) => {
+        handleInteractionMove(e.touches[0].clientX, e.touches[0].clientY);
+    }, 16); // 60fps için ~16ms gecikme
+
+    const handleTouchMoveWrapper = (e) => {
+        e.preventDefault();
+        throttledMove(e);
+    };
+
+    if (gridElement) {
+        gridElement.addEventListener('touchmove', handleTouchMoveWrapper, { passive: false });
+
+        return () => {
+            gridElement.removeEventListener('touchmove', handleTouchMoveWrapper);
+            throttledMove.cancel(); // Component kaldırıldığında throttle'ı iptal et
         };
-        if (gridElement) {
-            gridElement.addEventListener('touchmove', handleTouchMoveWrapper, { passive: false });
-            return () => {
-                gridElement.removeEventListener('touchmove', handleTouchMoveWrapper);
-            };
-        }
-    }, [board, isSwiping]);
+    }
+}, [board, isSwiping, handleInteractionMove]);
 
     React.useEffect(() => {
         if (!isRealtimeDuel || !realtimeGameData || !realtimeGameData.boardData || realtimeGameData.status !== 'in-progress') {

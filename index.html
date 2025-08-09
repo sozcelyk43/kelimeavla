@@ -2,8 +2,8 @@
 <html lang="tr">
 <head>
 	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Kelime Avı - Tam Sürüm</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">	
+<title>Kelime Avı - Tam Sürüm</title>
 	<script src="libs/react.production.min.js"></script>
 	<script src="libs/react-dom.production.min.js"></script>
 	<script src="libs/lodash.min.js"></script>
@@ -11,6 +11,7 @@
 	<script src="libs/confetti.browser.min.js"></script>
 	<script src="libs/firebase-app.js"></script>
 	<script src="libs/firebase-firestore.js"></script>
+	<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script> 
 	<script src="libs/firebase-auth.js"></script>
 	<script src="libs/firebase-remote-config.js"></script>
 	<script src="libs/babel.min.js"></script>
@@ -19,88 +20,77 @@
 	<script src="wordsen.js?v=1.0"></script>
 
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Lilita+One&family=Poppins:wght@500;700&display=swap');
-.font-lilita { font-family: 'Lilita One', cursive; }
-    .font-poppins { font-family: 'Poppins', sans-serif; }
+	@import url('https://fonts.googleapis.com/css2?family=Lilita+One&family=Poppins:wght@500;700&display=swap');
+	.font-lilita { font-family: 'Lilita One', cursive; }
+    	.font-poppins { font-family: 'Poppins', sans-serif; }
         body {overscroll-behavior-y: none;-webkit-user-select: none;user-select: none;height: 100vh;font-family: 'Inter', sans-serif;background-color: #f3f4f6;    }
 	body {overscroll-behavior-y: none;-webkit-user-select: none;user-select: none;height: 100vh;font-family: 'Inter', sans-serif;background-color: #f3f4f6;    }
 	body.no-scroll {overflow: hidden;touch-action: none;}
-    body.no-scroll #root {overflow: hidden;}
-    .grid { -webkit-tap-highlight-color: transparent; }
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
-    .scrollbar-thin { scrollbar-width: thin; scrollbar-color: #9CA3AF #E5E7EB; }
-    .scrollbar-thin::-webkit-scrollbar { width: 5px; }
-    .scrollbar-thin::-webkit-scrollbar-track { background: #E5E7EB; border-radius: 10px;}
-    .scrollbar-thin::-webkit-scrollbar-thumb { background-color: #9CA3AF; border-radius: 10px; border: 1px solid #E5E7EB; }
-    .shake-animation {  animation: shake 0.3s ease-in-out;}
-    .toast-notification { animation: toast-in-out 4s forwards; }
-    .hidden-word-start-letter { color: #0d6efd !important; font-weight: 900; }
-    .animate-hint-pulse {animation: pulse-hint 1.5s infinite ease-in-out;color: #713f12 !important;font-weight: 900;}
-    .animate-word-found { animation: word-found-animation 0.6s ease-out; }
+   	 body.no-scroll #root {overflow: hidden;}
+    	.grid { -webkit-tap-highlight-color: transparent; }
+    	@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+    	.scrollbar-thin { scrollbar-width: thin; scrollbar-color: #9CA3AF #E5E7EB; }
+    	.scrollbar-thin::-webkit-scrollbar { width: 5px; }
+    	.scrollbar-thin::-webkit-scrollbar-track { background: #E5E7EB; border-radius: 10px;}
+    	.scrollbar-thin::-webkit-scrollbar-thumb { background-color: #9CA3AF; border-radius: 10px; border: 1px solid #E5E7EB; }
+    	.shake-animation {  animation: shake 0.3s ease-in-out;}
+    	.toast-notification { animation: toast-in-out 4s forwards; }
+    	.hidden-word-start-letter { color: #0d6efd !important; font-weight: 900; }
+    	.animate-hint-pulse {animation: pulse-hint 1.5s infinite ease-in-out;color: #713f12 !important;font-weight: 900;}
+    	.animate-word-found { animation: word-found-animation 0.6s ease-out; }
 	.dynamic-grid {display: grid; grid-template-columns: repeat(var(--grid-cols, 6), 1fr);  }
-    @keyframes word-found-animation {
-    0% { transform: scale(1); background-color: #6ee7b7; box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
-    50% { transform: scale(1.1); background-color: #34d399; box-shadow: 0 0 15px 5px rgba(16, 185, 129, 0.5); }
-    100% { transform: scale(1); background-color: #6ee7b7; box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }	}
-    .animate-bonus-glow {animation: bonus-double-glow-animation 1.2s ease-out;}
-
-    @keyframes bonus-double-glow-animation {0% {transform: scale(1);}
-    25% {transform: scale(1.15);background-color: #fde047;box-shadow: 0 0 15px #facc15;}
-    50% {transform: scale(1);}
-    75% {transform: scale(1.15);background-color: #fde047;box-shadow: 0 0 15px #facc15;}
-    100% {transform: scale(1);}}	
-.bg-logo-animated-gradient {
-  /* Yeni, daha açık ve pastel tonlar */
-  background: linear-gradient(135deg, #fef9c3, #ffe4e6, #cffafe, #fef9c3);
-  background-size: 400% 400%;
-  animation: logo-gradient-animation 25s ease infinite;
-}
-    @keyframes logo-gradient-animation {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
+    	@keyframes word-found-animation {
+    	0% { transform: scale(1); background-color: #6ee7b7; box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+    	50% { transform: scale(1.1); background-color: #34d399; box-shadow: 0 0 15px 5px rgba(16, 185, 129, 0.5); }
+    	100% { transform: scale(1); background-color: #6ee7b7; box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }	}
+    	.animate-bonus-glow {animation: bonus-double-glow-animation 1.2s ease-out;}
+	@keyframes bonus-double-glow-animation {0% {transform: scale(1);}
+    	25% {transform: scale(1.15);background-color: #fde047;box-shadow: 0 0 15px #facc15;}
+    	50% {transform: scale(1);}
+    	75% {transform: scale(1.15);background-color: #fde047;box-shadow: 0 0 15px #facc15;}
+    	100% {transform: scale(1);}}	
+	.bg-logo-animated-gradient {
+  	background: linear-gradient(135deg, #fef9c3, #ffe4e6, #cffafe, #fef9c3);
+  	background-size: 400% 400%;
+  	animation: logo-gradient-animation 25s ease infinite;
+	}
+    	@keyframes logo-gradient-animation {
+      	0% { background-position: 0% 50%; }
+      	50% { background-position: 100% 50%; }
+      	100% { background-position: 0% 50%; }
+    	}
+    	#loader.hidden {opacity: 0;visibility: hidden;transition: opacity 0.5s ease-out, visibility 0.5s ease-out;}
+    	#loader-progress {animation: loading-progress 1.5s ease-in-out forwards;}
+    	@keyframes loading-progress {0% { width: 0%; }100% { width: 100%;}}
+    	.animate-timer-pulse {animation: pulse-timer 0.5s ease-out;}
+    	@keyframes pulse-timer {0% { transform: scale(1); }
+      	40% { transform: scale(1.15); color: #ef4444; }
+      	100% { transform: scale(1); }}
+    	@keyframes toast-in-out {
+    	0% { transform: translateY(100%); opacity: 0; }
+    	15% { transform: translateY(0); opacity: 1; }
+    	85% { transform: translateY(0); opacity: 1; }
+	100% { transform: translateY(100%); opacity: 0; }}
+    	@keyframes shake {
+    	0% { transform: translateX(0); }
+    	25% { transform: translateX(-5px); }
+    	50% { transform: translateX(5px); }
+    	75% { transform: translateX(-5px); }
+    	100% { transform: translateX(0); }}
+    	@keyframes gradient-animation {
+    	0% { background-position: 0% 50%; }
+    	50% { background-position: 100% 50%; }
+    	100% { background-position: 0% 50%; }}
+	.animate-spin-slow {animation: spin-slow 3s linear infinite;}
+	@keyframes spin-slow {from {transform: rotate(0deg);}to {transform: rotate(360deg);}}
+    	.animate-loading-bar-slide {width: 40%;animation: loading-bar-slide 1.5s ease-in-out infinite;}
+    	@keyframes loading-bar-slide {0% { transform: translateX(-150%); }100% { transform: translateX(300%); }}
+    	@keyframes pulse-hint {  0%, 100% { background-color: #fef08a; transform: scale(1); }50% { background-color: #fde047;transform: scale(1.05); box-shadow: 0 0 8px #facc15; } }
+</style> 
+<style>
+    body {
+        padding-top: env(safe-area-inset-top);
     }
-
-    #loader.hidden {opacity: 0;visibility: hidden;transition: opacity 0.5s ease-out, visibility 0.5s ease-out;}
-    #loader-progress {animation: loading-progress 1.5s ease-in-out forwards;}
-    @keyframes loading-progress {0% { width: 0%; }100% { width: 100%;}}
-    .animate-timer-pulse {animation: pulse-timer 0.5s ease-out;}
-
-    @keyframes pulse-timer {0% { transform: scale(1); }
-      40% { transform: scale(1.15); color: #ef4444; }
-      100% { transform: scale(1); }}
-
-    @keyframes toast-in-out {
-    0% { transform: translateY(100%); opacity: 0; }
-    15% { transform: translateY(0); opacity: 1; }
-    85% { transform: translateY(0); opacity: 1; }
-    100% { transform: translateY(100%); opacity: 0; }}
-
-    @keyframes shake {
-    0% { transform: translateX(0); }
-    25% { transform: translateX(-5px); }
-    50% { transform: translateX(5px); }
-    75% { transform: translateX(-5px); }
-    100% { transform: translateX(0); }}
-    @keyframes gradient-animation {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }}
-.animate-spin-slow {
-      animation: spin-slow 3s linear infinite;
-    }
-
-    @keyframes spin-slow {
-      from {
-        transform: rotate(0deg);
-      }
-      to {
-        transform: rotate(360deg);
-      }
-    }
-    .animate-loading-bar-slide {width: 40%;animation: loading-bar-slide 1.5s ease-in-out infinite;}
-    @keyframes loading-bar-slide {0% { transform: translateX(-150%); }100% { transform: translateX(300%); }}
-    @keyframes pulse-hint {  0%, 100% { background-color: #fef08a; transform: scale(1); }50% { background-color: #fde047;transform: scale(1.05); box-shadow: 0 0 8px #facc15; } }
 </style>
 
 </head>
@@ -126,45 +116,52 @@
 <script type="text/babel">
 
 	window.setAppVersion = function(version) {
-      const versionElement = document.getElementById('version-display');
+	const versionElement = document.getElementById('version-display');
 
-      if (versionElement) {
+	if (versionElement) {
         versionElement.innerText = `v${version}`;
-      } else {
+	} else {
         console.error("JS: HATA! 'version-display' elementi HTML'de bulunamadı!");
-      }
-    };
+	}
+	};
 
-  function DuelInviteModal({ isOpen, onClose, player, onInvite, language }) {
+function DuelInviteModal({ isOpen, onClose, player, onInvite, language }) {
     if (!isOpen || !player) return null;
-    
     const t = translations[language] || translations['en'];
     const [boardSize, setBoardSize] = React.useState('medium');
     const [difficulty, setDifficulty] = React.useState('easy');
-
+    const [modeType, setModeType] = React.useState('avi'); 
     const difficultyOptions = [
         { key: 'easy', label: t.kolay, icon: '🧸', desc: t.easyDesc, color: 'from-green-400 to-emerald-500' },
         { key: 'hard', label: t.zor, icon: '🔥', desc: t.hardDesc, color: 'from-red-500 to-rose-600' }
     ];
-
     const sizeOptions = [
         { key: 'small', label: t.smallArea, icon: '🤏' },
         { key: 'medium', label: t.mediumArea, icon: '👌' },
         { key: 'large', label: t.largeArea, icon: '👐' }
     ];
-
     const handleSendInvite = () => {
-        onInvite(player, boardSize, difficulty);
-        onClose();
-    };
-
-    return (
+    onInvite(player, boardSize, difficulty, modeType);
+    onClose();
+	};
+   	return (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={onClose}>
             <div className="bg-slate-50 p-6 rounded-2xl shadow-2xl w-full max-w-sm" onClick={e => e.stopPropagation()}>
                 <h3 className="text-2xl font-bold mb-6 text-gray-800 text-center">
                     <span className="font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-indigo-600">{t.setupGameFor(player.username)}</span>
                 </h3>
                 <div className="space-y-6">
+                    <div>
+                        <h4 className="font-bold text-lg text-slate-700 mb-3">Oyun Türü</h4>
+                        <div className="grid grid-cols-2 gap-3">
+                            <button onClick={() => setModeType('avi')} className={`py-3 font-bold rounded-xl transition-all transform flex items-center justify-center gap-2 ${modeType === 'avi' ? 'bg-indigo-600 text-white ring-4 ring-offset-2 ring-indigo-500 scale-105' : 'bg-slate-200 hover:bg-slate-300'}`}>
+                                🧭 Kelime Avı
+                            </button>
+                            <button onClick={() => setModeType('takip')} className={`py-3 font-bold rounded-xl transition-all transform flex items-center justify-center gap-2 ${modeType === 'takip' ? 'bg-indigo-600 text-white ring-4 ring-offset-2 ring-indigo-500 scale-105' : 'bg-slate-200 hover:bg-slate-300'}`}>
+                                🐉 Kelime Takibi
+                            </button>
+                        </div>
+                    </div>
                     <div>
                         <h4 className="font-bold text-lg text-slate-700 mb-3">{t.difficulty}</h4>
                         <div className="grid grid-cols-2 gap-3">
@@ -228,7 +225,7 @@ function DirectInviteModal({ isOpen, invitationDetails, onAccept, onDecline, lan
     return (
         <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4">
             <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-2xl w-full max-w-sm text-center transform transition-all animate-pulse-once">
-                <h3 className="text-3xl font-bold mb-2 text-gray-800">⚔️ {t.duelChallenge} ⚔️</h3>
+                <h3 className="text-3xl font-bold mb-2 text-gray-800">⚔️ {t.duelChallenge}</h3>
                 <p className="text-gray-600 text-lg mb-6">
                     <span className="font-bold text-indigo-600">{invitationDetails.invitedBy}</span> {t.invitedToGame(invitationDetails.invitedBy)}
                 </p>
@@ -253,6 +250,7 @@ function DirectInviteModal({ isOpen, invitationDetails, onAccept, onDecline, lan
 function RoomLobbyPage({ username, gameId, db, onBack, startGame, setPage, setToastMessage, setModeConfig, language }) {
     const t = translations[language] || translations['en'];
     const [roomData, setRoomData] = React.useState(null);
+    const [localStatus, setLocalStatus] = React.useState('loading');
 
     React.useEffect(() => {
         if (!gameId) {
@@ -262,28 +260,41 @@ function RoomLobbyPage({ username, gameId, db, onBack, startGame, setPage, setTo
 
         const roomRef = db.collection('game_rooms').doc(gameId);
         const unsubscribe = roomRef.onSnapshot(doc => {
-            if (doc.exists) {
-                const data = doc.data();
-                setRoomData(data);
-                
-                if (data.status === 'in-progress' && data.boardData && data.boardData.board && Object.keys(data.boardData.board).length > 0) {
-                    const newConfig = {
-                        name: 'multiplayer',
-                        boardSize: data.gameSettings.boardSize,
-                        difficulty: data.gameSettings.difficulty,
-                        modeType: 'avi' 
-                    };
-                    setModeConfig(newConfig);
-                    setPage('game');
-                }
-            } else {
+            if (!doc.exists) {
                 setToastMessage("Oda kapatıldı veya bulunamadı.");
                 onBack();
+                return;
+            }
+
+            const data = doc.data();
+            setRoomData(data);
+            const playerMe = data.players[username];
+          
+            if (data.status === 'synchronizing' && playerMe?.status !== 'ready') {
+                roomRef.update({ [`players.${username}.status`]: 'ready' });
+            }
+
+            if (data.status === 'synchronizing') {
+                const allPlayersReady = Object.values(data.players).every(p => p.status === 'ready');
+                if (allPlayersReady && data.host === username) {
+                    roomRef.update({ status: 'in-progress' });
+                }
+            }
+            
+            if (data.status === 'in-progress' && data.boardData?.board) {
+                const newConfig = {
+                    name: 'multiplayer',
+                    boardSize: data.gameSettings.boardSize,
+                    difficulty: data.gameSettings.difficulty,
+                    modeType: data.gameSettings.modeType || 'avi'
+                };
+                setModeConfig(newConfig);
+                setPage('game');
             }
         });
 
         return () => unsubscribe();
-    }, [gameId, db, onBack, setPage, setToastMessage, setModeConfig]);
+    }, [gameId, username]);
 
     const leaveRoom = async () => {
         if (!roomData) return;
@@ -314,32 +325,46 @@ function RoomLobbyPage({ username, gameId, db, onBack, startGame, setPage, setTo
 
     const isHost = roomData.host === username;
     const players = Object.values(roomData.players);
-    const playerUsernames = Object.keys(roomData.players);
-    const canStart = playerUsernames.length >= 2;
+    const canStart = players.length >= 2;
 
+    const getStatusMessage = () => {
+        switch (roomData.status) {
+            case 'generating':
+                return "Oyun alanı oluşturuluyor, lütfen bekleyin...";
+            case 'synchronizing':
+                return "Tüm oyuncular senkronize ediliyor...";
+            case 'waiting':
+                return isHost ? t.waitingForPlayers : t.waitingForHost;
+            default:
+                return "Yükleniyor...";
+        }
+    };
+    
     return (
         <div className="h-screen w-full bg-gradient-to-br from-gray-800 to-slate-900 text-white flex flex-col items-center justify-center p-4">
             <div className="text-center mb-8">
                 <h1 className="text-4xl font-black mb-2 tracking-tight">{t.hostsRoom(roomData.host)}</h1>
-                <p className="text-indigo-300 animate-pulse">{isHost ? t.waitingForPlayers : t.waitingForHost}</p>
+                <p className="text-indigo-300 animate-pulse text-lg">{getStatusMessage()}</p>
             </div>
 
             <div className="w-full max-w-lg grid grid-cols-2 gap-4 mb-8">
-                {playerUsernames.map((name, index) => {
-                    const pData = roomData.players[name];
-                    return (
-                        <div key={name} className="bg-white/10 p-3 rounded-lg flex flex-col items-center gap-2 text-center shadow-lg">
-                           <div className="relative">
-                             <img src={pData.avatarId ? `avatars/${pData.avatarId}.png` : 'avatars/default.png'} className="w-16 h-16 rounded-full object-cover border-2 border-slate-500" />
-                             {roomData.host === name && <span className="absolute -top-1 -right-1 text-2xl" title={t.host}>👑</span>}
-                           </div>
-                           <p className="font-bold text-sm">{name}</p>
-                        </div>
-                    );
-                })}
+                {Object.entries(roomData.players).map(([name, pData]) => (
+                    <div key={name} className={`bg-white/10 p-3 rounded-lg flex flex-col items-center gap-2 text-center shadow-lg transition-all ${roomData.status === 'synchronizing' && pData.status === 'ready' ? 'ring-2 ring-green-400' : ''}`}>
+                       <div className="relative">
+                         <img src={pData.avatarId ? `avatars/${pData.avatarId}.png` : 'avatars/default.png'} className="w-16 h-16 rounded-full object-cover border-2 border-slate-500" />
+                         {roomData.host === name && <span className="absolute -top-1 -right-1 text-2xl" title={t.host}>👑</span>}
+                       </div>
+                       <p className="font-bold text-sm">{name}</p>
+                       {roomData.status === 'synchronizing' && (
+                           <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${pData.status === 'ready' ? 'bg-green-500/80' : 'bg-gray-500/80'}`}>
+                               {pData.status === 'ready' ? 'Hazır' : 'Bekleniyor'}
+                           </span>
+                       )}
+                    </div>
+                ))}
             </div>
 
-            {isHost && (
+            {isHost && roomData.status === 'waiting' && (
                 <button
                     onClick={() => startGame(gameId)}
                     disabled={!canStart}
@@ -382,7 +407,7 @@ function initializeGame() {
     { id: 'indigo', name: 'Çivit Mavisi', class: 'bg-gradient-to-br from-indigo-500 to-purple-600' }
 ];
 
-    const ModernModeCard = ({ title, icon, bgColor, className, onClick, disabled, userInfo, buttonText = "Oyna" }) =>
+const ModernModeCard = ({ title, icon, bgColor, className, onClick, disabled, userInfo, buttonText = "Oyna" }) =>
         {const handleClick = () => {
             if (!disabled) {onClick();}};
 
@@ -405,10 +430,9 @@ function initializeGame() {
                 )}
 
                 <div className="p-3 h-full flex flex-col justify-between text-left pointer-events-none">
-                    <h3 className="text-lg font-bold leading-tight">{title}</h3>
+                    <h3 className="text-xl font-bold leading-tight drop-shadow">{title}</h3>
                     <div className={`mt-2 self-start bg-white/20 backdrop-blur-sm text-white text-xs font-bold uppercase tracking-wider rounded-full px-4 py-1.5 flex items-center gap-2`}>
                         <span>{disabled ? '...' : buttonText}</span>
-                        {!disabled && <span>→</span>}
                     </div>
                 </div>
             </div>
@@ -438,32 +462,36 @@ function initializeGame() {
 
 
 function runApp() {
-        const loader = document.getElementById('loader');
-        const firebaseConfig = {
-          apiKey: "AIzaSyC9qRRHO-m3e_2Kfs14wxxjsovhrE3idXs",
-          authDomain: "kelime-avla.firebaseapp.com",
-          projectId: "kelime-avla",
-          storageBucket: "kelime-avla.firebasestorage.app",
-          messagingSenderId: "557108031682",
-          appId: "1:557108031682:web:a0738215100b2c6b864b5b",
-          measurementId: "G-XYCB5BS8SR"
-        };
+    const loader = document.getElementById('loader');
+    const firebaseConfig = {
+  apiKey: "AIzaSyC9qRRHO-m3e_2Kfs14wxxjsovhrE3idXs",
+  authDomain: "kelime-avla.firebaseapp.com",
+  projectId: "kelime-avla",
+  databaseURL: "https://kelime-avla-default-rtdb.europe-west1.firebasedatabase.app/",
+  storageBucket: "kelime-avla.firebasestorage.app",
+  messagingSenderId: "557108031682",
+  appId: "1:557108031682:web:a0738215100b2c6b864b5b",
+  measurementId: "G-XYCB5BS8SR"
+};
 
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
-        }
-
-        ReactDOM.render(<App />, document.getElementById('root'));
-
-        setTimeout(() => {
-            if (loader) {
-                loader.classList.add('hidden');
-            }
-        }, 1800);
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
     }
+    
+    const db = firebase.firestore();
+    const rtdb = firebase.database();
 
+    ReactDOM.render(<App />, document.getElementById('root'));
 
-    function AvatarSelectionModal({ isOpen, onClose, onAvatarSelect }) {
+    setTimeout(() => {
+        if (loader) {
+            loader.classList.add('hidden');
+        }
+    }, 1800);
+}
+    
+
+function AvatarSelectionModal({ isOpen, onClose, onAvatarSelect }) {
         if (!isOpen) return null;
 
         return (
@@ -744,13 +772,14 @@ function RoomCreateModal({ isOpen, onClose, onCreate, language }) {
 
     const t = translations[language] || translations['en'];
     const [maxPlayers, setMaxPlayers] = React.useState(3);
-    const [boardSize, setBoardSize] = React.useState('medium');
-    const [difficulty, setDifficulty] = React.useState('easy');
+const [boardSize, setBoardSize] = React.useState('medium');
+const [difficulty, setDifficulty] = React.useState('easy');
+const [modeType, setModeType] = React.useState('avi'); 
 
     const handleCreateClick = () => {
-        onCreate({ maxPlayers, boardSize, difficulty });
-        onClose();
-    };    
+    onCreate({ maxPlayers, boardSize, difficulty, modeType });
+    onClose();
+};
 
 
 return (
@@ -773,6 +802,17 @@ return (
                         </div>
                     </div>
                     <div>
+                        <label className="block text-lg font-semibold text-slate-700 mb-3">Oyun Türü</label>
+                        <div className="grid grid-cols-2 gap-3">
+                            <button onClick={() => setModeType('avi')} className={`p-4 font-bold rounded-xl transition-all transform flex items-center justify-center gap-2 ${modeType === 'avi' ? 'bg-indigo-600 text-white ring-4 ring-offset-2 ring-indigo-500 scale-105' : 'bg-slate-200 hover:bg-slate-300'}`}>
+                                🧭 Kelime Avı
+                            </button>
+                            <button onClick={() => setModeType('takip')} className={`p-4 font-bold rounded-xl transition-all transform flex items-center justify-center gap-2 ${modeType === 'takip' ? 'bg-indigo-600 text-white ring-4 ring-offset-2 ring-indigo-500 scale-105' : 'bg-slate-200 hover:bg-slate-300'}`}>
+                                🐉 Kelime Takibi
+                            </button>
+                        </div>
+                    </div>
+                    <div>
                         <h4 className="font-semibold text-lg text-slate-700 mb-3">{t.difficulty}</h4>
                         <div className="grid grid-cols-2 gap-3">
                             <button onClick={() => setDifficulty('easy')} className={`py-3 rounded-xl font-bold flex flex-col items-center justify-center text-center transition-all transform ${difficulty === 'easy' ? 'bg-gradient-to-br from-green-400 to-emerald-500 text-white ring-4 ring-offset-2 ring-green-500 scale-105' : 'bg-slate-200 text-slate-800 hover:bg-slate-300'}`}> <span className="text-3xl">🧸</span> <span className="mt-1 text-sm">{t.kolay}</span> </button>
@@ -791,8 +831,7 @@ return (
                 <button onClick={handleCreateClick} className="w-full mt-8 bg-green-500 text-white font-bold py-3 rounded-lg hover:bg-green-600 transition-all text-lg">{t.createRoom}</button>
             </div>
         </div>
-    );
-}
+    );}
 
 function AccordionSection({ title, isOpen, onToggle, children, badgeCount, icon, colorClasses }) {
     const headerColor = colorClasses || 'bg-white';
@@ -839,7 +878,7 @@ function DuelLobbyPage({ username, onClose, db, setToastMessage, joinGameRoom, c
         if (!db || !username) return;
         const usersUnsubscribe = db.collection('users').onSnapshot(usersSnapshot => {
             const friendsSubUnsubscribe = db.collection('users').doc(username).collection('friends').onSnapshot(friendsSnapshot => {
-                const lobbyUnsubscribe = db.collection('lobby').onSnapshot(lobbySnapshot => {
+                const lobbyUnsubscribe = db.collection('lobby').where('presence', '==', 'online').onSnapshot(lobbySnapshot => {
                     const presenceMap = new Map();
                     lobbySnapshot.docs.forEach(doc => presenceMap.set(doc.id, doc.data().presence || 'offline'));
                     const friendUsernames = new Set(friendsSnapshot.docs.map(doc => doc.id));
@@ -1046,6 +1085,7 @@ const servers = {
       apiKey: "AIzaSyC9qRRHO-m3e_2Kfs14wxxjsovhrE3idXs",
       authDomain: "kelime-avla.firebaseapp.com",
       projectId: "kelime-avla",
+      databaseURL: "https://kelime-avla-default-rtdb.europe-west1.firebasedatabase.app/",
       storageBucket: "kelime-avla.firebasestorage.app",
       messagingSenderId: "557108031682",
       appId: "1:557108031682:web:a0738215100b2c6b864b5b",
@@ -1053,10 +1093,11 @@ const servers = {
     };
 
     if (!firebase.apps.length) {
-        firebase.initializeApp(firebaseConfig);
-    }
-    const db = firebase.firestore();
-    const ALL_SAVES_KEY = 'wordHuntAllSaves';
+    firebase.initializeApp(firebaseConfig);
+}
+const db = firebase.firestore();
+const rtdb = firebase.database();
+const ALL_SAVES_KEY = 'wordHuntAllSaves';
 
     window.onerror = function (msg, url, lineNo, columnNo, error) { console.error(`Global error: ${msg}\nURL: ${url}\nLine: ${lineNo}\nColumn: ${columnNo}\nError:`, error); const root = document.getElementById('root'); if (root) root.innerHTML = `<div class="p-4 text-red-600">Beklenmedik bir hata oluştu. Lütfen sayfayı yenileyin. Hata: ${msg}</div>`; return false; };
     function customToUpperCase(str) { if (typeof str !== 'string') return ''; try { return str.replace(/i/g, 'İ').replace(/ı/g, 'I').replace(/ğ/g, 'Ğ').replace(/ü/g, 'Ü').replace(/ş/g, 'Ş').replace(/ö/g, 'Ö').replace(/ç/g, 'Ç').toUpperCase(); } catch (err) { console.error('customToUpperCase hatası:', err); return (str || '').toUpperCase(); } }
@@ -1141,13 +1182,13 @@ const wordFoundColors = [
             achievementsButton: "Başarılar",
             footerText: "© 2025 Ozcelik Inc.",
             languageSwitch: "🇬🇧 English",
-            lobbyTitle: "⚔️ Çok Oyunculu ⚔️",
+            lobbyTitle: "Çok Oyunculu",
             lobbyDescription: "Arkadaşlarınla veya diğer oyuncularla yarış!",
-            vsAiTitle: "🤖 VS AI 🤖",
+            vsAiTitle: "VS AI",
             vsAiDescription: "Bilgisayara karşı kelime bulma yeteneğini sına!",
-            wordHuntTitle: "🧭 Kelime Avı Klasik 🧭",
-            wordHuntDescription: "Harflerin arasına gizlenmiş kelimeleri bul!",
-            wordTrackingTitle: "🎯 Kelime Takibi 🎯",
+            wordHuntTitle: "Kelime Avı",
+            wordHuntDescription: "Harflerin arasına gizlenmiş farklı kelimeleri bul!",
+            wordTrackingTitle: "Kelime Takibi",
             wordTrackingDescription: "Harfleri birleştirerek yılan gibi kelimeler oluştur!",
             loading: "Yükleniyor...",
             çok: "ÇOK", aşırı: "AŞIRI", kolay: "KOLAY", normal: "NORMAL", zor: "ZOR", süreli: "SÜRELİ",
@@ -1236,9 +1277,9 @@ superEasyDesc: "Rahat bir başlangıç",
             footerText: "© 2025 Ozcelik Inc.", languageSwitch: "🇹🇷 Türkçe",
             lobbyTitle: "⚔️ Multiplayer ⚔️", 
 	lobbyDescription: "Compete with friends or other players",
-            vsAiTitle: "🤖 Versus AI 🤖", vsAiDescription: "Test your word finding skills against the computer",
-            wordHuntTitle: "🧭 Word Hunt Classic 🧭", wordHuntDescription: "Find the words hidden among the letters",
-            wordTrackingTitle: "🎯 Word Tracking 🎯", wordTrackingDescription: "Create snake-like words by connecting letters",
+            vsAiTitle: "🤖 Versus AI", vsAiDescription: "Test your word finding skills against the computer",
+            wordHuntTitle: "🧭 Word Hunt Classic", wordHuntDescription: "Find the words hidden among the letters",
+            wordTrackingTitle: "🐉 Word Tracking", wordTrackingDescription: "Create snake-like words by connecting letters",
             loading: "Loading...",
             çok: "SUPER", aşırı: "SUPER", kolay: "EASY", normal: "NORMAL", zor: "HARD", süreli: "TIMED",
             superEasyMode: "SUPER EASY", easyMode: "EASY", hardMode: "HARD",
@@ -1354,37 +1395,36 @@ const GAME_STATS_KEY = 'wordHuntGameStats';
 
     const saveGameStats = (stats) => { try { localStorage.setItem(GAME_STATS_KEY, JSON.stringify(stats)); } catch (e) { console.error("İstatistikler kaydedilemedi:", e); } };
 
-function createBoard(level, language, config) {    
+function createBoard(level, language, config) {
     if (config && config.modeType === 'takip') {
         return createTakipBoard(level, language, config);
-    } 
+    }
 
     try {
         let rows, cols;
         const modeName = config ? config.name : 'easy';
 
-        if (modeName === 'vs-computer') {
-            const sizes = { small: { r: 7, c: 7 }, medium: { r: 9, c: 9 }, large: { r: 11, c: 11 } };
-            rows = sizes[config.boardSize].r; cols = sizes[config.boardSize].c;
-        } else if (modeName === 'multiplayer') {
-            const sizes = { small: { r: 7, c: 7 }, medium: { r: 9, c: 8 }, large: { r: 11, c: 11 } };
+        if (modeName === 'vs-computer' || modeName === 'multiplayer') {
+            const sizes = { small: { r: 8, c: 7 }, medium: { r: 10, c: 9 }, large: { r: 12, c: 11 } };
             rows = sizes[config.boardSize].r; cols = sizes[config.boardSize].c;
         } else {
             if (modeName === 'super-easy') {
                 const stage = Math.min(Math.floor(level / 12), 4);
-                rows = 6 + stage; cols = 6 + stage;
+                rows = 6 + stage; cols = 5 + stage;
             } else {
                 const stage = Math.min(Math.floor(level / 18), 4);
-                rows = 8 + stage; cols = 9 + stage;
+                rows = 8 + stage; cols = 7 + stage;
             }
         }
-        
-        const mainWordPool = _.shuffle((wordLists[language] || []).filter(w => w && w.length >= 3 && w.length < Math.min(rows, cols)).map(customToUpperCase));
+
+        const fullWordList = (wordLists[language] || []).map(customToUpperCase);
+        const potentialHiddenWords = fullWordList.filter(w => w && w.length >= 5 && w.length <= 7);
+        const hiddenWord = _.sample(potentialHiddenWords) || "TÜRKİYE";
+        const mainWordPool = _.shuffle(fullWordList.filter(w => w && w.length >= 3 && w.length < Math.min(rows, cols) && w !== hiddenWord));
         const twoLetterWordPool = _.shuffle((wordLists_2letters[language] || []).map(customToUpperCase));
         const selectedTwoLetterWords = twoLetterWordPool.slice(0, 2);
-        
         const wordsToPlacePool = [...selectedTwoLetterWords, ...mainWordPool];
-        
+
         for (let attempt = 1; attempt <= 100; attempt++) {
             const board = Array(rows).fill(null).map(() => Array(cols).fill(null));
             const occupied = Array(rows).fill(null).map(() => Array(cols).fill(false));
@@ -1410,47 +1450,61 @@ function createBoard(level, language, config) {
                 placedCellCount += word.length;
                 placedWordsInfo.push({ word, positions, direction: dir.name });
             };
-            
-            const shuffledWords = _.shuffle(wordsToPlacePool);
-            const midPoint = Math.ceil(shuffledWords.length / 2);
-            const diagonalWords = shuffledWords.slice(0, midPoint);
-            const nonDiagonalWords = shuffledWords.slice(midPoint);
 
-            const placeWordSet = (wordSet, directionSet) => {
-                for (const word of wordSet) {
-                    const availablePositions = [];
+            const shuffledWords = _.shuffle(wordsToPlacePool);
+
+            for (let i = 0; i < shuffledWords.length; i++) {
+                const word = shuffledWords[i];
+                const isDiagonalTurn = Math.floor(i / 2) % 2 === 0;
+                const primaryDirectionSet = isDiagonalTurn ? directions.diagonal : nonDiagonalDirections;
+
+                let placed = false;
+                const primaryPositions = [];
+                for (let r = 0; r < rows; r++) {
+                    for (let c = 0; c < cols; c++) {
+                        for (const dir of primaryDirectionSet) {
+                            if (canPlace(word, r, c, dir)) {
+                                primaryPositions.push({ r, c, dir });
+                            }
+                        }
+                    }
+                }
+
+                if (primaryPositions.length > 0) {
+                    const { r, c, dir } = _.sample(primaryPositions);
+                    placeWord(word, r, c, dir);
+                    placed = true;
+                }
+
+                if (!placed) {
+                    const fallbackDirectionSet = isDiagonalTurn ? nonDiagonalDirections : directions.diagonal;
+                    const fallbackPositions = [];
                     for (let r = 0; r < rows; r++) {
                         for (let c = 0; c < cols; c++) {
-                            for (const dir of directionSet) {
+                            for (const dir of fallbackDirectionSet) {
                                 if (canPlace(word, r, c, dir)) {
-                                    availablePositions.push({ r, c, dir });
+                                    fallbackPositions.push({ r, c, dir });
                                 }
                             }
                         }
                     }
-                    if (availablePositions.length > 0) {
-                        const { r, c, dir } = _.sample(availablePositions);
+                    if (fallbackPositions.length > 0) {
+                        const { r, c, dir } = _.sample(fallbackPositions);
                         placeWord(word, r, c, dir);
                     }
                 }
-            };
-            
-            placeWordSet(diagonalWords, directions.diagonal);
-            placeWordSet(nonDiagonalWords, nonDiagonalDirections);
-            
+            }
+
             const fillRatio = placedCellCount / (rows * cols);
-            if (fillRatio < 0.90 && attempt < 99) {
-                if(attempt % 10 === 0) 
+            if (fillRatio < 0.90 && attempt < 999) {
+                if(attempt % 10 === 0)
                 continue;
             }
-            
+
             for (let r = 0; r < rows; r++) { for (let c = 0; c < cols; c++) { if (board[r][c] === null) board[r][c] = _.sample(charSets[language]); } }
-            let hiddenWord = _.sample(mainWordPool.filter(w => w.length >= 5 && w.length <= 9 && !placedWordsInfo.some(p => p.word === w))) || "TÜRKİYE";
-            
-const uniquePlacedWords = _.uniqBy(placedWordsInfo, 'word');
 
-return { board, words: _.sortBy(uniquePlacedWords, 'word'), hiddenWord, scatteredHiddenLetterPositions: [] };
-
+            const uniquePlacedWords = _.uniqBy(placedWordsInfo, 'word');
+            return { board, words: _.sortBy(uniquePlacedWords, 'word'), hiddenWord, scatteredHiddenLetterPositions: [] };
         }
     } catch (e) {
         console.error(`[createBoard] KRİTİK HATA:`, e);
@@ -1461,134 +1515,185 @@ return { board, words: _.sortBy(uniquePlacedWords, 'word'), hiddenWord, scattere
     return null;
 }
 
-
 function createTakipBoard(level, language, config) {
+    const fullWordList = (wordLists[language] || []).map(customToUpperCase);
+    const potentialHiddenWords = fullWordList.filter(w => w && w.length >= 5 && w.length <= 7);
+    const hiddenWord = _.sample(potentialHiddenWords) || "TÜRKİYE";
     let rows, cols;
-    const { boardSize, name } = config;
-
-    if (boardSize) {
-        const sizes = { small: { r: 9, c: 7 }, medium: { r: 12, c: 9 }, large: { r: 15, c: 11 } };
-        rows = sizes[boardSize].r; cols = sizes[boardSize].c;
-    } else if (name === 'super-easy') {
-        const stage = Math.min(Math.floor(level / 12), 4);
-        rows = 4 + stage; cols = 5 + stage;
+    const { name } = config;
+    const stage = Math.min(Math.floor(level / 12), 5);
+    if (name === 'takip-super-easy') {
+        rows = 6 + stage;
+        cols = 5 + stage;
+    } else if (name === 'takip-easy' || name === 'takip-timed-easy') {
+        rows = 8 + stage;
+        cols = 7 + stage;
     } else {
-        const stage = Math.min(Math.floor(level / 18), 4);
-        rows = 8 + stage; cols = 9 + stage;
+        const sizes = { small: { r: 8, c: 7 }, medium: { r: 10, c: 9 }, large: { r: 12, c: 11 } };
+        if (config.boardSize) {
+             rows = sizes[config.boardSize].r;
+             cols = sizes[config.boardSize].c;
+        } else {
+            rows = 7 + stage;
+            cols = 8 + stage;
+        }
     }
 
-    const mainWordPool = (wordLists[language] || []).filter(w => w && w.length >= 3 && w.length <= 8).map(customToUpperCase);
-    
-    for (let attempt = 0; attempt < 50; attempt++) {
-        let potentialWords = _.shuffle(mainWordPool);
-        const board = Array(rows).fill(null).map(() => Array(cols).fill(null));
-        let placedWordsInfo = [];
-        const occupiedCoords = new Set();
+    const wordsByLength = _.groupBy(
+        (wordLists[language] || []).map(customToUpperCase),
+        'length'
+    );
 
-        const buildWindingPath = (word) => {
-            for (let i = 0; i < 200; i++) {
-                const emptyCells = [];
-                for(let r=0; r<rows; r++) { for(let c=0; c<cols; c++) { if(!occupiedCoords.has(`${r}-${c}`)) emptyCells.push({r,c}); }}
-                if (emptyCells.length < word.length) return null;
-                const startCell = _.sample(emptyCells);
-                if (!startCell) continue;
-                let path = [{ row: startCell.r, col: startCell.c }];
-                const tempOccupied = new Set(occupiedCoords);
-                tempOccupied.add(`${startCell.r}-${startCell.c}`);
-                let straightCount = 1;
-                let lastDir = null;
-                let success = true;
+    const board = Array(rows).fill(null).map(() => Array(cols).fill(null));
+    let placedWordsInfo = [];
+    const occupiedCoords = new Set();
 
-                for (let j = 1; j < word.length; j++) {
-                    const lastPos = path[j-1];
-                    let possibleDirs = [];
-                    const directionsToTry = directions.horizontal.concat(directions.vertical);
-                    for(const dir of _.shuffle(directionsToTry)) {
-                        if (lastDir && dir.dx === -lastDir.dx && dir.dy === -lastDir.dy) continue;
-                        const nextR = lastPos.row + dir.dx; const nextC = lastPos.col + dir.dy;
-                        if(nextR >= 0 && nextR < rows && nextC >=0 && nextC < cols && !tempOccupied.has(`${nextR}-${nextC}`)){
-                            possibleDirs.push(dir);
-                        }
+    const buildWindingPath = (word) => {
+        for (let i = 0; i < 200; i++) {
+            const emptyCells = [];
+            for(let r=0; r<rows; r++) { for(let c=0; c<cols; c++) { if(!occupiedCoords.has(`${r}-${c}`)) emptyCells.push({r,c}); }}
+            if (emptyCells.length < word.length) return null;
+
+            const startCell = _.sample(emptyCells);
+            if (!startCell) continue;
+
+            let path = [{ row: startCell.r, col: startCell.c }];
+            const tempOccupied = new Set(occupiedCoords);
+            tempOccupied.add(`${startCell.r}-${startCell.c}`);
+
+            let lastDir = null;
+            let success = true;
+
+            while (path.length < word.length) {
+                const lastPos = path[path.length - 1];
+                let possibleTurnDirs = [];
+                const directionsToTry = directions.horizontal.concat(directions.vertical);
+                for(const dir of _.shuffle(directionsToTry)) {
+                    if (lastDir && (dir.dx === lastDir.dx && dir.dy === lastDir.dy)) continue;
+                    if (lastDir && (dir.dx === -lastDir.dx && dir.dy === -lastDir.dy)) continue;
+
+                    const nextR = lastPos.row + dir.dx;
+                    const nextC = lastPos.col + dir.dy;
+                    if(nextR >= 0 && nextR < rows && nextC >=0 && nextC < cols && !tempOccupied.has(`${nextR}-${nextC}`)){
+                       possibleTurnDirs.push(dir);
                     }
-                    if(possibleDirs.length === 0) { success = false; break; }
-                    let finalDirs = possibleDirs;
-                    if(lastDir && straightCount >= 3) {
-                        const nonStraightDirs = possibleDirs.filter(dir => !(dir.dx === lastDir.dx && dir.dy === lastDir.dy));
-                        if(nonStraightDirs.length > 0) finalDirs = nonStraightDirs;
+                }
+
+                if (possibleTurnDirs.length === 0) {
+                    success = false;
+                    break;
+                }
+
+                const chosenDir = _.sample(possibleTurnDirs);
+                const segmentLength = _.random(2, 4);
+                let segmentSuccess = true;
+
+                for (let j = 0; j < segmentLength; j++) {
+                    if (path.length >= word.length) break;
+
+                    const currentPos = path[path.length - 1];
+                    const nextPos = { row: currentPos.row + chosenDir.dx, col: currentPos.col + chosenDir.dy };
+
+                    if (nextPos.row < 0 || nextPos.row >= rows || nextPos.col < 0 || nextPos.col >= cols || tempOccupied.has(`${nextPos.row}-${nextPos.col}`)) {
+                        segmentSuccess = false;
+                        break;
                     }
-                    const chosenDir = _.sample(finalDirs);
-                    if (!chosenDir) { success = false; break; }
-                    const nextPos = { row: lastPos.row + chosenDir.dx, col: lastPos.col + chosenDir.dy };
                     path.push(nextPos);
                     tempOccupied.add(`${nextPos.row}-${nextPos.col}`);
-                    if (lastDir && chosenDir.dx === lastDir.dx && chosenDir.dy === lastDir.dy) { straightCount++; } else { straightCount = 1; }
-                    lastDir = chosenDir;
                 }
-                if(success) return path;
-            }
-            return null;
-        };
 
-        for(const word of potentialWords) {
-            const path = buildWindingPath(word);
-            if(path) {
-                path.forEach((pos, k) => {
-                    board[pos.row][pos.col] = word[k];
-                    occupiedCoords.add(`${pos.row}-${pos.col}`);
-                });
-                placedWordsInfo.push({ word, positions: path, direction: 'snake' });
+                if (!segmentSuccess) {
+                    success = false;
+                    break;
+                }
+                lastDir = chosenDir;
+            }
+
+            if (success && path.length === word.length) {
+                return path;
             }
         }
-        
-        const filledRatio = occupiedCoords.size / (rows * cols);
-        if (filledRatio < 0.90 && attempt < 45) { 
-            continue;
+        return null;
+    };
+
+    let potentialWords = [];
+    const maxLength = Math.max(rows, cols);
+    for (let len = maxLength; len >= 4; len--) {
+        potentialWords.push(..._.shuffle(wordsByLength[len.toString()] || []));
+    }
+
+    for(const word of potentialWords) {
+        const targetFillRatio = 0.85;
+        const currentFillRatio = occupiedCoords.size / (rows * cols);
+        if (currentFillRatio > targetFillRatio) {
+            break;
         }
 
-        for (let r = 0; r < rows; r++) { for (let c = 0; c < cols; c++) { if (board[r][c] === null) board[r][c] = _.sample(charSets[language]); } }
-
-        let hiddenWord = _.sample(mainWordPool.filter(w => w.length >= 5 && w.length <= 9)) || "TÜRKİYE";
-        const hiddenWordLetters = hiddenWord.split('');
-        let currentBoardLetters = new Set();
-        for(let r=0; r<rows; r++) { for(let c=0; c<cols; c++) { currentBoardLetters.add(board[r][c]); } }
-        
-        const missingLetters = hiddenWordLetters.filter(l => !currentBoardLetters.has(l));
-        if (missingLetters.length > 0) {
-            const unlockedCells = [];
-            for(let r=0; r<rows; r++) { for(let c=0; c<cols; c++) { if(!occupiedCoords.has(`${r}-${c}`)) unlockedCells.push({r,c}); }}
-            _.shuffle(unlockedCells).slice(0, missingLetters.length).forEach((cell, i) => {
-                board[cell.r][cell.c] = missingLetters[i];
+        const path = buildWindingPath(word);
+        if(path) {
+            path.forEach((pos, k) => {
+                board[pos.row][pos.col] = word[k];
+                occupiedCoords.add(`${pos.row}-${pos.col}`);
             });
+            placedWordsInfo.push({ word, positions: path, direction: 'snake' });
         }
-        
-        const scatteredHiddenLetterPositions = [];
-        const hiddenWordCharCount = _.countBy(hiddenWordLetters);
-        const tempBoard = JSON.parse(JSON.stringify(board));
+    }
+
+    const threeLetterWords = _.shuffle(wordsByLength['3'] || []);
+    let addedThreeLetterCount = 0;
+    for (const word of threeLetterWords) {
+        if (addedThreeLetterCount >= 2) {
+            break;
+        }
+        const path = buildWindingPath(word);
+        if (path) {
+            path.forEach((pos, k) => {
+                board[pos.row][pos.col] = word[k];
+                occupiedCoords.add(`${pos.row}-${pos.col}`);
+            });
+            placedWordsInfo.push({ word, positions: path, direction: 'snake' });
+            addedThreeLetterCount++;
+        }
+    }
+
+    const placedLetters = placedWordsInfo.flatMap(info => info.word.split(''));
+    if (placedLetters.length > 0) {
         for (let r = 0; r < rows; r++) {
             for (let c = 0; c < cols; c++) {
-                const char = tempBoard[r][c];
-                if (hiddenWordCharCount[char] > 0) {
-                    scatteredHiddenLetterPositions.push({ row: r, col: c });
-                    hiddenWordCharCount[char]--;
-                    tempBoard[r][c] = null;
+                if (board[r][c] === null) {
+                    board[r][c] = _.sample(placedLetters);
                 }
             }
         }
-        
-       const uniquePlacedWords = _.uniqBy(placedWordsInfo, 'word');
-
-
-if (uniquePlacedWords.length === 0) {
-    console.error("createTakipBoard: 50 denemeye rağmen hiçbir kelime yerleştirilemedi.");
-    return null;
-}
-
-return { board, words: _.sortBy(uniquePlacedWords, 'word'), hiddenWord, scatteredHiddenLetterPositions: [] };
+    } else {
+         for (let r = 0; r < rows; r++) {
+             for (let c = 0; c < cols; c++) {
+                 if (board[r][c] === null) board[r][c] = _.sample(charSets[language]);
+             }
+         }
     }
-    console.error("Kelime Takibi tahtası oluşturulamadı.");
-    return null; 
-}
 
+    const hiddenWordLetters = hiddenWord.split('');
+    let currentBoardLetters = new Set();
+    for(let r=0; r<rows; r++) { for(let c=0; c<cols; c++) { currentBoardLetters.add(board[r][c]); } }
+
+    const missingLetters = hiddenWordLetters.filter(l => !currentBoardLetters.has(l));
+    if (missingLetters.length > 0) {
+        const unlockedCells = [];
+        for(let r=0; r<rows; r++) { for(let c=0; c<cols; c++) { if(!occupiedCoords.has(`${r}-${c}`)) unlockedCells.push({r,c}); }}
+        _.shuffle(unlockedCells).slice(0, missingLetters.length).forEach((cell, i) => {
+            board[cell.r][cell.c] = missingLetters[i];
+        });
+    }
+
+    if (placedWordsInfo.length === 0) {
+        console.error("createTakipBoard: Hiç kelime yerleştirilemedi.");
+        return createTakipBoard(level, language, config);
+    }
+
+   const uniquePlacedWords = _.uniqBy(placedWordsInfo, 'word');
+    return { board, words: _.sortBy(uniquePlacedWords, 'word'), hiddenWord, scatteredHiddenLetterPositions: [] };
+}
 
 function Modal({ isOpen, title, children, onClose }) {
     if (!isOpen) return null;
@@ -1642,6 +1747,9 @@ const Cell = React.memo(function Cell({letter, isSelected, isFoundRequiredPart, 
             }
         }
     }
+
+
+
 
     const calculateFontSize = () => {
         if (!numCols) return { fontSize: '18px' };
@@ -1709,18 +1817,128 @@ function LeaderboardDisplay({ scores, currentUser, language }) {
             );
         }
     
-function LeaderboardModal({ isOpen, onClose, currentUser, language }) { const t = translations[language] || translations['en']; const [activeTab, setActiveTab] = React.useState('super-easy'); const [scores, setScores] = React.useState({ 'super-easy': [], easy: [], hard: [], 'timed-easy': [], 'timed-hard': [] }); const [loading, setLoading] = React.useState(true);
+function LeaderboardModal({ isOpen, onClose, currentUser, language }) {
+    const t = translations[language] || translations['en'];
+    
+    // 1. Yeni State'ler: Ana mod seçimi ve alt sekme için ayrı state'ler
+    const [mainMode, setMainMode] = React.useState('avi'); // 'avi' veya 'takip'
+    const [activeTab, setActiveTab] = React.useState('super-easy');
+    const [scores, setScores] = React.useState({}); // Tüm skorları mod anahtarıyla saklayacak
+    const [loading, setLoading] = React.useState(true);
 
-        const tabs = [
-
+    // 2. Alt Sekme Tanımları: Her ana moda özel sekmeler
+    const aviTabs = [
         { key: 'super-easy', line1Key: 'çok', line2Key: 'kolay', activeBg: 'bg-green-500' },
-                { key: 'easy', line1Key: 'kolay', line2Key: 'normal', activeBg: 'bg-teal-500' },
-                { key: 'hard', line1Key: 'zor', line2Key: 'normal', activeBg: 'bg-red-500' },
-                { key: 'timed-easy', line1Key: 'süreli', line2Key: 'kolay', activeBg: 'bg-blue-500' },
-                { key: 'timed-hard', line1Key: 'süreli', line2Key: 'zor', activeBg: 'bg-orange-500' }
-            ];
+        { key: 'easy', line1Key: 'kolay', line2Key: 'normal', activeBg: 'bg-teal-500' },
+        { key: 'hard', line1Key: 'zor', line2Key: 'normal', activeBg: 'bg-red-500' },
+        { key: 'timed-easy', line1Key: 'süreli', line2Key: 'kolay', activeBg: 'bg-blue-500' },
+        { key: 'timed-hard', line1Key: 'süreli', line2Key: 'zor', activeBg: 'bg-orange-500' }
+    ];
 
-         React.useEffect(() => { if (isOpen) { setLoading(true); const fetchPromises = tabs.map(tab => db.collection("scores") .where("mode", "==", tab.key) .orderBy("score", "desc") .limit(50) .get() ); Promise.all(fetchPromises) .then(snapshots => { const newScores = {}; snapshots.forEach((snapshot, index) => { const mode = tabs[index].key; newScores[mode] = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })); }); setScores(newScores); }) .catch(error => console.error("Liderlik tablosu verileri çekilirken hata oluştu:", error)) .finally(() => setLoading(false)); } }, [isOpen]); if (!isOpen) return null; return ( <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4" onClick={onClose}> <div className="bg-white dark:bg-gray-900 p-4 sm:p-6 rounded-xl shadow-2xl max-w-lg w-full text-center relative" onClick={e => e.stopPropagation()}> <h3 className="text-3xl font-bold mb-4 text-gray-800 dark:text-gray-100">🏆 {t.leaderboard} 🏆</h3> <button onClick={onClose} className="absolute top-2 right-2 text-gray-500 hover:text-gray-800 dark:hover:text-gray-200 text-3xl">&times;</button> <div className="flex items-center border-b-2 border-gray-200 dark:border-gray-700"> {tabs.map(tab => { const isActive = activeTab === tab.key; return ( <button key={tab.key} onClick={() => setActiveTab(tab.key)} className={`flex-1 flex flex-col justify-center items-center h-14 py-1 text-center transition-all duration-300 border-x border-transparent ${isActive ? `${tab.activeBg} scale-105 z-10 rounded-t-lg` : 'hover:bg-gray-100 dark:hover:bg-gray-800'}`}> <span className={`block text-xs font-bold leading-tight uppercase ${isActive ? 'text-white' : 'text-gray-500 dark:text-gray-400'}`}> {t[tab.line1Key]} </span> <span className={`block text-xs font-semibold leading-tight uppercase ${isActive ? 'text-white' : 'text-gray-500 dark:text-gray-400'}`}> {t[tab.line2Key]} </span> </button> ); })} </div> <div className="min-h-[300px]"> {loading ? ( <p className="text-gray-600 dark:text-gray-400 pt-10">Liderlik tablosu yükleniyor...</p> ) : ( <LeaderboardDisplay scores={scores[activeTab]} currentUser={currentUser} language={language} /> )} </div> </div> </div> ); }
+    const takipTabs = [
+        { key: 'takip-super-easy', line1Key: 'çok', line2Key: 'kolay', activeBg: 'bg-green-500' },
+        { key: 'takip-easy', line1Key: 'kolay', line2Key: 'normal', activeBg: 'bg-teal-500' },
+        { key: 'takip-timed-easy', line1Key: 'süreli', line2Key: 'kolay', activeBg: 'bg-blue-500' },
+    ];
+
+    // Gösterilecek olan mevcut sekmeleri belirle
+    const currentTabs = mainMode === 'avi' ? aviTabs : takipTabs;
+
+    // 3. Ana Mod Değiştiğinde Alt Sekmeyi Sıfırlama
+    React.useEffect(() => {
+        if (isOpen) {
+            // Ana mod değiştiğinde, o modun ilk sekmesini aktif yap
+            setActiveTab(currentTabs[0].key);
+        }
+    }, [mainMode, isOpen]);
+
+    React.useEffect(() => {
+        if (!isOpen) return;
+        
+
+        setLoading(true);
+        db.collection("scores")
+            .where("mode", "==", activeTab)
+            .orderBy("score", "desc")
+            .limit(300)
+            .get()
+            .then(snapshot => {
+                const highScores = {};
+                snapshot.docs.forEach(doc => {
+                    const data = doc.data();
+                    if (!data.username) return;
+                    if (!highScores[data.username] || data.score > highScores[data.username].score) {
+                        highScores[data.username] = { id: doc.id, ...data };
+                    }
+                });
+                const finalScores = Object.values(highScores).sort((a, b) => b.score - a.score).slice(0, 50);
+
+
+
+                setScores(prevScores => ({...prevScores, [activeTab]: finalScores }));
+            })
+            .catch(error => console.error("Liderlik tablosu verileri çekilirken hata oluştu:", error))
+            .finally(() => setLoading(false));
+
+    }, [isOpen, activeTab]);
+
+    if (!isOpen) return null;
+
+    return (
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4" onClick={onClose}>
+            <div className="bg-white dark:bg-gray-900 p-4 sm:p-6 rounded-xl shadow-2xl max-w-lg w-full text-center relative" onClick={e => e.stopPropagation()}>
+                <h3 className="text-3xl font-bold mb-4 text-gray-800 dark:text-gray-100">🏆 Liderlik Tablosu</h3>
+                <button onClick={onClose} className="absolute top-2 right-2 text-gray-500 hover:text-gray-800 dark:hover:text-gray-200 text-3xl">&times;</button>
+                
+                {/* 5. YENİ: Ana Mod Seçim Butonları */}
+                <div className="grid grid-cols-2 gap-3 mb-4">
+                    <button
+                        onClick={() => setMainMode('avi')}
+                        className={`py-3 font-bold text-lg rounded-lg transition-all transform ${mainMode === 'avi' ? 'bg-sky-500 text-white scale-105 shadow-lg' : 'bg-gray-200 hover:bg-gray-300'}`}
+                    >
+                        🧭 Kelime Avı
+                    </button>
+                    <button
+                        onClick={() => setMainMode('takip')}
+                        className={`py-3 font-bold text-lg rounded-lg transition-all transform ${mainMode === 'takip' ? 'bg-amber-500 text-white scale-105 shadow-lg' : 'bg-gray-200 hover:bg-gray-300'}`}
+                    >
+                        🎯 Kelime Takibi
+                    </button>
+                </div>
+                
+                {/* 6. GÜNCELLENMİŞ: Alt Sekme Çubuğu */}
+                <div className="flex items-center border-b-2 border-gray-200 dark:border-gray-700">
+                    {currentTabs.map(tab => {
+                        const isActive = activeTab === tab.key;
+                        return (
+                            <button
+                                key={tab.key}
+                                onClick={() => setActiveTab(tab.key)}
+                                className={`flex-1 flex flex-col justify-center items-center h-14 py-1 text-center transition-all duration-300 border-x border-transparent ${isActive ? `${tab.activeBg} scale-105 z-10 rounded-t-lg` : 'hover:bg-gray-100 dark:hover:bg-gray-800'}`}
+                            >
+                                <span className={`block text-xs font-bold leading-tight uppercase ${isActive ? 'text-white' : 'text-gray-500 dark:text-gray-400'}`}>
+                                    {t[tab.line1Key]}
+                                </span>
+                                <span className={`block text-xs font-semibold leading-tight uppercase ${isActive ? 'text-white' : 'text-gray-500 dark:text-gray-400'}`}>
+                                    {t[tab.line2Key]}
+                                </span>
+                            </button>
+                        );
+                    })}
+                </div>
+                
+                <div className="min-h-[300px]">
+                    {loading ? (
+                        <p className="text-gray-600 dark:text-gray-400 pt-10">Liderlik tablosu yükleniyor...</p>
+                    ) : (
+                        <LeaderboardDisplay scores={scores[activeTab] || []} currentUser={currentUser} language={language} />
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+}
+
 
 
 function WordHuntOptionsModal({ t, startGame, onClose }) {
@@ -1752,6 +1970,7 @@ function WordHuntOptionsModal({ t, startGame, onClose }) {
     );
 }
 
+
 function WordTrackingOptionsModal({ t, startGame, onClose }) {
     const modes = [
         { key: 'takip-super-easy', icon: '🐛', title: t.superEasyMode, desc: t.superEasyDesc, color: 'from-green-500 to-emerald-600' },
@@ -1759,14 +1978,15 @@ function WordTrackingOptionsModal({ t, startGame, onClose }) {
         { key: 'takip-timed-easy', icon: '⏳', title: t.timedEasyMode, desc: t.timedEasyDesc, color: 'from-blue-500 to-indigo-600' },
         { key: 'takip-random', icon: '🐠', title: t.randomMode, desc: t.randomDesc, color: 'from-purple-500 to-violet-600' }
     ];
+    
     return (
         <div className="p-2">
             <div className="grid grid-cols-2 gap-3 text-white">
                  {modes.map(mode => (
                     <button 
                         key={mode.key}
-onClick={() => { startGame(mode.key); }}                       
- className={`p-4 h-32 rounded-xl flex flex-col items-center justify-center text-center transition-all transform hover:scale-105 bg-gradient-to-br ${mode.color}`}
+                        onClick={() => { startGame(mode.key); }}                       
+                        className={`p-4 h-32 rounded-xl flex flex-col items-center justify-center text-center transition-all transform hover:scale-105 bg-gradient-to-br ${mode.color}`}
                     >
                         <span className="text-5xl drop-shadow-lg">{mode.icon}</span>
                         <span className="font-bold mt-1">{mode.title}</span>
@@ -1777,6 +1997,7 @@ onClick={() => { startGame(mode.key); }}
         </div>
     );
 }
+
 
 
 function MultiplayerOptionsModal({ t, onBrowseRooms, onCreateRoom, onClose }) {
@@ -1806,7 +2027,6 @@ function MultiplayerOptionsModal({ t, onBrowseRooms, onCreateRoom, onClose }) {
     );
 }
 
-
 function HomePage({
     startGame,
     startGameVsComputer,
@@ -1828,7 +2048,7 @@ function HomePage({
     openVsComputerSetupModal
 }) {
     const t = translations[language] || translations['en'];
-    
+
     const handleAchievementsClick = () => {
         setModalContent({
             isOpen: true,
@@ -1838,123 +2058,156 @@ function HomePage({
         });
     };
 
-    const MainSectionCard = ({ title, icon, onClick, bgColor, description }) => {
-        return (
-            <div className={`rounded-2xl shadow-lg text-white overflow-hidden ${bgColor} transition-all duration-300 hover:shadow-2xl hover:scale-[1.03]`}>
-                <button onClick={onClick} className="w-full p-6 text-left">
-                    <div className="flex justify-between items-center">
-                        <div className="flex-1">
-                            <h3 className="text-2xl font-bold tracking-tight">{title}</h3>
-                            <p className="text-sm opacity-90 font-light mt-1">{description}</p>
-                        </div>
-                        <div className="ml-4">
-                            <span className="text-6xl opacity-40 drop-shadow-lg">{icon}</span>
-                        </div>
-                    </div>
-                </button>
-            </div>
-        );
-    };
-    
     const selectedCardColor = playerCardColors.find(c => c.id === cardColor) || playerCardColors.find(c => c.id === 'gray');
 
     return (
-        <div className="h-full w-full flex flex-col bg-logo-animated-gradient">
-            <div className="container mx-auto px-4 pt-3 text-center flex flex-col flex-1 overflow-hidden">
-               <header className="flex-shrink-0 my-6">
-    <div className="w-full max-w-md mx-auto text-center">
-        {/* YENİ FONT ve STİL ile Ana Başlık */}
-        <h1 className="text-5xl md:text-6xl tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-rose-500 to-cyan-400 drop-shadow-lg font-lilita">
-            {t.title}
-        </h1>
+        <div className="h-full w-full flex flex-col justify-center items-center p-4 bg-logo-animated-gradient">
+            <div className="w-full max-w-sm">
+                <header className="text-center">
+                    <div className="w-full max-w-md mx-auto text-center">
+                        <h1 className="text-4xl md:text-5xl tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-rose-500 to-cyan-400 drop-shadow-lg font-lilita">
+                            {t.title}
+                        </h1>
+                        <div className="inline-block mt-2 bg-slate-900/30 backdrop-blur-sm px-3 py-0.5 rounded-full">
+                            <p className="text-white text-xs font-semibold font-poppins drop-shadow">
+                                {t.homePageSubtitle}
+                            </p>
+                        </div>
+                    </div>
+                </header>
 
-        {/* YENİ STİL: Koyu renk efekti için "hap" (pill) tasarımı */}
-        <div className="inline-block mt-3 bg-slate-900/30 backdrop-blur-sm px-4 py-1 rounded-full">
-            <p className="text-white text-sm font-semibold font-poppins drop-shadow">
-                {t.homePageSubtitle}
+                <main className="my-6">
+                    <div className="grid grid-cols-2 gap-4" style={{gridTemplateRows: 'repeat(2, 160px)'}}>
+                        <ModernModeCard
+                            title={t.wordHuntTitle}
+                            icon="🧭"
+                            bgColor="bg-gradient-to-br from-sky-400 to-blue-500"
+                            onClick={openWordHuntModal}
+                        />
+                        <ModernModeCard
+                            title={t.wordTrackingTitle}
+                            icon="🐉"
+                            bgColor="bg-gradient-to-br from-amber-400 to-orange-500"
+                            onClick={openWordTrackingModal}
+                        />
+                        <ModernModeCard
+                            title={t.lobbyTitle}
+                            icon="⚔️"
+                            bgColor="bg-gradient-to-br from-purple-500 to-indigo-600"
+                            onClick={openMultiplayerModal}
+                            buttonText="Giriş"
+                            disabled={!username}
+                        />
+                        <ModernModeCard
+                            title={t.vsAiTitle}
+                            icon="🤖"
+                            bgColor="bg-gradient-to-br from-slate-500 to-gray-700"
+                            onClick={openVsComputerSetupModal}
+                            buttonText="Oyna"
+                        />
+                    </div>
+                </main>
+
+                <footer className="text-center">
+    <div className="flex-shrink-0 grid grid-cols-2 gap-3 mb-4 max-w-sm mx-auto">
+        <button
+            onClick={() => setLeaderboardModalOpen(true)}
+            className="w-full p-2 bg-gradient-to-br from-amber-400 to-orange-500 text-white font-bold rounded-xl shadow-lg flex items-center justify-center gap-2 transition-transform hover:scale-105"
+        >
+            <span className="text-xl">🏆</span>
+            <span className="text-sm">{t.leaderboardButton}</span>
+        </button>
+        <button
+            onClick={handleAchievementsClick}
+            className="w-full p-2 bg-gradient-to-br from-lime-500 to-emerald-600 text-white font-bold rounded-xl shadow-lg flex items-center justify-center gap-2 transition-transform hover:scale-105"
+        >
+            <span className="text-xl">🏅</span>
+            <span className="text-sm">{t.achievementsButton}</span>
+        </button>
+    </div>
+
+    <div className="flex flex-col items-center gap-4">
+        {/* Profil Kısmı */}
+        {username && (
+            <div
+                onClick={openProfileModal}
+                className={`flex items-center gap-2 p-1.5 pr-4 rounded-full shadow-md cursor-pointer transition-all hover:shadow-lg hover:scale-105 ${selectedCardColor.class}`}
+            >
+                <img
+                    src={avatarId ? `avatars/${avatarId}.png` : 'avatars/default.png'}
+                    className="w-9 h-9 rounded-full object-cover border-2 border-white/50"
+                />
+                <p className="font-bold text-sm text-white drop-shadow">{username}</p>
+            </div>
+        )}
+
+        {/* YENİ VE BAYRAKLI DİL DEĞİŞTİRİCİ */}
+        <div className="relative inline-flex items-center bg-slate-900/30 rounded-full p-1">
+            <button
+                onClick={() => setLanguage('tr')}
+                className={`flex items-center justify-center gap-2 px-4 py-1.5 text-sm font-bold rounded-full transition-colors duration-300 ease-in-out ${language === 'tr' ? 'bg-white text-indigo-600 shadow-md' : 'bg-transparent text-white/70 hover:text-white'}`}
+            >
+                <img src="tr_flag.svg" alt="Türkçe" className="w-5 h-5 rounded-full" />
+                <span>Türkçe</span>
+            </button>
+            <button
+                onClick={() => setLanguage('en')}
+                className={`flex items-center justify-center gap-2 px-4 py-1.5 text-sm font-bold rounded-full transition-colors duration-300 ease-in-out ${language === 'en' ? 'bg-white text-indigo-600 shadow-md' : 'bg-transparent text-white/70 hover:text-white'}`}
+            >
+                <img src="gb_flag.svg" alt="English" className="w-5 h-5 rounded-full" />
+                <span>English</span>
+            </button>
+        </div>
+
+
+
+
+
+        {/* YENİ VE OKUNAKLI FOOTER */}
+        <div className="inline-block bg-slate-900/30 backdrop-blur-sm px-4 py-1 rounded-full mt-4 shadow-md">
+            <p className="text-xs text-white/70 font-semibold">
+                {t.footerText}
             </p>
         </div>
     </div>
-</header>
-
-                {/* Ana İçerik - Oyun Modu Butonları */}
-                <div className="flex-1 overflow-y-auto scrollbar-thin py-4">
-                    <div className="w-full max-w-md mx-auto space-y-4">
-                        <MainSectionCard title={t.lobbyTitle} icon="⚔️" description={t.lobbyDescription} onClick={openMultiplayerModal} bgColor="bg-gradient-to-br from-purple-600 to-indigo-700" />
-                        <MainSectionCard title={t.vsAiTitle} icon="🤖" description={t.vsAiDescription} onClick={openVsComputerSetupModal} bgColor="bg-gradient-to-br from-slate-500 to-slate-700" />
-                        <MainSectionCard title={t.wordHuntTitle} icon="🧭" description={t.wordHuntDescription} onClick={openWordHuntModal} bgColor="bg-gradient-to-br from-sky-500 to-cyan-600" />
-                        <MainSectionCard title={t.wordTrackingTitle} icon="🎯" description={t.wordTrackingDescription} onClick={openWordTrackingModal} bgColor="bg-gradient-to-br from-amber-500 to-orange-600" />
-                    </div>
-                </div>
-                
-                {/* YENİ ALT BÖLÜM (FOOTER) */}
-                <footer className="p-4 text-center text-sm text-slate-500 flex-shrink-0">
-                    {/* 1. Liderlik ve Başarılar Butonları Buraya Taşındı */}
-                    <div className="flex-shrink-0 grid grid-cols-2 gap-3 mb-6 max-w-sm mx-auto">
-                        <button 
-                            onClick={() => setLeaderboardModalOpen(true)} 
-                            className="w-full p-3 bg-gradient-to-br from-amber-400 to-orange-500 text-white font-bold rounded-xl shadow-lg flex items-center justify-center gap-2 transition-transform hover:scale-105"
-                        >
-                            <span className="text-2xl">📈</span>
-                            <span>{t.leaderboardButton}</span>
-                        </button>
-                        <button 
-                            onClick={handleAchievementsClick} 
-                            className="w-full p-3 bg-gradient-to-br from-lime-500 to-emerald-600 text-white font-bold rounded-xl shadow-lg flex items-center justify-center gap-2 transition-transform hover:scale-105"
-                        >
-                            <span className="text-2xl">🏅</span>
-                            <span>{t.achievementsButton}</span>
-                        </button>
-                    </div>
-
-                    {/* 2. Avatar Kutusu ve Dil Seçenekleri İçin Yeni Yatay Kapsayıcı */}
-                    <div className="flex items-center justify-center gap-6 w-full">
-                        {username && (
-                            <div 
-                                onClick={openProfileModal}
-                                className={`flex items-center gap-2 p-1.5 pr-4 rounded-full shadow-md cursor-pointer transition-all hover:shadow-lg hover:scale-105 ${selectedCardColor.class}`}
-                            >
-                                <img
-                                    src={avatarId ? `avatars/${avatarId}.png` : 'avatars/default.png'}
-                                    className="w-12 h-12 rounded-full object-cover border-2 border-white/50"
-                                />
-                                <p className="font-bold text-sm text-white drop-shadow">{username}</p>
-                            </div>
-                        )}
-
-                        {/* Dil Değiştirme Butonları */}
-                        <div className="flex items-center justify-center gap-4">
-                            <button 
-                                onClick={() => setLanguage('tr')}
-                                title="Türkçe"
-                                className={`w-12 h-12 p-1 rounded-full transition-all duration-200 ${language === 'tr' ? 'transform scale-110 ring-2 ring-offset-2 ring-indigo-500' : 'opacity-60 hover:opacity-100 hover:scale-110'}`}
-                            >
-                                <img src="tr_flag.svg" alt="Türkçe" className="w-full h-full rounded-full object-cover shadow-md" />
-                            </button>
-
-                            <button 
-                                onClick={() => setLanguage('en')}
-                                title="English"
-                                className={`w-12 h-12 p-1 rounded-full transition-all duration-200 ${language === 'en' ? 'transform scale-110 ring-2 ring-offset-2 ring-indigo-500' : 'opacity-60 hover:opacity-100 hover:scale-110'}`}
-                            >
-                                <img src="gb_flag.svg" alt="English" className="w-full h-full rounded-full object-cover shadow-md" />
-                            </button>
-                        </div>
-                    </div>
-
-                    <div className="mt-4 text-xs text-white/60">
-                        {t.footerText}
-                    </div>
-                </footer>
+</footer>
             </div>
         </div>
     );
 }
 
-const WordHunt = React.forwardRef(({ config, gameId, username, goToHome, language, stats, onStatsChange, initialSavedState, setToastMessage, toastMessage }, ref) => {
+
+
+
+const MagnifyingLoupe = React.memo(function MagnifyingLoupe({ visible, letter, top, left }) {
+    if (!visible || !letter) return null;
+
+    const style = {
+        top: `${top}px`,
+        left: `${left}px`,
+        transform: 'translate(-50%, -100%)', };
+
+    return (
+        <div 
+            className="fixed z-50 pointer-events-none transition-opacity duration-150"
+            style={style}
+        >
+            <div className="w-16 h-16 bg-slate-800 text-white text-4xl font-black rounded-full flex items-center justify-center shadow-lg border-4 border-white">
+                {letter}
+            </div>
+            <div className="w-0 h-0 border-l-8 border-l-transparent border-r-8 border-r-transparent border-t-8 border-t-slate-800 mx-auto"></div>
+        </div>
+    );
+});
+
+
+
+
+
+const WordHunt = React.forwardRef(({ config, gameId, username, goToHome, language, stats, onStatsChange, initialSavedState, setToastMessage, toastMessage, setToastStyle }, ref) => {
     const t = translations[language] || translations['en'];
 
-
+const [loupeState, setLoupeState] = React.useState({ visible: false, letter: null, top: 0, left: 0 });
 React.useImperativeHandle(ref, () => ({
         showExitConfirmation() {
             handleGoHomeClick();
@@ -2000,6 +2253,14 @@ React.useImperativeHandle(ref, () => ({
     const computerStateRef = React.useRef(computerState);
     const [loadingProgress, setLoadingProgress] = React.useState(0);
     const [loadingMessageIndex, setLoadingMessageIndex] = React.useState(0);
+React.useEffect(() => {
+    const isTakip = config.modeType === 'takip';
+    const modeName = isTakip ? 'Kelime Takibi (🐉)' : 'Kelime Avı ( 🧭️ )';
+    setToastStyle(isTakip ? 'orange' : 'blue');
+    setToastMessage(`${modeName} Modu Başladı!`);
+}, []);
+
+
     React.useEffect(() => {
         if (!isGenerating) return;
 
@@ -2048,28 +2309,52 @@ React.useImperativeHandle(ref, () => ({
 
 const handleInteractionStart = React.useCallback((clientX, clientY) => {
     const canPlay = isRealtimeDuel || isVsComputer ? true : !allRequiredWordsFound;
-    if (!canPlay || !board) {
-        return;
-    }
+    if (!canPlay || !board) return;
     
     const cell = getCellFromEvent(clientX, clientY);
-    const cellFoundStatus = cell ? isCellFound(cell.row, cell.col) : 'yok';
-
-    if (cell && !cellFoundStatus) {
+    if (cell && !isCellFound(cell.row, cell.col)) {
         setIsSwiping(true);
         setSelectedCells([cell]);
-    } else {
+
+        if (config.modeType === 'takip') {
+            const cellElement = document.querySelector(`[data-row='${cell.row}'][data-col='${cell.col}']`);
+            if (cellElement) {
+                const rect = cellElement.getBoundingClientRect();
+                setLoupeState({
+                    visible: true,
+                    letter: board[cell.row][cell.col],
+                    top: rect.top - 10,
+                    left: rect.left + (rect.width / 2)
+                });
+            }
+        }
     }
-}, [board, isCellFound, isRealtimeDuel, allRequiredWordsFound, isVsComputer]);
-
-
+}, [board, isCellFound, isRealtimeDuel, allRequiredWordsFound, isVsComputer, config.modeType]);
 
 const handleInteractionMove = React.useCallback((clientX, clientY) => {
     if (!isSwiping) return;
-
     const currentCell = getCellFromEvent(clientX, clientY);
     if (!currentCell) return;
     
+    const lastSelectedCell = selectedCells[selectedCells.length - 1];
+    if (lastSelectedCell && lastSelectedCell.row === currentCell.row && lastSelectedCell.col === currentCell.col) {
+        return;
+    }
+
+    if (config.modeType === 'takip') {
+        const cellElement = document.querySelector(`[data-row='${currentCell.row}'][data-col='${currentCell.col}']`);
+        if (cellElement) {
+            const rect = cellElement.getBoundingClientRect();
+            setLoupeState(prev => ({
+                ...prev,
+                visible: true,
+                letter: board[currentCell.row][currentCell.col],
+                top: rect.top - 10,
+                left: rect.left + (rect.width / 2)
+            }));
+        }
+    }
+
     setSelectedCells(prevSelectedCells => {
         if (prevSelectedCells.length === 0) return prevSelectedCells;
         
@@ -2116,9 +2401,7 @@ const handleInteractionMove = React.useCallback((clientX, clientY) => {
             return path;
         }
     });
-}, [isSwiping, board, config.modeType, isCellFound]);
-
-
+}, [isSwiping, board, config.modeType, isCellFound, selectedCells]);
 
     const throttledMouseMove = React.useMemo(() => _.throttle((e) => handleInteractionMove(e.clientX, e.clientY), 50), [handleInteractionMove]);
 
@@ -2348,79 +2631,80 @@ const handleInteractionMove = React.useCallback((clientX, clientY) => {
 
    
 
-    const handleInteractionEnd = () => {
-        if (!isSwiping || !board || selectedCells.length <= 1) {
-            setIsSwiping(false);
+const handleInteractionEnd = () => {
+    setLoupeState(prev => ({ ...prev, visible: false }));
+    
+    if (!isSwiping || !board || selectedCells.length <= 1) {
+        setIsSwiping(false);
+        setSelectedCells([]);
+        return;
+    }
+    setIsSwiping(false);
+    const rawWord = selectedCells.map(c => board?.[c.row]?.[c.col] || '').join('');
+    const word = customToUpperCase(rawWord);
+    if (isRealtimeDuel) {
+        const targetWord = realtimeGameData.boardData.words.find(w => w.word === word);
+        const alreadyFoundByAnyPlayer = Object.values(realtimeGameData.players).some(p => (p.foundWords || []).includes(word));
+        if (targetWord && !alreadyFoundByAnyPlayer) {
+            playSound('correctSound');
+            vibrate('success');
+            const points = word.length * 10;
+            const gameRef = db.collection('game_rooms').doc(gameId);
+            const scoreUpdateKey = `players.${username}.score`;
+            const scoreUpdate = { [scoreUpdateKey]: firebase.firestore.FieldValue.increment(points) };
+            const wordsUpdateKey = `players.${username}.foundWords`;
+            const wordsUpdate = { [wordsUpdateKey]: firebase.firestore.FieldValue.arrayUnion(word) };
+            gameRef.update(scoreUpdate).catch(err => console.error("Skor güncellenirken hata:", err));
+            gameRef.update(wordsUpdate).catch(err => console.error("Kelime güncellenirken hata:", err));
+        } else {
+            playSound('wrongSound');
+            vibrate('error');
+        }
+    } else {
+        const isAlreadyUsedByComputer = isVsComputer && selectedCells.some(cell =>
+            gameState.words.some(w =>
+                computerState.foundWords.includes(w.word) &&
+                w.positions.some(p => p.row === cell.row && p.col === cell.col)
+            )
+        );
+        if (isAlreadyUsedByComputer) {
+            playSound('wrongSound');
+            vibrate('error');
             setSelectedCells([]);
             return;
         }
-        setIsSwiping(false);
-        const rawWord = selectedCells.map(c => board?.[c.row]?.[c.col] || '').join('');
-        const word = customToUpperCase(rawWord);
-        if (isRealtimeDuel) {
-            const targetWord = realtimeGameData.boardData.words.find(w => w.word === word);
-            const alreadyFoundByAnyPlayer = Object.values(realtimeGameData.players).some(p => (p.foundWords || []).includes(word));
-            if (targetWord && !alreadyFoundByAnyPlayer) {
+        const targetWord = gameState.words.find(w => w.word === word);
+        if (targetWord && !foundWords.includes(word)) {
+            setFoundWords(prev => [...prev, word]);
+            setFoundWordsInOrder(prev => [...prev, word]);
+            let wordScore = isVsComputer ? word.length * 5 : word.length * (getScoreMultiplier(levelStartTime));
+            setScore(s => s + wordScore);
+            playSound('correctSound');
+            vibrate('success');
+            setJustFoundWordInfo({ word, positions: targetWord.positions });
+            setTimeout(() => setJustFoundWordInfo(null), 600);
+        }
+        else {
+            const masterWordList = (wordLists[language] || []).map(customToUpperCase);
+            const isBonusWord = masterWordList.includes(word);
+            const alreadyFound = foundWords.includes(word) || foundBonusWords.includes(word);
+            if (isBonusWord && !alreadyFound && word.length >= 3) {
+                setFoundBonusWords(prev => [...prev, word]);
+                const bonusScore = word.length * 2;
+                setScore(s => s + bonusScore);
                 playSound('correctSound');
                 vibrate('success');
-                const points = word.length * 10;
-                const gameRef = db.collection('game_rooms').doc(gameId);
-                const scoreUpdateKey = `players.${username}.score`;
-                const scoreUpdate = { [scoreUpdateKey]: firebase.firestore.FieldValue.increment(points) };
-                const wordsUpdateKey = `players.${username}.foundWords`;
-                const wordsUpdate = { [wordsUpdateKey]: firebase.firestore.FieldValue.arrayUnion(word) };
-                gameRef.update(scoreUpdate).catch(err => console.error("Skor güncellenirken hata:", err));
-                gameRef.update(wordsUpdate).catch(err => console.error("Kelime güncellenirken hata:", err));
+                setJustFoundWordInfo({ word, positions: selectedCells });
+                setTimeout(() => setJustFoundWordInfo(null), 600);
+                setToastMessage(`Listede olmayan (${word}) kelimesini buldun, +${bonusScore} puan`);
             } else {
                 playSound('wrongSound');
                 vibrate('error');
             }
-        } else {
-            const isAlreadyUsedByComputer = isVsComputer && selectedCells.some(cell =>
-                gameState.words.some(w =>
-                    computerState.foundWords.includes(w.word) &&
-                    w.positions.some(p => p.row === cell.row && p.col === cell.col)
-                )
-            );
-            if (isAlreadyUsedByComputer) {
-                playSound('wrongSound');
-                vibrate('error');
-                setSelectedCells([]);
-                return;
-            }
-            const targetWord = gameState.words.find(w => w.word === word);
-			if (targetWord && !foundWords.includes(word)) {
-				setFoundWords(prev => [...prev, word]);
-				setFoundWordsInOrder(prev => [...prev, word]);
-				let wordScore = isVsComputer ? word.length * 5 : word.length * (getScoreMultiplier(levelStartTime));
-				setScore(s => s + wordScore);
-				playSound('correctSound');
-				vibrate('success');
-				setJustFoundWordInfo({ word, positions: targetWord.positions });
-				setTimeout(() => setJustFoundWordInfo(null), 600);
-			}
-            else {
-                const masterWordList = (wordLists[language] || []).map(customToUpperCase);
-                const isBonusWord = masterWordList.includes(word);
-                const alreadyFound = foundWords.includes(word) || foundBonusWords.includes(word);
-                if (isBonusWord && !alreadyFound && word.length >= 3) {
-                    setFoundBonusWords(prev => [...prev, word]);
-                    const bonusScore = word.length * 2;
-                    setScore(s => s + bonusScore);
-                    playSound('correctSound');
-                    vibrate('success');
-                    setJustFoundWordInfo({ word, positions: selectedCells });
-                    setTimeout(() => setJustFoundWordInfo(null), 600);
-                    setToastMessage(`Listede olmayan (${word}) kelimesini buldun, +${bonusScore} puan`);
-                } else {
-                    playSound('wrongSound');
-                    vibrate('error');
-                }
-            }
         }
-        setSelectedCells([]);
-    };
-  
+    }
+    setSelectedCells([]);
+};  
     const playSound = React.useCallback((soundId) => {
         const sound = document.getElementById(soundId);
         if (sound) {
@@ -2470,36 +2754,58 @@ const handleInteractionMove = React.useCallback((clientX, clientY) => {
 
     const triggerConfetti = () => confetti({ particleCount: 150, spread: 90, origin: { y: 0.6 } });
     
-    const handleCheckHiddenWord = () => {
-        if (!gameState || !gameState.hiddenWord) { return; }
-        const getHiddenWordMultiplier = (attempts) => { const attemptNumber = attempts + 1; if (attemptNumber === 1) return 5; if (attemptNumber === 2) return 4; if (attemptNumber === 3) return 3; if (attemptNumber === 4) return 2; return 1; };
-        const guessedWord = customToUpperCase(answerSlots.map(l => l && l.char).join(''));
-        const correctWord = gameState.hiddenWord;
-        if (guessedWord === correctWord) {
-            playSound('achievementSound'); vibrate('achievement'); triggerConfetti();
-            const newStats = { ...stats }; if (!newStats.modesCompleted) newStats.modesCompleted = {};
-            newStats.modesCompleted[config.name] = true; let goldEarned = 0;
-            if (config.name === 'easy' || config.name === 'super-easy') goldEarned = 1; else if (config.name === 'hard') goldEarned = 3; else if (config.name === 'timed-easy') goldEarned = 5; else if (config.name === 'timed-hard') goldEarned = 8;
-            newStats.gold = (stats.gold || 0) + goldEarned;
-            const attemptMultiplier = getHiddenWordMultiplier(hiddenWordAttempts);
-            const hiddenWordBaseScore = (correctWord.length * 50); const finalHiddenWordScore = hiddenWordBaseScore * attemptMultiplier;
-            const finalScore = score + finalHiddenWordScore; setScore(finalScore);
-            const currentHighScore = newStats.highScores[config.name] || 0;
-            newStats.highScores[config.name] = Math.max(currentHighScore, finalScore); onStatsChange(newStats);
-            const shareText = `Kelime Avı'nda ${level + 1}. seviyeyi tamamladım ve ${finalScore} puan aldım!`;
-            setModalContent({
-                isOpen: true, title: '', onClose: config?.isOneShot ? goToHome : goToNextLevel,
-                body: ( <div className="text-white bg-gradient-to-br from-green-500 to-teal-600 rounded-2xl shadow-2xl p-6 text-center w-full max-w-sm"> <div className="text-6xl mb-3 animate-bounce">🏆</div> <h2 className="text-3xl font-black tracking-tight mb-2">Seviye Tamamlandı!</h2> <div className="grid grid-cols-2 gap-4 text-left my-6 bg-black/20 p-4 rounded-xl"> <div className="border-r border-white/20 pr-4"> <p className="text-xs text-white/70 uppercase tracking-wider">Seviye</p> <p className="text-3xl font-bold">{level + 1}</p> </div> <div> <p className="text-xs text-white/70 uppercase tracking-wider">Kazanılan Altın</p> <p className="text-3xl font-bold">💰 +{goldEarned}</p> </div> <div className="col-span-2 text-center border-t border-white/20 pt-4"> <p className="text-sm font-semibold text-white/80 uppercase">Toplam Puan</p> <p className="text-5xl font-extrabold">{finalScore}</p> </div> </div> <div className="flex flex-col gap-3"> {config?.isOneShot ? ( <button onClick={goToHome} className="w-full px-4 py-3 bg-white text-green-700 font-bold rounded-lg transform transition-transform hover:scale-105 shadow-lg">Ana Sayfaya Dön</button> ) : ( <button onClick={goToNextLevel} className="w-full px-4 py-3 bg-white text-green-700 font-bold rounded-lg transform transition-transform hover:scale-105 shadow-lg">Sonraki Seviye →</button> )} </div> <ShareButtons text={shareText} setToastMessage={setToastMessage} /> </div> )
-            });
-        } else {
-            playSound('wrongSound'); vibrate('error'); setIsShaking(true); setTimeout(() => setIsShaking(false), 400); setHiddenWordAttempts(prev => prev + 1);
-            const lettersToReturn = []; const newAnswerSlots = Array(gameState.hiddenWord.length).fill(null);
-            answerSlots.forEach((letter, index) => { if (letter) { if (hintLockedSlots.includes(index)) { newAnswerSlots[index] = letter; } else { lettersToReturn.push(letter); } } });
-            setSourceLetters(prevSource => _.shuffle([...prevSource, ...lettersToReturn])); setAnswerSlots(newAnswerSlots);
+const handleCheckHiddenWord = async () => {
+    if (!gameState || !gameState.hiddenWord) { return; }
+    const getHiddenWordMultiplier = (attempts) => { const attemptNumber = attempts + 1; if (attemptNumber === 1) return 5; if (attemptNumber === 2) return 4; if (attemptNumber === 3) return 3; if (attemptNumber === 4) return 2; return 1; };
+    const guessedWord = customToUpperCase(answerSlots.map(l => l && l.char).join(''));
+    const correctWord = gameState.hiddenWord;
+    if (guessedWord === correctWord) {
+        playSound('achievementSound'); vibrate('achievement'); triggerConfetti();
+        const newStats = { ...stats }; if (!newStats.modesCompleted) newStats.modesCompleted = {};
+        newStats.modesCompleted[config.name] = true; let goldEarned = 0;
+        if (config.name === 'easy' || config.name === 'super-easy') goldEarned = 1; else if (config.name === 'hard') goldEarned = 3; else if (config.name === 'timed-easy') goldEarned = 5; else if (config.name === 'timed-hard') goldEarned = 8;
+        newStats.gold = (stats.gold || 0) + goldEarned;
+        const attemptMultiplier = getHiddenWordMultiplier(hiddenWordAttempts);
+        const hiddenWordBaseScore = (correctWord.length * 50); const finalHiddenWordScore = hiddenWordBaseScore * attemptMultiplier;
+        const finalScore = score + finalHiddenWordScore; setScore(finalScore);
+        const currentHighScore = newStats.highScores[config.name] || 0;
+        newStats.highScores[config.name] = Math.max(currentHighScore, finalScore);
+        onStatsChange(newStats);
+
+        if (username) {
+            try {
+                await db.collection("scores").add({
+                    username: username,
+                    score: finalScore,
+                    mode: config.name,
+                    level: level + 1,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+            } catch (error) {
+                console.error("Liderlik skoru kaydedilirken hata oluştu: ", error);
+            }
         }
-    };
+        
+        const shareText = `Kelime Avı'nda ${level + 1}. seviyeyi tamamladım ve ${finalScore} puan aldım!`;
+        setModalContent({
+            isOpen: true, title: '', onClose: config?.isOneShot ? goToHome : goToNextLevel,
+            body: ( <div className="text-white bg-gradient-to-br from-green-500 to-teal-600 rounded-2xl shadow-2xl p-6 text-center w-full max-w-sm"> <div className="text-6xl mb-3 animate-bounce">🏆</div> <h2 className="text-3xl font-black tracking-tight mb-2">Seviye Tamamlandı!</h2> <div className="grid grid-cols-2 gap-4 text-left my-6 bg-black/20 p-4 rounded-xl"> <div className="border-r border-white/20 pr-4"> <p className="text-xs text-white/70 uppercase tracking-wider">Seviye</p> <p className="text-3xl font-bold">{level + 1}</p> </div> <div> <p className="text-xs text-white/70 uppercase tracking-wider">Kazanılan Altın</p> <p className="text-3xl font-bold">💰 +{goldEarned}</p> </div> <div className="col-span-2 text-center border-t border-white/20 pt-4"> <p className="text-sm font-semibold text-white/80 uppercase">Toplam Puan</p> <p className="text-5xl font-extrabold">{finalScore}</p> </div> </div> <div className="flex flex-col gap-3"> {config?.isOneShot ? ( <button onClick={goToHome} className="w-full px-4 py-3 bg-white text-green-700 font-bold rounded-lg transform transition-transform hover:scale-105 shadow-lg">Ana Sayfaya Dön</button> ) : ( <button onClick={goToNextLevel} className="w-full px-4 py-3 bg-white text-green-700 font-bold rounded-lg transform transition-transform hover:scale-105 shadow-lg">Sonraki Seviye →</button> )} </div> <ShareButtons text={shareText} setToastMessage={setToastMessage} setToastStyle={setToastStyle} /> </div> )
+        });
+    } else {
+        playSound('wrongSound'); vibrate('error'); setIsShaking(true); setTimeout(() => setIsShaking(false), 400); setHiddenWordAttempts(prev => prev + 1);
+        const lettersToReturn = []; const newAnswerSlots = Array(gameState.hiddenWord.length).fill(null);
+        answerSlots.forEach((letter, index) => { if (letter) { if (hintLockedSlots.includes(index)) { newAnswerSlots[index] = letter; } else { lettersToReturn.push(letter); } } });
+        setSourceLetters(prevSource => _.shuffle([...prevSource, ...lettersToReturn])); setAnswerSlots(newAnswerSlots);
+    }
+};
     
-	const getModeDisplayName = (modeKey, translations) => {
+	
+
+
+
+
+
+const getModeDisplayName = (modeKey, translations) => {
         const keyMap = { 'super-easy': 'superEasyMode', 'easy': 'easyMode', 'hard': 'hardMode', 'timed-easy': 'timedEasyMode', 'timed-hard': 'timedHardMode' };
         const translationKey = keyMap[modeKey] || 'randomMode';
         return translations[translationKey] || modeKey;
@@ -2631,8 +2937,12 @@ const handleInteractionMove = React.useCallback((clientX, clientY) => {
 			setModalContent({
 				isOpen: true,
 				title: '',
-				onClose: goToHome,
-				body: (
+onClose: () => {
+    if (realtimeGameData && realtimeGameData.host === username) {
+        db.collection('game_rooms').doc(gameId).delete().catch(err => console.error("Oda silinemedi:", err));
+    }
+    goToHome();
+},				body: (
 					 <div className={`relative w-full max-w-sm text-white bg-gradient-to-br ${cardClass} rounded-2xl shadow-2xl p-6 text-center`}>
 						<div className="text-6xl mb-4 animate-bounce">{resultIcon}</div>
 						<h2 className="text-4xl font-black tracking-tighter mb-2">{resultTitle}</h2>
@@ -2785,36 +3095,85 @@ const handleInteractionMove = React.useCallback((clientX, clientY) => {
     }, [realtimeGameData, username]);
 
 	if (isLoading || isGenerating) {
-        const message = t.loadingMessages[loadingMessageIndex];
-        const levelText = t.level;
-        const levelNumber = level + 1;
+        if (config.name === 'vs-computer') {
+        const modeTypeMap = { 'avi': 'Kelime Avı', 'takip': 'Kelime Takibi' };
+        const aiStrengthMap = { 'zayif': 'Zayıf', 'orta': 'Orta', 'guclu': 'Güçlü' };
+        const difficultyMap = { 'easy': 'Kolay', 'hard': 'Zor' };
+        const boardSizeMap = { 'small': 'Küçük', 'medium': 'Orta', 'large': 'Geniş' };
+
+        const dynamicMessage = `-${modeTypeMap[config.modeType] || ''} modunda, ${aiStrengthMap[config.aiStrength] || ''} zekâya karşı, ${difficultyMap[config.difficulty] || ''} seviyede ${boardSizeMap[config.boardSize] || ''} büyüklükte oyun hazırlanıyor...`;
+
+       return (
+     <div className="h-full w-full flex flex-col items-center justify-center text-white p-4" style={{
+        background: 'linear-gradient(135deg, #1f2937, #374151, #4b5563)', 
+        backgroundSize: '400% 400%',
+        animation: 'gradient-animation 15s ease infinite'
+    }}>
+        <img src="logo.png" alt="Oyun Logosu" className="w-36 h-36 mb-6 drop-shadow-lg" />
         
-		return (
-            <div className="h-full w-full flex flex-col items-center justify-center text-white p-4" style={{
-                background: 'linear-gradient(135deg, #4f46e5, #7c3aed, #db2777, #f59e0b)',
-                backgroundSize: '400% 400%',
-                animation: 'gradient-animation 10s ease infinite'
-            }}>
-                <img src="logo.png" alt="Oyun Logosu" className="w-36 h-36 mb-6 drop-shadow-lg animate-bounce" />
-                
-                <div className="text-center mb-6" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.5)' }}>
-                    <p className="text-5xl font-black tracking-tighter">
-                        <span className="text-cyan-300">{levelText}</span>
-                        <span className="text-white ml-3">{levelNumber}</span>
-                    </p>
-                </div>
+        <div className="text-center mb-6" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.5)' }}>
+            <p className="text-5xl font-black tracking-tighter">
+                <span className="text-red-500">VS</span>
+                <span className="text-gray-300 ml-3">AI 🤖</span>
+            </p>
+        </div>
 
-                <p className="text-xl text-white/80 animate-pulse min-h-[28px]">{message || t.loading}</p>
-
-                <div className="w-64 max-w-full mt-6 bg-white/20 rounded-full h-3.5 overflow-hidden shadow-inner border border-white/30">
-                    <div
-                        className="bg-gradient-to-r from-green-300 via-cyan-300 to-green-300 h-full rounded-full transition-all duration-300 ease-linear"
-                        style={{ width: `${Math.min(loadingProgress, 100)}%` }}
-                    ></div>
-                </div>
+        {/* --- YENİLENEN YAZI ALANI --- */}
+        <div className="text-lg text-white/90 animate-pulse min-h-[120px] text-center max-w-md flex flex-col items-center justify-center gap-1 mb-4">
+            <div className="bg-white/10 px-3 py-1 rounded-full">
+                <span className="font-bold text-cyan-300">{modeTypeMap[config.modeType] || ''}</span> Modunda
             </div>
-        );
-	}
+            <div className="text-base text-white/80">
+                <span className="font-bold text-amber-300">{aiStrengthMap[config.aiStrength] || ''}</span> zekâya karşı
+            </div>
+            <div className="text-base text-white/80">
+                <span className="font-bold text-green-300">{difficultyMap[config.difficulty] || ''}</span> seviyede, <span className="font-bold text-purple-300">{boardSizeMap[config.boardSize] || ''}</span> alanda
+            </div>
+            <div className="text-sm text-white/70 mt-2">
+                Oyun hazırlanıyor...
+            </div>
+        </div>
+
+        <div className="w-64 max-w-full bg-white/20 rounded-full h-3.5 overflow-hidden shadow-inner border border-white/30">
+            <div
+                className="bg-gradient-to-r from-red-500 via-rose-500 to-red-500 h-full rounded-full transition-all duration-300 ease-linear"
+                style={{ width: `${Math.min(loadingProgress, 100)}%` }}
+            ></div>
+        </div>
+    </div>
+);
+    }
+
+    const message = t.loadingMessages[loadingMessageIndex];
+    const levelText = t.level;
+    const levelNumber = level + 1;
+    
+    return (
+        <div className="h-full w-full flex flex-col items-center justify-center text-white p-4" style={{
+            background: 'linear-gradient(135deg, #4f46e5, #7c3aed, #db2777, #f59e0b)',
+            backgroundSize: '400% 400%',
+            animation: 'gradient-animation 10s ease infinite'
+        }}>
+            <img src="logo.png" alt="Oyun Logosu" className="w-36 h-36 mb-6 drop-shadow-lg animate-bounce" />
+            
+            <div className="text-center mb-6" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.5)' }}>
+                <p className="text-5xl font-black tracking-tighter">
+                    <span className="text-cyan-300">{levelText}</span>
+                    <span className="text-white ml-3">{levelNumber}</span>
+                </p>
+            </div>
+
+            <p className="text-xl text-white/80 animate-pulse min-h-[28px]">{message || t.loading}</p>
+
+            <div className="w-64 max-w-full mt-6 bg-white/20 rounded-full h-3.5 overflow-hidden shadow-inner border border-white/30">
+                <div
+                    className="bg-gradient-to-r from-green-300 via-cyan-300 to-green-300 h-full rounded-full transition-all duration-300 ease-linear"
+                    style={{ width: `${Math.min(loadingProgress, 100)}%` }}
+                ></div>
+            </div>
+        </div>
+    );
+}
 
     if (error) { return (<div className="flex flex-col items-center justify-center h-full p-4 text-center"><p className="text-lg font-semibold text-red-600">{error}</p><button onClick={goToHome} className="mt-4 bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600">Ana Sayfaya Dön</button></div>); }
     
@@ -2851,7 +3210,7 @@ const handleInteractionMove = React.useCallback((clientX, clientY) => {
 						{board.map((row, r) => row.map((letter, c) => {
 							const isSelected = selectedCells.some(cell => cell.row === r && cell.col === c);
 							const owner = cellOwnerMap[`${r}-${c}`];
-							let cellClass = 'bg-white text-gray-800 hover:bg-gray-200';
+							let cellClass = 'bg-white text-gray-800';
 							if (isSelected) {
 								cellClass = 'bg-yellow-300 text-black transform scale-110 shadow-lg';
 							} else if (owner && realtimeGameData.players[owner]) {
@@ -2886,6 +3245,8 @@ const handleInteractionMove = React.useCallback((clientX, clientY) => {
 						<button onClick={showExitConfirmation} className="w-full py-2 px-4 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg shadow-md transition-all text-sm">Oyundan Çık (Terk Et)</button>
 					</div>
 					<Modal isOpen={modalContent.isOpen} title={modalContent.title} onClose={modalContent.onClose || closeModal}>{modalContent.body}</Modal>
+<MagnifyingLoupe visible={loupeState.visible} letter={loupeState.letter} top={loupeState.top} left={loupeState.left} />
+
 				</div>
 			</div>
 		);
@@ -2906,7 +3267,7 @@ const handleInteractionMove = React.useCallback((clientX, clientY) => {
             onTouchEnd={handleInteractionEnd} onTouchCancel={handleInteractionEnd}
             onContextMenu={(e) => e.preventDefault()} >
 
-            {board.map((row, r) => row.map((letter, c) => { const isSelected = selectedCells.some(cell => cell.row === r && cell.col === c); const foundBy = isCellFound(r, c); let cellClass = 'bg-white text-gray-800 hover:bg-gray-200'; if (isSelected) { cellClass = 'bg-yellow-300 text-black transform scale-110 shadow-lg'; } else if (foundBy === 'player') { cellClass = 'bg-green-300 text-green-800'; } else if (foundBy === 'computer') { cellClass = 'bg-red-300 text-red-800'; } return ( <div key={`${r}-${c}`} data-row={r} data-col={c} className={`flex items-center justify-center aspect-square text-center font-bold rounded-sm transition-all duration-150 select-none ${cellClass}`} style={fontSizeStyle}> {letter} </div> );}))} </div> </div> <div className="flex-1 min-h-0 w-full max-w-2xl mx-auto"> <div className="bg-white rounded-lg p-1 shadow h-full overflow-y-auto scrollbar-thin"> <div className="flex flex-wrap justify-center content-start gap-x-1.5 gap-y-1 p-1"> {allWordsInLevel.map(({ word }) => { const isFound = allFoundWordsCombined.has(word); const isHidden = config.difficulty === 'hard' && !isFound; return (<span key={word} className={`font-medium transition-all duration-300 rounded-md px-2 py-1 text-xs ${ isFound ? 'bg-gray-300 text-gray-500 line-through opacity-50' : isHidden ? 'bg-gray-400 text-transparent pointer-events-none' : 'bg-indigo-100 text-gray-800' }`}>{isHidden ? '???' : word}</span>); })} </div> </div> </div> <div className="flex-shrink-0 w-full max-w-2xl mx-auto"> <button onClick={showExitConfirmation} className="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow-md transition-all text-sm">Ana Menüye Dön</button> </div> </div> </div> );
+            {board.map((row, r) => row.map((letter, c) => { const isSelected = selectedCells.some(cell => cell.row === r && cell.col === c); const foundBy = isCellFound(r, c); let cellClass = 'bg-white text-gray-800'; if (isSelected) { cellClass = 'bg-yellow-300 text-black transform scale-110 shadow-lg'; } else if (foundBy === 'player') { cellClass = 'bg-green-300 text-green-800'; } else if (foundBy === 'computer') { cellClass = 'bg-red-300 text-red-800'; } return ( <div key={`${r}-${c}`} data-row={r} data-col={c} className={`flex items-center justify-center aspect-square text-center font-bold rounded-sm transition-all duration-150 select-none ${cellClass}`} style={fontSizeStyle}> {letter} </div> );}))} </div> </div> <div className="flex-1 min-h-0 w-full max-w-2xl mx-auto"> <div className="bg-white rounded-lg p-1 shadow h-full overflow-y-auto scrollbar-thin"> <div className="flex flex-wrap justify-center content-start gap-x-1.5 gap-y-1 p-1"> {allWordsInLevel.map(({ word }) => { const isFound = allFoundWordsCombined.has(word); const isHidden = config.difficulty === 'hard' && !isFound; return (<span key={word} className={`font-medium transition-all duration-300 rounded-md px-2 py-1 text-xs ${ isFound ? 'bg-gray-300 text-gray-500 line-through opacity-50' : isHidden ? 'bg-gray-400 text-transparent pointer-events-none' : 'bg-indigo-100 text-gray-800' }`}>{isHidden ? '???' : word}</span>); })} </div> </div> </div> <div className="flex-shrink-0 w-full max-w-2xl mx-auto"> <button onClick={showExitConfirmation} className="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow-md transition-all text-sm">Ana Menüye Dön</button> </div> </div> </div> );
     }
 
     const calculateFontSize = (numCols) => {
@@ -2947,22 +3308,22 @@ const handleInteractionMove = React.useCallback((clientX, clientY) => {
 
                 <div className="w-full flex-shrink-0">
                     {!allRequiredWordsFound ? (
-                        <div ref={gridRef} className={`grid gap-0.5 content-start rounded-lg shadow-md w-full max-w-full mx-auto aspect-square ${theme.gridBg}`} 
-                            style={{ gridTemplateColumns: `repeat(${board[0].length}, minmax(0, 1fr))` }} 
-                            onMouseDown={(e) => handleInteractionStart(e.clientX, e.clientY)} 
-                            onMouseMove={(e) => throttledMouseMove(e.clientX, e.clientY)} 
-                            onMouseUp={handleInteractionEnd} onMouseLeave={handleInteractionEnd} 
-                            onTouchStart={(e) => handleInteractionStart(e.touches[0].clientX, e.touches[0].clientY)} 
+                        <div ref={gridRef} className={`grid gap-0.5 content-start rounded-lg shadow-md w-full max-w-full mx-auto aspect-square ${theme.gridBg}`}
+                            style={{ gridTemplateColumns: `repeat(${board[0].length}, minmax(0, 1fr))` }}
+                            onMouseDown={(e) => handleInteractionStart(e.clientX, e.clientY)}
+                            onMouseMove={(e) => throttledMouseMove(e.clientX, e.clientY)}
+                            onMouseUp={handleInteractionEnd} onMouseLeave={handleInteractionEnd}
+                            onTouchStart={(e) => handleInteractionStart(e.touches[0].clientX, e.touches[0].clientY)}
                             onTouchEnd={handleInteractionEnd} onTouchCancel={handleInteractionEnd}
                             onContextMenu={(e) => e.preventDefault()}
                         >
                         {(() => {
                             const numCols = board[0] ? board[0].length : 1;
-							return board.map((row, rowIndex) => row.map((letter, colIndex) => { 
+							return board.map((row, rowIndex) => row.map((letter, colIndex) => {
 								const isSelected = selectedCells.some(cell => cell.row === rowIndex && cell.col === colIndex);
-								const isFoundPart = isCellFound(rowIndex, colIndex); 
-								const isJustFound = justFoundWordInfo?.positions.some(p => p.row === rowIndex && p.col === colIndex); 
-								const isBonusGlowCell = bonusGlowCells.some(cell => cell.row === rowIndex && cell.col === colIndex); 
+								const isFoundPart = isCellFound(rowIndex, colIndex);
+								const isJustFound = justFoundWordInfo?.positions.some(p => p.row === rowIndex && p.col === colIndex);
+								const isBonusGlowCell = bonusGlowCells.some(cell => cell.row === rowIndex && cell.col === colIndex);
 								const colorInfo = foundCellColorMap[`${rowIndex}-${colIndex}`];
 								return <Cell key={`${rowIndex}-${colIndex}`} letter={letter} isSelected={isSelected} isFoundRequiredPart={!!isFoundPart} isJustFound={isJustFound} isBonusGlow={isBonusGlowCell} theme={theme} numCols={numCols} foundWordColorInfo={colorInfo} rowIndex={rowIndex} colIndex={colIndex} />;
 							}));
@@ -2997,8 +3358,9 @@ const handleInteractionMove = React.useCallback((clientX, clientY) => {
 					<button onClick={handleGoHomeClick} title={t.homeButton} className="w-full rounded-xl p-1 flex flex-row items-center justify-center gap-2 shadow-sm font-bold text-sm bg-white/80 hover:bg-white border border-slate-200 text-slate-700"><span className="text-base">🏠</span><span>{t.homeButton}</span></button>
 					{allRequiredWordsFound ? ( <button onClick={handleHiddenWordHint} disabled={stats.gold < 1} className="w-full rounded-xl p-1 flex flex-row items-center justify-center gap-2 shadow-sm font-bold text-sm bg-sky-500 hover:bg-sky-600 text-white disabled:bg-slate-400 disabled:text-white/80 disabled:cursor-not-allowed"> <span className="text-base">🔑</span> <span>{t.hint}</span> <span className="opacity-80 font-normal">(-1💰)</span> </button> ) : ( <button onClick={handleRevealWordHint} disabled={stats.gold < 1 || (gameState && foundWords.length === gameState.words.length)} className="w-full rounded-xl p-1 flex flex-row items-center justify-center gap-2 shadow-sm font-bold text-sm bg-amber-500 hover:bg-amber-600 text-white disabled:bg-slate-400 disabled:text-white/80 disabled:cursor-not-allowed"> <span className="text-base">🔎</span> <span>{t.reveal}</span> <span className="opacity-80 font-normal">(-1💰)</span> </button> )}
 				</div>
-                <Modal isOpen={modalContent.isOpen} title={modalContent.title} onClose={modalContent.onClose || closeModal}>{modalContent.body}</Modal>
-            </div>
+        <Modal isOpen={modalContent.isOpen} title={modalContent.title} onClose={modalContent.onClose || closeModal}>{modalContent.body}</Modal>
+        <MagnifyingLoupe visible={loupeState.visible} letter={loupeState.letter} top={loupeState.top} left={loupeState.left} />
+    </div>
         </div>
     );
 });
@@ -3058,7 +3420,7 @@ function DuelModeModal({ isOpen, onClose, duelProgress, startGame, currentUser, 
         return (
             <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-2 sm:p-4" onClick={onClose}>
                 <div className="bg-white dark:bg-gray-900 p-4 sm:p-6 rounded-2xl shadow-2xl max-w-4xl w-full text-center relative max-h-[95vh] overflow-y-auto scrollbar-thin" onClick={e => e.stopPropagation()}>
-                    <h3 className="text-3xl sm:text-4xl font-black mb-6 text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-indigo-600">🏆 DÜELLO MEYDANI 🏆</h3>
+                    <h3 className="text-3xl sm:text-4xl font-black mb-6 text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-indigo-600">🏆 DÜELLO MEYDANI</h3>
                     <button onClick={onClose} className="absolute top-3 right-3 text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 text-4xl">&times;</button>
                     <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-8">
                         {duelModes.map(modeInfo => {
@@ -3247,33 +3609,23 @@ function App() {
         const [isInitializing, setIsInitializing] = React.useState(true);
         const [gameId, setGameId] = React.useState(null);
         const [toastMessage, setToastMessage] = React.useState(null);
+	const [toastStyle, setToastStyle] = React.useState('blue'); 
         const [isAvatarModalOpen, setIsAvatarModalOpen] = React.useState(false);
         const [avatarId, setAvatarId] = React.useState(null);
         const [isProfileModalOpen, setIsProfileModalOpen] = React.useState(false);
         const [friendRequest, setFriendRequest] = React.useState(null);
         const [cardColor, setCardColor] = React.useState(null);
-		const [unlockedAvatars, setUnlockedAvatars] = React.useState(['avatar1', 'avatar2', 'avatar3']);
+	const [unlockedAvatars, setUnlockedAvatars] = React.useState(['avatar1', 'avatar2', 'avatar3']);
         const [unlockedColors, setUnlockedColors] = React.useState(['gray', 'teal', 'sky']);
         const [directInvite, setDirectInvite] = React.useState(null);
         const [gameKey, setGameKey] = React.useState(null);
         const [isLeaderboardModalOpen, setLeaderboardModalOpen] = React.useState(false);
         const wordHuntRef = React.useRef(null);
         const [isCreateRoomModalOpen, setCreateRoomModalOpen] = React.useState(false);
-
         const t = translations[language] || translations['en'];
-
-
-
-
-
-
-
-const loadUserData = async (user) => {
+	const loadUserData = async (user) => {
         const userRef = db.collection("users").doc(user);
         const doc = await userRef.get();
-
-
-
 
         if (doc.exists) {
             const userData = doc.data();
@@ -3289,7 +3641,7 @@ const loadUserData = async (user) => {
         }
     };
 
-const handlePurchaseItem = async (itemType, itemId, cost) => {
+	const handlePurchaseItem = async (itemType, itemId, cost) => {
         if (gold < cost) {
             setToastMessage("Yetersiz altın!");
             return;
@@ -3391,10 +3743,11 @@ const createGameRoom = async (settings) => {
                 host: username,
                 createdAt: firebase.firestore.FieldValue.serverTimestamp(),
                 gameSettings: {
-                    boardSize: settings.boardSize || 'medium',
-                    difficulty: settings.difficulty || 'easy', 
-                    maxPlayers: parseInt(settings.maxPlayers) || 3,
-                },
+    boardSize: settings.boardSize || 'medium',
+    difficulty: settings.difficulty || 'easy',
+    maxPlayers: parseInt(settings.maxPlayers) || 3,
+    modeType: settings.modeType || 'avi', 
+},
                 players: {
                     [username]: { score: 0, foundWords: [], avatarId: avatarId || 'avatar1', cardColor: cardColor || 'gray', color: 'green', joinedAt: firebase.firestore.FieldValue.serverTimestamp() }
                 }
@@ -3405,7 +3758,7 @@ const createGameRoom = async (settings) => {
                 setToastMessage("Oda başarıyla kuruldu!");
                 setGameId(roomRef.id);
                 setPage('room_lobby');
-setModalContent({ isOpen: false }); 
+				setModalContent({ isOpen: false });
             } catch (error) {
                 console.error("Oda kurulamadı:", error);
                 setToastMessage("Hata: Oda oluşturulamadı.");
@@ -3430,7 +3783,7 @@ setModalContent({ isOpen: false });
                         setToastMessage("Zaten bu odadasınız.");
                         setGameId(roomIdToJoin);
                         setPage('room_lobby');
- setModalContent({ isOpen: false });
+ 						setModalContent({ isOpen: false });
                         return;
                     }
                     
@@ -3453,7 +3806,7 @@ setModalContent({ isOpen: false });
                 setToastMessage("Odaya başarıyla katıldınız!");
                 setGameId(roomIdToJoin);
                 setPage('room_lobby');
-
+				setModalContent({ isOpen: false });
             } catch (error) {
                 console.error("Odaya katılırken hata:", error);
                 setToastMessage(`Hata: ${error.toString()}`);
@@ -3468,7 +3821,6 @@ const startGame = async (roomId) => {
     try {
         const roomDoc = await roomRef.get();
         if (!roomDoc.exists) {
-            console.error("[startGame] Hata: Oda bulunamadı.");
             setToastMessage("Hata: Oyun odası bulunamadı.");
             return;
         }
@@ -3479,14 +3831,18 @@ const startGame = async (roomId) => {
             return;
         }
 
-        const boardSize = roomData.gameSettings.boardSize;
-        
-        const gameConfig = { name: 'multiplayer', boardSize: boardSize, modeType: 'avi' };
+        await roomRef.update({ status: 'generating' });
+
+        const gameConfig = {
+            name: 'multiplayer',
+            boardSize: roomData.gameSettings.boardSize,
+            modeType: roomData.gameSettings.modeType || 'avi'
+        };
         const newBoardData = createBoard(null, language, gameConfig);
 
         if (!newBoardData) {
-            console.error("[startGame] Hata: createBoard fonksiyonu 'null' döndürdü.");
-            setToastMessage("Hata: Oyun tahtası oluşturulamadı. Lütfen tekrar deneyin.");
+            setToastMessage("Hata: Oyun tahtası oluşturulamadı.");
+            await roomRef.update({ status: 'waiting' }); 
             return;
         }
 
@@ -3496,19 +3852,19 @@ const startGame = async (roomId) => {
         });
 
         await roomRef.update({
-            status: 'in-progress',
-            boardData: { ...newBoardData, board: boardAsMap }
+            'boardData': { ...newBoardData, board: boardAsMap },
+            'status': 'synchronizing'
         });
-        setPage('game');
+        
+
 
     } catch (error) {
-        console.error("[startGame] Veritabanı GÜNCELLEME HATASI:", error);
-        setToastMessage("Kritik Hata: Oyun veritabanına yazılamadı. Konsolu kontrol edin.");
+        console.error("Oyun başlatılırken hata:", error);
+        setToastMessage("Kritik Hata: Oyun başlatılamadı.");
     }
 };
 
-
-const sendDirectInvite = (targetPlayer, boardSize, difficulty) => {
+const sendDirectInvite = (targetPlayer, boardSize, difficulty, modeType) => {
             if (!username || !targetPlayer) return;
 
             setToastMessage(`${targetPlayer.username} kullanıcısına davet gönderiliyor...`);
@@ -3522,10 +3878,11 @@ const sendDirectInvite = (targetPlayer, boardSize, difficulty) => {
                 host: username,
                 createdAt: firebase.firestore.FieldValue.serverTimestamp(),
                 gameSettings: {
-                    boardSize: boardSize || 'medium',
-                    difficulty: difficulty || 'easy', 
-                    maxPlayers: 2
-                },
+    boardSize: boardSize || 'medium',
+    difficulty: difficulty || 'easy',
+    maxPlayers: 2,
+    modeType: modeType || 'avi', 
+},
                 players: {
                     [username]: { score: 0, foundWords: [], avatarId: avatarId || 'avatar1', cardColor: cardColor || 'gray', color: 'green' },
                     [targetPlayer.username]: { score: 0, foundWords: [], avatarId: targetPlayer.avatarId || 'avatar1', cardColor: targetPlayer.cardColor || 'gray', color: 'red' }
@@ -3547,6 +3904,7 @@ const sendDirectInvite = (targetPlayer, boardSize, difficulty) => {
                 setToastMessage("Davet gönderildi!");
                 setGameId(gameId);
                 setPage('room_lobby');
+                setModalContent({ isOpen: false });
             }).catch(error => {
                 console.error("Davet gönderilirken hata:", error);
                 setToastMessage("Hata: Davet gönderilemedi.");
@@ -3559,9 +3917,21 @@ const handleAcceptDirectInvite = async () => {
             try {
                 const roomDoc = await gameRef.get();
                 if (!roomDoc.exists) throw new Error("Oda bulunamadı!");
+                
                 const roomData = roomDoc.data();
-                const boardSize = roomData.gameSettings.boardSize;
-                const newBoardData = createBoard(null, language, null, boardSize);
+
+                // DÜZELTME BAŞLANGICI: Oda ayarlarından doğru bir config nesnesi oluşturuluyor
+                const gameConfig = {
+                    name: 'multiplayer',
+                    boardSize: roomData.gameSettings.boardSize,
+                    difficulty: roomData.gameSettings.difficulty,
+                    modeType: roomData.gameSettings.modeType // En önemli kısım: Oyun türünü buradan alıyoruz
+                };
+                
+                // createBoard fonksiyonu doğru config ile çağrılıyor
+                const newBoardData = createBoard(null, language, gameConfig);
+                // DÜZELTME SONU
+
                 if (!newBoardData) throw new Error("Oyun tahtası oluşturulamadı.");
 
                 const boardAsMap = {};
@@ -3582,6 +3952,8 @@ const handleAcceptDirectInvite = async () => {
                 setToastMessage("Hata: Oyuna katılamadınız. " + error.message);
             }
         };
+
+
 
         const handleDeclineDirectInvite = async () => {
             if (!directInvite) return;
@@ -3651,6 +4023,51 @@ React.useEffect(() => {
 
             return () => unsubscribe(); 
         }, [username, db]);
+
+
+React.useEffect(() => {
+    if (!username) return;
+    const userStatusDatabaseRef = rtdb.ref('/status/' + username);
+    const userStatusFirestoreRef = db.collection('lobby').doc(username);
+    const amOnline = {
+        presence: 'online',
+        last_changed: firebase.database.ServerValue.TIMESTAMP,
+    };
+    const amOffline = {
+        presence: 'offline',
+        last_changed: firebase.database.ServerValue.TIMESTAMP,
+    };
+    rtdb.ref('.info/connected').on('value', (snapshot) => {
+        if (snapshot.val() === false) {
+            userStatusFirestoreRef.set({ presence: 'offline' }, { merge: true });
+            return;
+        }
+        userStatusDatabaseRef.onDisconnect().set(amOffline).then(() => {
+            userStatusDatabaseRef.set(amOnline);
+
+            const handleVisibilityChange = () => {
+                if (document.visibilityState === 'hidden') {
+                    userStatusDatabaseRef.set(amOffline);
+                } else {
+                    userStatusDatabaseRef.set(amOnline);
+                }
+            };
+            document.addEventListener('visibilitychange', handleVisibilityChange);
+        });
+    });
+
+    const unsubscribe = userStatusDatabaseRef.on('value', (snapshot) => {
+        const status = snapshot.val();
+        if (status) {
+            userStatusFirestoreRef.set(status, { merge: true });
+        }
+    });
+
+    return () => {
+        rtdb.ref('.info/connected').off();
+        userStatusDatabaseRef.off();
+    };
+}, [username]);
 
 
 
@@ -3878,145 +4295,124 @@ React.useEffect(() => {
         }, [page]);
 
         React.useEffect(() => {
-            if (toastMessage) {
-                const timer = setTimeout(() => setToastMessage(null), 3800);
-                return () => clearTimeout(timer);
-            }
-        }, [toastMessage]);
+    if (toastMessage) {
+        const timer = setTimeout(() => {
+            setToastMessage(null);
+            setToastStyle('blue'); 
+        }, 3800);
+        return () => clearTimeout(timer);
+    }
+}, [toastMessage]);
 
 const startSinglePlayerGame = (selectedMode) => {
-            const t = translations[language] || translations['en'];
-            
-            const isTracking = selectedMode.startsWith('takip-');
-            const modeName = isTracking ? selectedMode.substring(6) : selectedMode;
-            const modeType = isTracking ? 'takip' : 'avi';
+    const t = translations[language] || translations['en'];
+    const isTracking = selectedMode.startsWith('takip-');
+    const modeType = isTracking ? 'takip' : 'avi';
 
-            if (modeName === 'random') {
-    let playableModes;
+    if (selectedMode.endsWith('random')) {
+        let playableModes;
+        if (isTracking) {
+            playableModes = ['takip-super-easy', 'takip-easy', 'takip-timed-easy'];
+        } else {
+            playableModes = ['super-easy', 'easy', 'hard', 'timed-easy', 'timed-hard'];
+        }
+        const randomModeKey = _.sample(playableModes);
 
-    if (isTracking) {
-        playableModes = ['super-easy', 'easy', 'timed-easy'];
-    } else {
-        playableModes = ['super-easy', 'easy', 'hard', 'timed-easy', 'timed-hard'];
+        // DÜZELTME BAŞLANGICI: Mod anahtarlarını, çeviri anahtarlarına dönüştüren net bir harita oluşturuyoruz.
+        const modeToTranslationKey = {
+            'super-easy': 'superEasyMode',
+            'easy': 'easyMode',
+            'hard': 'hardMode',
+            'timed-easy': 'timedEasyMode',
+            'timed-hard': 'timedHardMode',
+            'takip-super-easy': 'superEasyMode',
+            'takip-easy': 'easyMode',
+            'takip-timed-easy': 'timedEasyMode'
+        };
+
+        // Bu haritayı kullanarak doğru çeviri anahtarını ve kullanıcı dostu ismi alıyoruz.
+        const translationKey = modeToTranslationKey[randomModeKey];
+        const randomModeNameForUI = t[translationKey] || randomModeKey;
+        // DÜZELTME SONU
+        
+        const randomLevel = _.random(0, 89);
+        
+        setModalContent({
+            isOpen: true,
+            title: '',         
+            onClose: () => setModalContent({ isOpen: false }),
+            body: (
+                <div className="w-full max-w-sm text-white bg-gradient-to-br from-purple-500 to-indigo-600 rounded-2xl shadow-2xl p-6 text-center">
+                    <div className="text-6xl mb-4 animate-bounce">🐠</div>
+                    <h2 className="text-3xl font-bold mb-2">{t.randomGameTitle}</h2>
+                    <p className="text-white/80 mb-6" dangerouslySetInnerHTML={{ __html: t.randomGameBody(randomModeNameForUI, randomLevel + 1) }}></p>
+                    <button 
+                        onClick={() => {
+                            setGameKey(Date.now());
+                            setModeConfig({ name: randomModeKey, modeType: randomModeKey.startsWith('takip-') ? 'takip' : 'avi', level: randomLevel, isOneShot: true });
+                            setPage('game');
+                            setModalContent({ isOpen: false });
+                        }} 
+                        className="w-full bg-emerald-500 text-white font-bold py-3 rounded-lg shadow-lg hover:bg-emerald-600 transition-all transform hover:scale-105"
+                    >
+                        {t.startButton}
+                    </button>
+                </div>
+            )
+        });
+        return;
     }
 
-    const randomModeKey = _.sample(playableModes);
-    const keyForTranslation = randomModeKey.replace(/-(\w)/g, (m, l) => l.toUpperCase()) + 'Mode';
-    const randomModeName = t[keyForTranslation] || randomModeKey;
-    const randomLevel = _.random(0, 89);
-    
-    setModalContent({
-        isOpen: true,
-        title: '',         
-onClose: () => setModalContent({ isOpen: false }),
-        body: (
-            <div className="w-full max-w-sm text-white bg-gradient-to-br from-purple-500 to-indigo-600 rounded-2xl shadow-2xl p-6 text-center">
-                
-                {/* Balık Emojisi */}
-                <div className="text-6xl mb-4 animate-bounce">🐠</div>
-
-                {/* Başlık */}
-                <h2 className="text-3xl font-bold mb-2">
-                    {t.randomGameTitle}
-                </h2>
-
-                {/* Açıklama Metni */}
-                <p className="text-white/80 mb-6" dangerouslySetInnerHTML={{ __html: t.randomGameBody(randomModeName, randomLevel + 1) }}></p>
-                
-                {/* Başla Butonu */}
-                <button 
-                    onClick={() => {
-                        setGameKey(Date.now());
-                        setModeConfig({ name: randomModeKey, modeType: modeType, level: randomLevel, isOneShot: true });
-                        setPage('game');
-                        setModalContent({ isOpen: false });
-                    }} 
-                    className="w-full bg-emerald-500 text-white font-bold py-3 rounded-lg shadow-lg hover:bg-emerald-600 transition-all transform hover:scale-105"
-                >
-                    {t.startButton}
-                </button>
-            </div>
-        )
-    });
-    return;
-}
-
-            const savedGameForMode = allSaves?.[selectedMode];
-            
-if (!savedGameForMode) {
-                setModalContent({ isOpen: false });
-                setGameKey(Date.now());
-                setModeConfig({ name: modeName, modeType: modeType });
-                setPage('game');
-            } else {
-                const handleContinue = () => {
-                    setGameKey(Date.now());
-                    setModeConfig({ name: savedGameForMode.mode, modeType: modeType, level: savedGameForMode.level });
-                    setLanguage(savedGameForMode.language);
-                    setModalContent({ isOpen: false });
-                    setPage('game');
-                };
-                const handleNewGame = () => {
-                    const currentSaves = { ...allSaves };
-                    delete currentSaves[selectedMode];
-                    localStorage.setItem(ALL_SAVES_KEY, JSON.stringify(currentSaves));
-                    setAllSaves(currentSaves);
-                    
-                    setModalContent({ isOpen: false });
-                    setGameKey(Date.now());
-                    setModeConfig({ name: modeName, modeType: modeType });
-                    setPage('game');
-                };
-
-                let modalBgClass = 'from-sky-600 to-indigo-700';
-                if (savedGameForMode.mode.includes('super-easy')) {
-                    modalBgClass = 'from-purple-600 to-violet-700';
-                } else if (savedGameForMode.mode.includes('hard')) {
-                    modalBgClass = 'from-red-600 to-rose-700';
-                }
-                
-                setModalContent({
-                    isOpen: true,
-                    title: t.savedGameFoundTitle, 
-                    body: (
-                        <div className={`w-full max-w-sm text-white bg-gradient-to-br ${modalBgClass} rounded-2xl shadow-2xl p-6 text-center`}>
-    <div className="text-6xl mb-4 animate-spin-slow">🧭</div>
-    <h2 className="text-2xl font-bold mb-2">{t.savedGameFoundTitle}</h2>
-                            <p className="text-white/80 mb-6" dangerouslySetInnerHTML={{ __html: t.savedGameFoundBody(savedGameForMode.level + 1) }}></p>
-                            <div className="flex flex-col gap-3">
-                                <button 
-                                    onClick={handleContinue}
-                                    className="w-full px-8 py-3 bg-amber-500 text-white font-bold rounded-lg hover:bg-amber-400 transition-all transform hover:scale-105 shadow-lg"
-                                >
-                                    {t.continueButton}
-                                </button>
-                                <button 
-                                    onClick={handleNewGame}
-                                    className="w-full px-8 py-2 bg-emerald-600 text-white font-bold rounded-lg hover:bg-emerald-500 transition-all"
-                                >
-                                    {t.newGameButton}
-                                </button>
-                            </div>
-                        </div>
-                    ),
-                    onClose: () => setModalContent({ isOpen: false })
-                });
-            }
-        };
-
-	const launchVsComputerGame = (difficulty, boardSize, aiStrength) => { 
-            setModalContent({ isOpen: false });
+    const savedGameForMode = allSaves?.[selectedMode];
+    if (!savedGameForMode) {
+        setModalContent({ isOpen: false });
+        setGameKey(Date.now());
+        setModeConfig({ name: selectedMode, modeType: modeType, level: 0 });
+        setPage('game');
+    } else {
+        const handleContinue = () => {
             setGameKey(Date.now());
-            setModeConfig({ 
-                name: 'vs-computer', 
-                difficulty: difficulty, 
-                boardSize: boardSize,
-                aiStrength: aiStrength 
-            });
+            // ÖNEMLİ DÜZELTME: Kayıt dosyasındaki potansiyel hatalı 'mode' yerine,
+            // kullanıcının tıkladığı butonun doğru 'selectedMode' değerini kullanıyoruz.
+            setModeConfig({ name: selectedMode, modeType: modeType, level: savedGameForMode.level });
+            setLanguage(savedGameForMode.language);
+            setModalContent({ isOpen: false });
             setPage('game');
         };
+        const handleNewGame = () => {
+            const currentSaves = { ...allSaves };
+            delete currentSaves[selectedMode];
+            localStorage.setItem(ALL_SAVES_KEY, JSON.stringify(currentSaves));
+            setAllSaves(currentSaves);
+            setModalContent({ isOpen: false });
+            setGameKey(Date.now());
+            setModeConfig({ name: selectedMode, modeType: modeType, level: 0 });
+            setPage('game');
+        };
+        let modalBgClass = 'from-sky-600 to-indigo-700';
+        if (savedGameForMode.mode.includes('super-easy')) { modalBgClass = 'from-purple-600 to-violet-700'; } else if (savedGameForMode.mode.includes('hard')) { modalBgClass = 'from-red-600 to-rose-700'; }
+        setModalContent({
+            isOpen: true, title: t.savedGameFoundTitle,
+            body: ( <div className={`w-full max-w-sm text-white bg-gradient-to-br ${modalBgClass} rounded-2xl shadow-2xl p-6 text-center`}> <div className="text-6xl mb-4 animate-spin-slow">🧭</div> <h2 className="text-2xl font-bold mb-2">{t.savedGameFoundTitle}</h2> <p className="text-white/80 mb-6" dangerouslySetInnerHTML={{ __html: t.savedGameFoundBody(savedGameForMode.level + 1) }}></p> <div className="flex flex-col gap-3"> <button onClick={handleContinue} className="w-full px-8 py-3 bg-amber-500 text-white font-bold rounded-lg hover:bg-amber-400 transition-all transform hover:scale-105 shadow-lg">{t.continueButton}</button> <button onClick={handleNewGame} className="w-full px-8 py-2 bg-emerald-600 text-white font-bold rounded-lg hover:bg-emerald-500 transition-all">{t.newGameButton}</button> </div> </div> ),
+            onClose: () => setModalContent({ isOpen: false })
+        });
+    }
+};
 
 
+
+const launchVsComputerGame = (difficulty, boardSize, aiStrength, modeType) => { 
+    setModalContent({ isOpen: false });
+    setGameKey(Date.now());
+    setModeConfig({ 
+        name: 'vs-computer', 
+        difficulty: difficulty, 
+        boardSize: boardSize,
+        aiStrength: aiStrength,
+        modeType: modeType || 'avi' 
+    });
+    setPage('game');
+};
 
 
 
@@ -4025,69 +4421,81 @@ if (!savedGameForMode) {
 
 
 const openVsComputerSetupModal = () => {
-            const VsComputerSetupModal = ({ onStart }) => {
-                const [difficulty, setDifficulty] = React.useState('easy');
-                const [size, setSize] = React.useState('medium');
-                const [aiStrength, setAiStrength] = React.useState('orta');
+    const VsComputerSetupModal = ({ onStart }) => {
+        const [difficulty, setDifficulty] = React.useState('easy');
+        const [size, setSize] = React.useState('medium');
+        const [aiStrength, setAiStrength] = React.useState('orta');
+        const [modeType, setModeType] = React.useState('avi'); 
 
-                const strengthOptions = [ { key: 'zayif', label: 'Zayıf', icon: '🧠' }, { key: 'orta', label: 'Orta', icon: '🤓' }, { key: 'guclu', label: 'Güçlü', icon: '⚡️' } ];
-                const difficultyOptions = [ { key: 'easy', label: t.kolay, icon: '🧸' }, { key: 'hard', label: t.zor, icon: '🔥' } ];
-                const sizeOptions = [ { key: 'small', label: t.smallArea, icon: '🤏' }, { key: 'medium', label: t.mediumArea, icon: '👌' }, { key: 'large', label: t.largeArea, icon: '👐' } ];
-                
-                return (
-                    <div className="flex flex-col gap-6 mt-2">
-                        <div>
-                            <h4 className="font-bold text-lg text-slate-700 mb-3 text-left">Yapay Zekâ Gücü</h4>
-                            <div className="grid grid-cols-3 gap-3">
-                                {strengthOptions.map(opt => (
-                                    <button key={opt.key} onClick={() => setAiStrength(opt.key)}
-                                        className={`p-3 h-24 rounded-xl font-bold flex flex-col items-center justify-center text-center transition-all transform ${aiStrength === opt.key ? 'bg-gradient-to-br from-amber-400 to-orange-500 text-white ring-4 ring-offset-2 ring-amber-500 scale-105' : 'bg-slate-200 text-slate-800 hover:bg-slate-300'}`}>
-                                        <span className="text-3xl">{opt.icon}</span>
-                                        <span className="mt-1 text-sm">{opt.label}</span>
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-                        <div>
-                            <h4 className="font-bold text-lg text-slate-700 mb-3 text-left">{t.difficulty}</h4>
-                            <div className="grid grid-cols-2 gap-3">
-                                {difficultyOptions.map(opt => (
-                                    <button key={opt.key} onClick={() => setDifficulty(opt.key)}
-                                        className={`p-3 h-24 rounded-xl font-bold flex flex-col items-center justify-center text-center transition-all transform ${difficulty === opt.key ? (opt.key === 'easy' ? 'bg-gradient-to-br from-green-400 to-emerald-500' : 'bg-gradient-to-br from-red-500 to-rose-600') + ' text-white ring-4 ring-offset-2 ring-indigo-500 scale-105' : 'bg-slate-200 text-slate-800 hover:bg-slate-300'}`}>
-                                        <span className="text-4xl">{opt.icon}</span>
-                                        <span className="mt-1 text-base">{opt.label}</span>
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-                        <div>
-                            <h4 className="font-bold text-lg text-slate-700 mb-3 text-left">{t.boardSize}</h4>
-                            <div className="grid grid-cols-3 gap-3">
-                                {sizeOptions.map(opt => (
-                                     <button key={opt.key} onClick={() => setSize(opt.key)}
-                                        className={`p-3 h-24 rounded-xl font-bold flex flex-col items-center justify-center text-center transition-all transform ${size === opt.key ? 'bg-indigo-600 text-white ring-4 ring-offset-2 ring-indigo-500 scale-105' : 'bg-slate-200 text-slate-800 hover:bg-slate-300'}`}>
-                                        <span className="text-3xl">{opt.icon}</span>
-                                        <span className="mt-1 text-sm">{opt.label}</span>
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-                        <button
-                            onClick={() => onStart(difficulty, size, aiStrength)}
-                            className="w-full mt-4 py-3 bg-gradient-to-r from-purple-600 to-indigo-700 text-white font-bold rounded-lg text-lg hover:shadow-xl transition-all transform hover:scale-105"
-                        >
-                            {t.startGameButton}
+        const strengthOptions = [ { key: 'zayif', label: 'Zayıf', icon: '🧠' }, { key: 'orta', label: 'Orta', icon: '🤓' }, { key: 'guclu', label: 'Güçlü', icon: '⚡️' } ];
+        const difficultyOptions = [ { key: 'easy', label: t.kolay, icon: '🧸' }, { key: 'hard', label: t.zor, icon: '🔥' } ];
+        const sizeOptions = [ { key: 'small', label: t.smallArea, icon: '🤏' }, { key: 'medium', label: t.mediumArea, icon: '👌' }, { key: 'large', label: t.largeArea, icon: '👐' } ];
+        
+        return (
+            <div className="flex flex-col gap-6 mt-2">
+                {/* YENİ EKLENEN OYUN TÜRÜ SEÇİMİ */}
+                <div>
+                    <h4 className="font-bold text-lg text-slate-700 mb-3 text-left">Oyun Türü</h4>
+                    <div className="grid grid-cols-2 gap-3">
+                        <button onClick={() => setModeType('avi')} className={`py-3 font-bold rounded-xl transition-all transform flex items-center justify-center gap-2 ${modeType === 'avi' ? 'bg-indigo-600 text-white ring-4 ring-offset-2 ring-indigo-500 scale-105' : 'bg-slate-200 hover:bg-slate-300'}`}>
+                            🧭 Kelime Avı
+                        </button>
+                        <button onClick={() => setModeType('takip')} className={`py-3 font-bold rounded-xl transition-all transform flex items-center justify-center gap-2 ${modeType === 'takip' ? 'bg-indigo-600 text-white ring-4 ring-offset-2 ring-indigo-500 scale-105' : 'bg-slate-200 hover:bg-slate-300'}`}>
+                            🐉 Kelime Takibi
                         </button>
                     </div>
-                );
-            };
-            setModalContent({
-                isOpen: true,
-                title: t.vsAiTitle,
-                body: <VsComputerSetupModal onStart={launchVsComputerGame} />
-            });
-        };
-
+                </div>
+                <div>
+                    <h4 className="font-bold text-lg text-slate-700 mb-3 text-left">Yapay Zekâ Gücü</h4>
+                    <div className="grid grid-cols-3 gap-3">
+                        {strengthOptions.map(opt => (
+                            <button key={opt.key} onClick={() => setAiStrength(opt.key)}
+                                className={`p-3 h-24 rounded-xl font-bold flex flex-col items-center justify-center text-center transition-all transform ${aiStrength === opt.key ? 'bg-gradient-to-br from-amber-400 to-orange-500 text-white ring-4 ring-offset-2 ring-amber-500 scale-105' : 'bg-slate-200 text-slate-800 hover:bg-slate-300'}`}>
+                                <span className="text-3xl">{opt.icon}</span>
+                                <span className="mt-1 text-sm">{opt.label}</span>
+                            </button>
+                        ))}
+                    </div>
+                </div>
+                <div>
+                    <h4 className="font-bold text-lg text-slate-700 mb-3 text-left">{t.difficulty}</h4>
+                    <div className="grid grid-cols-2 gap-3">
+                        {difficultyOptions.map(opt => (
+                            <button key={opt.key} onClick={() => setDifficulty(opt.key)}
+                                className={`p-3 h-24 rounded-xl font-bold flex flex-col items-center justify-center text-center transition-all transform ${difficulty === opt.key ? (opt.key === 'easy' ? 'bg-gradient-to-br from-green-400 to-emerald-500' : 'bg-gradient-to-br from-red-500 to-rose-600') + ' text-white ring-4 ring-offset-2 ring-indigo-500 scale-105' : 'bg-slate-200 text-slate-800 hover:bg-slate-300'}`}>
+                                <span className="text-4xl">{opt.icon}</span>
+                                <span className="mt-1 text-base">{opt.label}</span>
+                            </button>
+                        ))}
+                    </div>
+                </div>
+                <div>
+                    <h4 className="font-bold text-lg text-slate-700 mb-3 text-left">{t.boardSize}</h4>
+                    <div className="grid grid-cols-3 gap-3">
+                        {sizeOptions.map(opt => (
+                             <button key={opt.key} onClick={() => setSize(opt.key)}
+                                className={`p-3 h-24 rounded-xl font-bold flex flex-col items-center justify-center text-center transition-all transform ${size === opt.key ? 'bg-indigo-600 text-white ring-4 ring-offset-2 ring-indigo-500 scale-105' : 'bg-slate-200 text-slate-800 hover:bg-slate-300'}`}>
+                                <span className="text-3xl">{opt.icon}</span>
+                                <span className="mt-1 text-sm">{opt.label}</span>
+                            </button>
+                        ))}
+                    </div>
+                </div>
+                <button
+                    onClick={() => onStart(difficulty, size, aiStrength, modeType)}
+                    className="w-full mt-4 py-3 bg-gradient-to-r from-purple-600 to-indigo-700 text-white font-bold rounded-lg text-lg hover:shadow-xl transition-all transform hover:scale-105"
+                >
+                    {t.startGameButton}
+                </button>
+            </div>
+        );
+    };
+    setModalContent({
+        isOpen: true,
+        title: t.vsAiTitle,
+        body: <VsComputerSetupModal onStart={launchVsComputerGame} />
+    });
+};
 
 
 
@@ -4195,19 +4603,20 @@ const statsForWordHunt = React.useMemo(() => {
 
                     {page === 'game' && (
                         <WordHunt
-                            ref={wordHuntRef}
-                            key={gameKey}
-                            config={modeConfig}
-                            gameId={gameId}
-                            username={username}
-                            goToHome={goToHome}
-                            language={language}
-                            stats={statsForWordHunt}
-                            onStatsChange={handleStatsChange}
-                            initialSavedState={allSaves && !gameId ? allSaves[modeConfig.name] || allSaves[`takip-${modeConfig.name}`] : null}
-                            toastMessage={toastMessage}
-                            setToastMessage={setToastMessage}
-                        />
+    ref={wordHuntRef}
+    key={gameKey}
+    config={modeConfig}
+    gameId={gameId}
+    username={username}
+    goToHome={goToHome}
+    language={language}
+    stats={statsForWordHunt}
+    onStatsChange={handleStatsChange}
+    initialSavedState={allSaves && !gameId ? allSaves[modeConfig.name] || allSaves[`takip-${modeConfig.name}`] : null}
+    toastMessage={toastMessage}
+    setToastMessage={setToastMessage}
+    setToastStyle={setToastStyle}
+/>
                     )}
                 </div>
                 <Modal isOpen={modalContent.isOpen} title={modalContent.title} onClose={modalContent.onClose || (() => setModalContent({isOpen: false}))}>
@@ -4256,9 +4665,11 @@ const statsForWordHunt = React.useMemo(() => {
                     language={language}
                 />
                 {toastMessage && (
-                    <div className="toast-notification fixed bottom-24 left-1/2 -translate-x-1/2 bg-indigo-600 text-white font-bold py-3 px-6 rounded-full shadow-lg z-[9999]">
-                        {toastMessage}
-                    </div>
+                    <div className={`toast-notification fixed bottom-24 left-1/2 -translate-x-1/2 ${
+    toastStyle === 'orange' ? 'bg-orange-500' : 'bg-indigo-600'
+} text-white font-bold py-3 px-6 rounded-full shadow-lg z-[9999]`}>
+    {toastMessage}
+</div>
                 )}
             </ErrorBoundary>
         );
